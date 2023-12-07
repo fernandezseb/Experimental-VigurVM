@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <cstring>
 #include <cinttypes>
+#include <cstddef>
 
 // Type strings
 #define T_VOID    "void"

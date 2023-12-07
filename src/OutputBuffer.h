@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "Core.h"
 
 class OutputBuffer {
 private:
