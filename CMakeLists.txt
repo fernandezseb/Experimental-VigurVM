@@ -23,6 +23,8 @@ add_executable(${PROJECT_NAME}
         src/Memory.h
         src/OutputBuffer.h
         src/OutputBuffer.cpp
+        src/DynamicArray.cpp
+        src/DynamicArray.h
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
@@ -38,3 +40,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_link_directories(${PROJECT_NAME} PRIVATE Linux)
     target_link_libraries(${PROJECT_NAME} Linux)
 endif()
+
+enable_testing()
+add_subdirectory(test)
