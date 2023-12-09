@@ -1,13 +1,19 @@
 #pragma once
+
 #include "Core.h"
+#include "DynamicArray.h"
+
 #include "ClassLoader/ClassLoader.h"
 
 #include <vector>
 
+
+
 class MethodArea {
 public:
+    MethodArea() : classes(1000) {}
     // Loaded classes to use
-    std::vector<ClassInfo*> classes;
+    DynamicArray<ClassInfo*> classes;
 };
 
 enum VariableType
@@ -73,6 +79,7 @@ private:
 public:
     VM();
     void start();
+    ClassInfo* getClassByName(const char* class_name);
     ClassInfo* getClass(const char* className);
     void runMain(const char* className);
 };

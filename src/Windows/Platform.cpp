@@ -97,6 +97,13 @@ PlatformFile* Platform::getFile(const char* name)
 		OPEN_EXISTING,
 		0,
 		NULL);
+
+	if (file->hFile == INVALID_HANDLE_VALUE)
+	{
+		freeMemory(file);
+		return nullptr;
+	}
+
 	file->name = name;
 
 	return file;

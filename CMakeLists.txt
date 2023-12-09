@@ -25,6 +25,25 @@ add_executable(${PROJECT_NAME}
         src/OutputBuffer.cpp
         src/DynamicArray.cpp
         src/DynamicArray.h
+        src/VM/VM.cpp
+        src/VM/VM.h
+
+        src/Data/Attribute.h
+        src/Data/Attribute.cpp
+        src/Data/Class.h
+        src/Data/ConstantPool.h
+        src/Data/ConstantPool.cpp
+        src/Data/Descriptor.h
+
+        src/ClassLoader/AttributeParser.h
+        src/ClassLoader/AttributeParser.cpp
+        src/ClassLoader/ClassLoader.h
+        src/ClassLoader/ClassLoader.cpp
+        src/ClassLoader/DescriptorParser.h
+        src/ClassLoader/DescriptorParser.cpp
+
+
+
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")

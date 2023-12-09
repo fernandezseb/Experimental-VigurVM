@@ -1,6 +1,7 @@
 #include "DynamicArray.h"
 
 #include "Platform.h"
+#include "Data/Class.h"
 
 template <class T>
 void DynamicArray<T>::expand()
@@ -59,3 +60,4 @@ DynamicArray<T>::~DynamicArray()
 }
 
 template class DynamicArray<uint32_t>;
+template class DynamicArray<ClassInfo*>;
