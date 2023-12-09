@@ -23,5 +23,5 @@ private:
 	ClassInfo* readClass(ByteArray& byteArray);
 	Memory* memory;
 public:
-	ClassInfo* readClass(const char* className, Memory* memory);
+	ClassInfo* readClass(const char* className, Memory* memory, const char* classPath);
 };

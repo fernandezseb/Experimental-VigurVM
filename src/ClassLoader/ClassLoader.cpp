@@ -243,7 +243,7 @@ ClassInfo* ClassLoader::readClass(ByteArray& byteArray)
     return classInfo;
 }
 
-ClassInfo* ClassLoader::readClass(const char* className, Memory* memory)
+ClassInfo* ClassLoader::readClass(const char* className, Memory* memory, const char* classPath)
 {
     this->memory = memory;
     char name[300] = {0};
@@ -253,9 +253,19 @@ ClassInfo* ClassLoader::readClass(const char* className, Memory* memory)
 
     if (file == NULL)
     {
-        fprintf(stderr, "Class file not found for className: %s\n", className);
-        Platform::exitProgram(-6);
+        char cpName[300] = {0};
+        strcat(cpName, classPath);
+        strcat(cpName,  name);
+        file = Platform::getFile(cpName);
+
+
+        if (file == NULL)
+        {
+            fprintf(stderr, "Class file not found for className: %s\n", className);
+            Platform::exitProgram(-6);
+        }
     }
+
 
     size_t size;
     uint8_t* fileContent = Platform::readEntireFile(file, &size);

@@ -1,15 +1,17 @@
 #include "VM.h"
 
+#include "Configuration.h"
 #include "../Memory.h"
 
 VM::VM()
 {
 }
 
-void VM::start()
+void VM::start(Configuration configuration)
 {
-    // getClass("java/lang/Object");
-    // getClass("java/lang/String");
+    this->configuration = configuration;
+    getClass("java/lang/Object");
+    getClass("java/lang/String");
 }
 
 ClassInfo* VM::getClassByName(const char* class_name)
@@ -31,7 +33,7 @@ ClassInfo* VM::getClass(const char* className)
     if (classInfo == NULL) {
         Memory *memory = new Memory(2000, MIB(20));
         printf("Loading class %s...\n", className);
-        ClassInfo *classInfo = bootstrapClassLoader.readClass(className, memory);
+        ClassInfo *classInfo = bootstrapClassLoader.readClass(className, memory, configuration.classPath);
         // TODO: Run static initializers (clinit)
         heap.methodArea.classes.add(classInfo);
         return classInfo;

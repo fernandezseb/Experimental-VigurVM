@@ -2,11 +2,10 @@
 
 #include "Core.h"
 #include "DynamicArray.h"
-
+#include "Configuration.h"
 #include "ClassLoader/ClassLoader.h"
 
 #include <vector>
-
 
 
 class MethodArea {
@@ -76,9 +75,10 @@ private:
     ClassLoader bootstrapClassLoader;
     JavaHeap heap;
     VMThread thread;
+    Configuration configuration;
 public:
     VM();
-    void start();
+    void start(Configuration configuration);
     ClassInfo* getClassByName(const char* class_name);
     ClassInfo* getClass(const char* className);
     void runMain(const char* className);

@@ -27,6 +27,7 @@ add_executable(${PROJECT_NAME}
         src/DynamicArray.h
         src/VM/VM.cpp
         src/VM/VM.h
+        src/VM/Configuration.h
 
         src/Data/Attribute.h
         src/Data/Attribute.cpp
@@ -41,7 +42,6 @@ add_executable(${PROJECT_NAME}
         src/ClassLoader/ClassLoader.cpp
         src/ClassLoader/DescriptorParser.h
         src/ClassLoader/DescriptorParser.cpp
-
 
 
 )
