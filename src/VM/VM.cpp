@@ -10,6 +10,8 @@ VM::VM()
 void VM::start(Configuration configuration)
 {
     this->configuration = configuration;
+    getClass("java/lang/OutOfMemoryError");
+    getClass("java/lang/VirtualMachineError");
     getClass("java/lang/Object");
     getClass("java/lang/String");
 }
@@ -43,12 +45,20 @@ ClassInfo* VM::getClass(const char* className)
 
 void VM::runMain(const char* className)
 {
+    if (className == 0)
+    {
+        fprintf(stderr, "Error: Class name of starting class not defined..\n");
+        Platform::exitProgram(-6);
+    }
+
     Memory memory(1000, KIB(5));
     ClassInfo* startupClass = getClass(className);
     MethodInfo* entryPoint = startupClass->findMethodWithName("main");
+
     if (entryPoint == 0)
     {
         fprintf(stderr, "Error: Entry point not found. Exiting...\n");
+        Platform::exitProgram(-6);
     }
 
     thread.pc = 0;
