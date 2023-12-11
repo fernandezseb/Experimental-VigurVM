@@ -12,7 +12,7 @@ void VM::start(Configuration configuration)
     this->configuration = configuration;
     getClass("java/lang/OutOfMemoryError");
     getClass("java/lang/VirtualMachineError");
-    // getClass("java/lang/Object");
+    getClass("java/lang/Object");
     // getClass("java/lang/String");
 
     thread.name = "main";
@@ -159,7 +159,6 @@ void VM::executeLoop()
                 variable.type = VariableType_INT;
                 variable.data = byte;
                 topFrame->operands.push_back(variable);
-                printf("3");
                 break;
             }
         case 0xb3: // putstatic
@@ -180,6 +179,34 @@ void VM::executeLoop()
             {
                 thread.pc = topFrame->previousPc;
                 thread.stack.frames.pop_back();
+                break;
+            }
+        case 0xb8: // invoke static
+            {
+                uint8_t indexByte1 = code[thread.pc++];
+                uint8_t indexByte2 = code[thread.pc++];
+                uint16_t index = (indexByte1 << 8) | indexByte2;
+                CPMethodRef* methodRef = (CPMethodRef*) topFrame->constantPool->constants[index-1];
+                CPClassInfo* targetClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
+                CPNameAndTypeInfo* nameAndTypeInfo = (CPNameAndTypeInfo*) topFrame->constantPool->constants[methodRef->nameAndTypeIndex-1];
+                ClassInfo* targetClass = getClass(topFrame->constantPool->getString(targetClassInfo->nameIndex));
+                // TODO: Take in account descriptor of method as well, for overriding and such
+                MethodInfo* methodInfo = targetClass->findMethodWithName(topFrame->constantPool->getString(nameAndTypeInfo->nameIndex));
+
+                if (!methodInfo->isStatic())
+                {
+                    fprintf(stderr, "Error: Running non-static method as static\n");
+                    Platform::exitProgram(-10);
+                }
+
+                if (methodInfo->isNative())
+                {
+                    printf("Running native code of method: %s\n", methodInfo->name);
+                } else
+                {
+                    fprintf(stderr, "Error: Running static methods not implemented yet\n");
+                    Platform::exitProgram(-10);
+                }
                 break;
             }
         default:
