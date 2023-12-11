@@ -15,19 +15,6 @@ public:
     DynamicArray<ClassInfo*> classes;
 };
 
-enum VariableType
-{
-    VariableType_REFERENCE,
-    VariableType_INT,
-    VariableType_FLOAT
-};
-
-struct Variable
-{
-    VariableType type;
-    u4 data;
-};
-
 struct StackFrame {
     // Local variable array
     std::vector<Variable> localVariables;
@@ -76,6 +63,9 @@ private:
     JavaHeap heap;
     VMThread thread;
     Configuration configuration;
+    static std::vector<Variable> createVariableForDescriptor(char* descriptor);
+    static uint16_t getDescriptorVarCount(char* get_string);
+    void initStaticFields(ClassInfo* class_info);
 public:
     VM();
     void start(Configuration configuration);

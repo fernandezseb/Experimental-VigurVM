@@ -35,6 +35,7 @@ add_executable(${PROJECT_NAME}
         src/Data/ConstantPool.h
         src/Data/ConstantPool.cpp
         src/Data/Descriptor.h
+        src/Data/Variable.h
 
         src/ClassLoader/AttributeParser.h
         src/ClassLoader/AttributeParser.cpp

@@ -4,6 +4,7 @@
 
 #include "Attribute.h"
 #include "../Memory.h"
+#include "Data/Variable.h"
 
 class FieldInfo {
 public:
@@ -12,6 +13,10 @@ public:
 	uint16_t descriptorIndex;
 	bool isPrivate;
 	AttributeCollection* attributes;
+	bool isStatic() const {
+		return ((accessFlags & ACC_STATIC) != 0);
+	}
+	Variable* staticData;
 };
 
 class MethodInfo {
@@ -71,6 +76,9 @@ public:
 	AttributeCollection* attributes;
 	char* sourceFile;
 	Memory* memory;
+	// Runtime data
+	Variable* staticFields;
+	uint16_t staticFieldsCount;
 public:
 	bool isPublic() const {
 		return ((accessFlags & ACC_PUBLIC) != 0);
