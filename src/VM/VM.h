@@ -66,6 +66,9 @@ private:
     static std::vector<Variable> createVariableForDescriptor(char* descriptor);
     static uint16_t getDescriptorVarCount(char* get_string);
     void initStaticFields(ClassInfo* class_info);
+    void updateVariableFromOperand(Variable* variable, char* get_string, StackFrame* stack_frame);
+    void executeLoop();
+    void runStaticInitializer(ClassInfo* class_info);
 public:
     VM();
     void start(Configuration configuration);

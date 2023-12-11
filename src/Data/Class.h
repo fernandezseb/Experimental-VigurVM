@@ -100,4 +100,20 @@ public:
 		CPClassInfo* classInfo = constantPool->getClassInfo(thisClass);
 		return constantPool->getString(classInfo->nameIndex);
 	}
+
+	[[nodiscard]] FieldInfo* findField(char* name, char* descriptor) const
+	{
+		FieldInfo* field = nullptr;
+
+		for (u2 currentField = 0; currentField < fieldsCount; ++currentField)
+		{
+			if (strcmp(constantPool->getString(fields[currentField]->nameIndex), name) == 0 &&
+			strcmp(constantPool->getString(fields[currentField]->descriptorIndex), descriptor) == 0)
+			{
+				return fields[currentField];
+			}
+		}
+
+		return field;
+	}
 };

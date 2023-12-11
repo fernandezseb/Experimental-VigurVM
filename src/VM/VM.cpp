@@ -12,8 +12,14 @@ void VM::start(Configuration configuration)
     this->configuration = configuration;
     getClass("java/lang/OutOfMemoryError");
     getClass("java/lang/VirtualMachineError");
-    getClass("java/lang/Object");
-    getClass("java/lang/String");
+    // getClass("java/lang/Object");
+    // getClass("java/lang/String");
+
+    thread.name = "main";
+    thread.stack.frames.reserve(200);
+    thread.pc = 0;
+    thread.currentClass = nullptr;
+    thread.currentMethod = nullptr;
 }
 
 ClassInfo* VM::getClassByName(const char* class_name)
@@ -104,6 +110,113 @@ void VM::initStaticFields(ClassInfo* class_info)
     }
 }
 
+void VM::updateVariableFromOperand(Variable* variable, char* descriptor, StackFrame* frame)
+{
+    // TODO: implement setting of field data for double and long
+    if (strcmp(descriptor, "I") == 0)
+    {
+        if (variable->type != VariableType_INT)
+        {
+            fprintf(stderr, "Error: Type mismatch!\n");
+            Platform::exitProgram(-78);
+        }
+
+        if (frame->operands.size() <= 0)
+        {
+            fprintf(stderr, "Error: No operands on stack found!\n");
+            Platform::exitProgram(-78);
+        }
+
+        if (frame->operands[frame->operands.size()-1].type != VariableType_INT)
+        {
+            fprintf(stderr, "Error: Operand on stack is of the wrong type!\n");
+            Platform::exitProgram(-90);
+        }
+        variable->data = frame->operands[frame->operands.size()-1].data;
+
+    } else
+    {
+        fprintf(stderr, "Error: Setting of variable of type with descriptor: %s not implemented yet!\n", descriptor);
+        Platform::exitProgram(-6);
+    }
+}
+
+void VM::executeLoop()
+{
+    while(!thread.stack.frames.empty())
+    {
+        StackFrame* topFrame = &thread.stack.frames[thread.stack.frames.size()-1];
+        uint8_t* code = thread.currentMethod->code->code;
+        uint8_t opcode = code[thread.pc++];
+        printf("Running instruction with opcode: 0x%0x\n", opcode);
+        switch (opcode)
+        {
+        case 0x10: // bipush: push byte
+            {
+
+                uint8_t byte = code[thread.pc++];
+                Variable variable;
+                variable.type = VariableType_INT;
+                variable.data = byte;
+                topFrame->operands.push_back(variable);
+                printf("3");
+                break;
+            }
+        case 0xb3: // putstatic
+            {
+                uint8_t indexByte1 = code[thread.pc++];
+                uint8_t indexByte2 = code[thread.pc++];
+                uint16_t index = (indexByte1 << 8) | indexByte2;
+                CPFieldRef* fieldRef =  (CPFieldRef*) topFrame->constantPool->constants[index-1];
+                CPClassInfo* classInfo =  topFrame->constantPool->getClassInfo(fieldRef->classIndex);
+                CPNameAndTypeInfo* nameAndType = (CPNameAndTypeInfo*) topFrame->constantPool->constants[fieldRef->nameAndTypeIndex-1];
+                const char* className = topFrame->constantPool->getString(classInfo->nameIndex);
+                ClassInfo* targetClass = getClass(className);
+                FieldInfo* targetField = targetClass->findField(topFrame->constantPool->getString(nameAndType->nameIndex), topFrame->constantPool->getString(nameAndType->descriptorIndex));
+                updateVariableFromOperand(targetField->staticData, topFrame->constantPool->getString(nameAndType->descriptorIndex), topFrame);
+                break;
+            }
+        case 0xb1: // return
+            {
+                thread.pc = topFrame->previousPc;
+                thread.stack.frames.pop_back();
+                break;
+            }
+        default:
+            {
+                fprintf(stderr, "Unrecognized opcode detected: 0x%0x", opcode);
+                Platform::exitProgram(-3);
+            }
+        }
+    }
+}
+
+void VM::runStaticInitializer(ClassInfo* classInfo)
+{
+    MethodInfo* entryPoint = classInfo->findMethodWithName("<clinit>");
+
+    if (entryPoint == 0)
+    {
+        // No static initializers for this class
+        return;
+    }
+
+    thread.pc = 0;
+    thread.currentClass = classInfo;
+    thread.currentMethod = entryPoint;
+
+    StackFrame stackFrame;
+    stackFrame.localVariables.reserve(entryPoint->code->maxLocals);
+    stackFrame.operands.reserve(entryPoint->code->maxStack);
+    stackFrame.constantPool = classInfo->constantPool;
+    stackFrame.previousPc = 0;
+
+    thread.stack.frames.push_back(stackFrame);
+    thread.currentFrame = &thread.stack.frames[0];
+
+    executeLoop();
+}
+
 ClassInfo* VM::getClass(const char* className)
 {
     ClassInfo* classInfo = getClassByName(className);
@@ -114,6 +227,7 @@ ClassInfo* VM::getClass(const char* className)
         initStaticFields(classInfo);
         // TODO: Run static initializers (clinit)
         heap.methodArea.classes.add(classInfo);
+        runStaticInitializer(classInfo);
         return classInfo;
     }
     return classInfo;
@@ -140,8 +254,6 @@ void VM::runMain(const char* className)
     thread.pc = 0;
     thread.currentClass = startupClass;
     thread.currentMethod = entryPoint;
-    thread.name = "main";
-    thread.stack.frames.reserve(200);
 
     StackFrame stackFrame;
     stackFrame.localVariables.reserve(entryPoint->code->maxLocals);
@@ -152,5 +264,5 @@ void VM::runMain(const char* className)
     thread.stack.frames.push_back(stackFrame);
     thread.currentFrame = &thread.stack.frames[0];
 
-    printf("brol");
+    printf("brol\n");
 }
