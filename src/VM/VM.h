@@ -7,7 +7,6 @@
 
 #include <vector>
 
-
 class MethodArea {
 public:
     MethodArea() : classes(1000) {}
@@ -39,6 +38,9 @@ public:
     MethodArea methodArea;
     // List of objects
     std::vector<Reference*> objects;
+
+    uint32_t createArray(ArrayType type, uint64_t size);
+    uint32_t createObject(ClassInfo* class_info);
 };
 
 class VMThread {

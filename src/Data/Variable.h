@@ -64,18 +64,27 @@ public:
     };
 };
 
+class FieldData {
+public:
+    uint16_t nameIndex;
+    uint16_t descriptorIndex;
+    Variable* Data;
+};
+
+// TODO: Add superclass references
 class Object : public Reference {
 public:
     Object() : Reference(OBJECT) {
     };
-    FieldInfo* fields;
+    FieldData** fields;
+    uint16_t fieldsCount;
 };
 
 class Array : public Reference {
 public:
-    Array() : Reference(ARRAY), type(AT_UNDEFINED), length(0l), data(0) {
+    Array() : Reference(ARRAY), arrayType(AT_UNDEFINED), length(0l), data(0) {
     };
-    ArrayType type;
+    ArrayType arrayType;
     uint64_t length;
     uint32_t* data;
 };

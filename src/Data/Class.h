@@ -77,8 +77,8 @@ public:
 	char* sourceFile;
 	Memory* memory;
 	// Runtime data
-	Variable* staticFields;
-	uint16_t staticFieldsCount;
+	Variable* staticFields; // An array of data for all static fields, the field also has a copy of this data (could be 1 or 2 items)
+	uint16_t staticFieldsCount; // Total amount of static fields
 public:
 	bool isPublic() const {
 		return ((accessFlags & ACC_PUBLIC) != 0);

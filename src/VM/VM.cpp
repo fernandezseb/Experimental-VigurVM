@@ -1,5 +1,7 @@
 #include "VM.h"
 
+#include <variant>
+
 #include "Configuration.h"
 #include "../Memory.h"
 
@@ -10,16 +12,17 @@ VM::VM()
 void VM::start(Configuration configuration)
 {
     this->configuration = configuration;
-    getClass("java/lang/OutOfMemoryError");
-    getClass("java/lang/VirtualMachineError");
-    getClass("java/lang/Object");
-    getClass("java/lang/String");
 
     thread.name = "main";
     thread.stack.frames.reserve(200);
     thread.pc = 0;
     thread.currentClass = nullptr;
     thread.currentMethod = nullptr;
+
+    getClass("java/lang/OutOfMemoryError");
+    getClass("java/lang/VirtualMachineError");
+    getClass("java/lang/Object");
+    getClass("java/lang/String");
 }
 
 ClassInfo* VM::getClassByName(const char* class_name)
@@ -33,6 +36,34 @@ ClassInfo* VM::getClassByName(const char* class_name)
         }
     }
     return 0;
+}
+
+uint32_t JavaHeap::createArray(ArrayType type, uint64_t size)
+{
+    Array* array = (Array*) Platform::allocateMemory(sizeof(Array), 0);
+    array->length = size;
+    array->type = ARRAY;
+    array->arrayType = AT_REFERENCE;
+    array->data = (uint32_t*) Platform::allocateMemory(sizeof(uint32_t) * size, 0);
+    for (int i = 0; i < size; ++i)
+    {
+        array->data[i] = 0;
+    }
+    objects.push_back(array);
+    return objects.size()-1;
+}
+
+uint32_t JavaHeap::createObject(ClassInfo* class_info)
+{
+    Object* object = (Object*) Platform::allocateMemory(sizeof(Array), 0);
+    object->type = OBJECT;
+    object->fields = 0;
+    object->fieldsCount = 0;
+
+    // TODO: Initialize the fields properly and do this resursive
+
+    objects.push_back(object);
+    return objects.size()-1;
 }
 
 std::vector<Variable> VM::createVariableForDescriptor(char* descriptor)
@@ -145,7 +176,28 @@ void VM::updateVariableFromOperand(Variable* variable, char* descriptor, StackFr
             Platform::exitProgram(-90);
         }
         variable->data = frame->operands[frame->operands.size()-1].data;
+        frame->operands.pop_back();
+    } else if (descriptor[0] == '[') {
 
+        if (variable->type != VariableType_REFERENCE)
+        {
+            fprintf(stderr, "Error: Type mismatch!\n");
+            Platform::exitProgram(-78);
+        }
+
+        if (frame->operands.size() <= 0)
+        {
+            fprintf(stderr, "Error: No operands on stack found!\n");
+            Platform::exitProgram(-78);
+        }
+
+        if (frame->operands[frame->operands.size()-1].type != VariableType_REFERENCE)
+        {
+            fprintf(stderr, "Error: Operand on stack is of the wrong type!\n");
+            Platform::exitProgram(-90);
+        }
+        variable->data = frame->operands[frame->operands.size()-1].data;
+        frame->operands.pop_back();
     } else
     {
         fprintf(stderr, "Error: Setting of variable of type with descriptor: %s not implemented yet!\n", descriptor);
@@ -163,6 +215,14 @@ void VM::executeLoop()
         printf("Running instruction with opcode: 0x%0x\n", opcode);
         switch (opcode)
         {
+        case 0x1: // aconst_null
+            {
+                Variable reference = {};
+                reference.type = VariableType_REFERENCE;
+                reference.data = 0;
+                topFrame->operands.push_back(reference);
+                break;
+            }
         case 0x2: //iconst_m1
             {
                 Variable variable;
@@ -225,6 +285,15 @@ void VM::executeLoop()
                 thread.stack.frames.pop_back();
                 break;
             }
+        case 0x59: // dup
+            {
+                Variable top = topFrame->operands.back();
+                Variable copy = {};
+                copy.type = top.type;
+                copy.data = top.data;
+                topFrame->operands.push_back(copy);
+                break;
+            }
         case 0xb8: // invoke static
             {
                 uint8_t indexByte1 = code[thread.pc++];
@@ -251,6 +320,51 @@ void VM::executeLoop()
                     fprintf(stderr, "Error: Running static methods not implemented yet\n");
                     Platform::exitProgram(-10);
                 }
+                break;
+            }
+        case 0xbb:
+            {
+                uint8_t indexByte1 = code[thread.pc++];
+                uint8_t indexByte2 = code[thread.pc++];
+                uint16_t index = (indexByte1 << 8) | indexByte2;
+
+                CPClassInfo* cpClasInfo = topFrame->constantPool->getClassInfo(index);
+                ClassInfo* targetClass = getClass(topFrame->constantPool->getString(cpClasInfo->nameIndex));
+
+                uint32_t reference = heap.createObject(targetClass);
+                Variable variable;
+                variable.type = VariableType_REFERENCE;
+                variable.data = reference;
+
+                topFrame->operands.push_back(variable);
+
+                break;
+            }
+        case 0xbd: // anewarray
+            {
+                uint8_t indexByte1 = code[thread.pc++];
+                uint8_t indexByte2 = code[thread.pc++];
+                uint16_t index = (indexByte1 << 8) | indexByte2;
+
+                CPClassInfo* cpclassInfo = topFrame->constantPool->getClassInfo(index);
+                ClassInfo* classInfo = getClass(topFrame->constantPool->getString(cpclassInfo->nameIndex));
+
+                int32_t size = topFrame->operands[topFrame->operands.size()-1].data;
+
+                topFrame->operands.pop_back();
+
+                if (size < 0)
+                {
+                    fprintf(stderr, "Error: Can't create an array with negative size\n");
+                    Platform::exitProgram(-6);
+                }
+
+                uint32_t reference = heap.createArray(AT_REFERENCE, size);
+                Variable variable;
+                variable.type = VariableType_REFERENCE;
+                variable.data = reference;
+
+                topFrame->operands.push_back(variable);
                 break;
             }
         default:
