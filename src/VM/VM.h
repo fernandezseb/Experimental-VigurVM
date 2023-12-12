@@ -38,6 +38,7 @@ class JavaHeap {
 public:
     MethodArea methodArea;
     // List of objects
+    std::vector<Reference*> objects;
 };
 
 class VMThread {

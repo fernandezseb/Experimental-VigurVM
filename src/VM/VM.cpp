@@ -13,7 +13,7 @@ void VM::start(Configuration configuration)
     getClass("java/lang/OutOfMemoryError");
     getClass("java/lang/VirtualMachineError");
     getClass("java/lang/Object");
-    // getClass("java/lang/String");
+    getClass("java/lang/String");
 
     thread.name = "main";
     thread.stack.frames.reserve(200);
@@ -61,6 +61,18 @@ std::vector<Variable> VM::createVariableForDescriptor(char* descriptor)
         variableHigh.data = (((int64_t) 0) << 32);
         variables.push_back(variableHigh);
         variables.push_back(variableLow);
+    } else if (descriptor[0] == '[')
+    {
+        Variable variable;
+        variable.type = VariableType_REFERENCE;
+        variable.data = 0;
+        variables.push_back(variable);
+    } else if (descriptor[0] == 'L')
+    {
+        Variable variable;
+        variable.type = VariableType_REFERENCE;
+        variable.data = 0;
+        variables.push_back(variable);
     }
     else
     {
@@ -151,6 +163,38 @@ void VM::executeLoop()
         printf("Running instruction with opcode: 0x%0x\n", opcode);
         switch (opcode)
         {
+        case 0x2: //iconst_m1
+            {
+                Variable variable;
+                variable.type = VariableType_INT;
+                variable.data = ((int32_t)-1);
+                topFrame->operands.push_back(variable);
+                break;
+            }
+        case 0x3: //iconst_0
+            {
+                Variable variable;
+                variable.type = VariableType_INT;
+                variable.data = 0;
+                topFrame->operands.push_back(variable);
+                break;
+            }
+        case 0x4: //iconst_1
+            {
+                Variable variable;
+                variable.type = VariableType_INT;
+                variable.data = ((int32_t)1);
+                topFrame->operands.push_back(variable);
+                break;
+            }
+        case 0x5: //iconst_2
+            {
+                Variable variable;
+                variable.type = VariableType_INT;
+                variable.data = ((int32_t)2);
+                topFrame->operands.push_back(variable);
+                break;
+            }
         case 0x10: // bipush: push byte
             {
 
@@ -241,6 +285,7 @@ void VM::runStaticInitializer(ClassInfo* classInfo)
     thread.stack.frames.push_back(stackFrame);
     thread.currentFrame = &thread.stack.frames[0];
 
+    printf("Executing static initializers...\n");
     executeLoop();
 }
 
@@ -291,5 +336,7 @@ void VM::runMain(const char* className)
     thread.stack.frames.push_back(stackFrame);
     thread.currentFrame = &thread.stack.frames[0];
 
+    printf("Executing main method...\n");
+    executeLoop();
     printf("brol\n");
 }
