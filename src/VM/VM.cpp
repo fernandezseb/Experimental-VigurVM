@@ -199,6 +199,27 @@ void VM::updateVariableFromOperand(Variable* variable, char* descriptor, StackFr
         }
         variable->data = frame->operands[frame->operands.size()-1].data;
         frame->operands.pop_back();
+    } else if (descriptor[0] == 'L') {
+
+        if (variable->type != VariableType_REFERENCE)
+        {
+            fprintf(stderr, "Error: Type mismatch!\n");
+            Platform::exitProgram(-78);
+        }
+
+        if (frame->operands.size() <= 0)
+        {
+            fprintf(stderr, "Error: No operands on stack found!\n");
+            Platform::exitProgram(-78);
+        }
+
+        if (frame->operands[frame->operands.size()-1].type != VariableType_REFERENCE)
+        {
+            fprintf(stderr, "Error: Operand on stack is of the wrong type!\n");
+            Platform::exitProgram(-90);
+        }
+        variable->data = frame->operands[frame->operands.size()-1].data;
+        frame->operands.pop_back();
     } else
     {
         fprintf(stderr, "Error: Setting of variable of type with descriptor: %s not implemented yet!\n", descriptor);
@@ -297,6 +318,9 @@ void VM::executeLoop()
                 {
                     StackFrame* previousStackFrame = &thread.stack.frames[thread.stack.frames.size()-1];
                     thread.currentFrame = previousStackFrame;
+                } else
+                {
+                    thread.currentFrame = 0;
                 }
                 break;
             }
@@ -360,7 +384,7 @@ void VM::executeLoop()
 
                     thread.currentFrame->localVariables[0] = previousFrame->operands.back();
                     previousFrame->operands.pop_back();
-                    printf(">Created new stack frame for constructor call on: %s\n", className);
+                    printf("> Created new stack frame for constructor call on: %s\n", className);
                 } else
                 {
                     fprintf(stderr, "Error: Invokespecial not implemented for other cases than constructors\n");
@@ -524,11 +548,13 @@ void VM::runMain(const char* className)
     stackFrame.operands.reserve(entryPoint->code->maxStack);
     stackFrame.constantPool = startupClass->constantPool;
     stackFrame.previousPc = 0;
+    stackFrame.previousClass = 0;
+    stackFrame.previousMethod = 0;
 
     thread.stack.frames.push_back(stackFrame);
-    thread.currentFrame = &thread.stack.frames[0];
+    thread.currentFrame = &thread.stack.frames[thread.stack.frames.size()-1];
 
     printf("Executing main method...\n");
     executeLoop();
-    printf("brol\n");
+    printf("Done executing\n");
 }
