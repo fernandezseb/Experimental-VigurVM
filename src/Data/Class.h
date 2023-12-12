@@ -84,10 +84,23 @@ public:
 		return ((accessFlags & ACC_PUBLIC) != 0);
 	}
 
+	// TODO: Remove
 	MethodInfo* findMethodWithName(const char* name) const
 	{
 		for (uint16_t currentMethod = 0; currentMethod < methodCount; ++currentMethod) {
 			if (strcmp(methods[currentMethod]->name, name) == 0)
+			{
+				return methods[currentMethod];
+			}
+		}
+		return nullptr;
+	}
+
+	MethodInfo* findMethodWithNameAndDescriptor(const char* name, const char* descriptor) const
+	{
+		for (uint16_t currentMethod = 0; currentMethod < methodCount; ++currentMethod) {
+			if (strcmp(methods[currentMethod]->name, name) == 0
+				&& strcmp(constantPool->getString(methods[currentMethod]->descriptorIndex), descriptor) == 0)
 			{
 				return methods[currentMethod];
 			}

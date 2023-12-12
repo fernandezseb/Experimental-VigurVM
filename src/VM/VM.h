@@ -26,6 +26,9 @@ struct StackFrame {
     // used to restore the state of the invoker,
     // pc of the invoker
     u4 previousPc;
+
+    ClassInfo* previousClass;
+    MethodInfo* previousMethod;
 };
 
 class JavaStack {

@@ -1,5 +1,6 @@
 #include "VM.h"
 
+#include <stack>
 #include <variant>
 
 #include "Configuration.h"
@@ -265,6 +266,13 @@ void VM::executeLoop()
                 topFrame->operands.push_back(variable);
                 break;
             }
+        case 0x2a: // aload_0
+            {
+                // TODO: Check if it is OK type and such
+                Variable var = topFrame->localVariables[0];
+                topFrame->operands.push_back(var);
+                break;
+            }
         case 0xb3: // putstatic
             {
                 uint8_t indexByte1 = code[thread.pc++];
@@ -282,7 +290,14 @@ void VM::executeLoop()
         case 0xb1: // return
             {
                 thread.pc = topFrame->previousPc;
+                thread.currentClass = topFrame->previousClass;
+                thread.currentMethod = topFrame->previousMethod;
                 thread.stack.frames.pop_back();
+                if (thread.stack.frames.size() > 0)
+                {
+                    StackFrame* previousStackFrame = &thread.stack.frames[thread.stack.frames.size()-1];
+                    thread.currentFrame = previousStackFrame;
+                }
                 break;
             }
         case 0x59: // dup
@@ -292,6 +307,66 @@ void VM::executeLoop()
                 copy.type = top.type;
                 copy.data = top.data;
                 topFrame->operands.push_back(copy);
+                break;
+            }
+        case 0xb7: // Invoke special
+            {
+                uint8_t indexByte1 = code[thread.pc++];
+                uint8_t indexByte2 = code[thread.pc++];
+                uint16_t index = (indexByte1 << 8) | indexByte2;
+                CPMethodRef* methodRef = (CPMethodRef*) topFrame->constantPool->constants[index-1];
+                CPClassInfo* cpClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
+                CPNameAndTypeInfo* nameAndTypeInfo = (CPNameAndTypeInfo*) topFrame->constantPool->constants[methodRef->nameAndTypeIndex-1];
+                const char* methodName = topFrame->constantPool->getString(nameAndTypeInfo->nameIndex);
+                const char* methodDescriptor = topFrame->constantPool->getString(nameAndTypeInfo->descriptorIndex);
+                const char* className = topFrame->constantPool->getString(cpClassInfo->nameIndex);
+                ClassInfo* targetClassInfo = getClass(className);
+                MethodInfo* methodInfo = targetClassInfo->findMethodWithNameAndDescriptor(methodName, methodDescriptor);
+                // TODO: Implement argument passing (including subclass argument)
+                // TODO: Check correct parsing of descriptors with subclasses
+
+                if (strcmp(methodName, "<init>") ==0)
+                {
+                    // TODO: Check argument types
+
+                    StackFrame* previousFrame = topFrame;
+                    StackFrame stackFrame;
+                    stackFrame.localVariables.reserve(methodInfo->code->maxLocals);
+                    stackFrame.operands.reserve(methodInfo->code->maxStack);
+                    stackFrame.constantPool = targetClassInfo->constantPool;
+                    stackFrame.previousPc = thread.pc;
+                    stackFrame.previousClass = thread.currentClass;
+                    stackFrame.previousMethod = thread.currentMethod;
+
+                    thread.pc = 0;
+                    thread.currentClass = targetClassInfo;
+                    thread.currentMethod = methodInfo;
+
+                    thread.stack.frames.push_back(stackFrame);
+                    thread.currentFrame = &thread.stack.frames[thread.stack.frames.size()-1];
+
+                    for (int i = 0; i <= methodInfo->argsCount; ++i)
+                    {
+                        Variable var;
+                        var.data = 0;
+                        var.type = VariableType_UNDEFINED;
+                        thread.currentFrame->localVariables.push_back(var);
+                    }
+
+                    for (int i = methodInfo->argsCount; i > 0; --i) {
+                        thread.currentFrame->localVariables[i] = previousFrame->operands.back();
+                        previousFrame->operands.pop_back();
+                    }
+
+                    thread.currentFrame->localVariables[0] = previousFrame->operands.back();
+                    previousFrame->operands.pop_back();
+                    printf(">Created new stack frame for constructor call on: %s\n", className);
+                } else
+                {
+                    fprintf(stderr, "Error: Invokespecial not implemented for other cases than constructors\n");
+                    Platform::exitProgram(-30);
+                }
+
                 break;
             }
         case 0xb8: // invoke static
@@ -386,18 +461,21 @@ void VM::runStaticInitializer(ClassInfo* classInfo)
         return;
     }
 
-    thread.pc = 0;
-    thread.currentClass = classInfo;
-    thread.currentMethod = entryPoint;
-
     StackFrame stackFrame;
     stackFrame.localVariables.reserve(entryPoint->code->maxLocals);
     stackFrame.operands.reserve(entryPoint->code->maxStack);
     stackFrame.constantPool = classInfo->constantPool;
-    stackFrame.previousPc = 0;
+    stackFrame.previousPc = thread.pc;
+    stackFrame.previousClass = thread.currentClass;
+    stackFrame.previousMethod = thread.currentMethod;
+
+
+    thread.pc = 0;
+    thread.currentClass = classInfo;
+    thread.currentMethod = entryPoint;
 
     thread.stack.frames.push_back(stackFrame);
-    thread.currentFrame = &thread.stack.frames[0];
+    thread.currentFrame = &thread.stack.frames[thread.stack.frames.size()-1];
 
     printf("Executing static initializers...\n");
     executeLoop();
