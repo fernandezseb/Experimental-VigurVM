@@ -477,7 +477,7 @@ void VM::executeLoop()
 
 void VM::runStaticInitializer(ClassInfo* classInfo)
 {
-    MethodInfo* entryPoint = classInfo->findMethodWithName("<clinit>");
+    MethodInfo* entryPoint = classInfo->findMethodWithNameAndDescriptor("<clinit>", "()V");
 
     if (entryPoint == 0)
     {
@@ -531,7 +531,7 @@ void VM::runMain(const char* className)
 
     Memory memory(1000, KIB(5));
     ClassInfo* startupClass = getClass(className);
-    MethodInfo* entryPoint = startupClass->findMethodWithName("main");
+    MethodInfo* entryPoint = startupClass->findMethodWithNameAndDescriptor("main", "([Ljava/lang/String;)V");
 
     if (entryPoint == 0)
     {
