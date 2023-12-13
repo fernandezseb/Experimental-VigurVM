@@ -41,6 +41,11 @@ PlatformFile* Platform::getFile(const char* name)
 	PlatformFile *file = (PlatformFile*) allocateMemory(sizeof(PlatformFile), 0);
 
 	file->fd = open(name, O_RDONLY);
+
+	if (file->fd < 0) {
+		return 0;
+	}
+
 	file->name = name;
 	file->fileMemory = NULL;
 
