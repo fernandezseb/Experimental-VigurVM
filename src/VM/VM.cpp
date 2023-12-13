@@ -14,6 +14,10 @@ void VM::start(Configuration configuration)
 {
     this->configuration = configuration;
 
+    // We don't want the heap to return reference 0,
+    // because this would be considered a null pointer
+    heap.objects.push_back(0);
+
     thread.name = "main";
     thread.stack.frames.reserve(200);
     thread.pc = 0;
@@ -57,14 +61,68 @@ uint32_t JavaHeap::createArray(ArrayType type, uint64_t size)
 uint32_t JavaHeap::createObject(ClassInfo* class_info)
 {
     Object* object = (Object*) Platform::allocateMemory(sizeof(Array), 0);
+
+
+    u2 fieldsCount = 0;
+
+    for (u2 currentField = 0; currentField < class_info->fieldsCount; ++currentField)
+    {
+        FieldInfo* fieldInfo = class_info->fields[currentField];
+        if (!fieldInfo->isStatic())
+        {
+            ++fieldsCount;
+        }
+    }
+
+    object->classInfo = class_info;
     object->type = OBJECT;
     object->fields = 0;
-    object->fieldsCount = 0;
+    if (fieldsCount > 0)
+    {
+        object->fields = (FieldData*) Platform::allocateMemory(sizeof(FieldData) * fieldsCount, 0);
+    }
+    object->fieldsCount = fieldsCount;
 
-    // TODO: Initialize the fields properly and do this resursive
+    fieldsCount = 0;
+    for (u2 currentField = 0; currentField < class_info->fieldsCount; ++currentField)
+    {
+        FieldInfo* fieldInfo = class_info->fields[currentField];
+        if (!fieldInfo->isStatic())
+        {
+            Variable var = {};
+            var.data = 0;
+            var.type = VariableType_UNDEFINED;
+            FieldData data = {};
+            data.descriptorIndex = fieldInfo->descriptorIndex;
+            data.nameIndex = fieldInfo->nameIndex;
+            data.data = var;
+            object->fields[fieldsCount++] = data;
+        }
+    }
+
+    // TODO: Initialize the fields resursive
 
     objects.push_back(object);
     return objects.size()-1;
+}
+
+Object* JavaHeap::getObject(uint32_t id)
+{
+    if (id == 0)
+    {
+        // Nullpointer
+        fprintf(stderr, "Error: Null pointer exception!");
+        Platform::exitProgram(-1);
+    }
+    Reference* ref = objects[id];
+    if (ref->type == OBJECT)
+    {
+        return (Object*) objects[id];
+    } else
+    {
+        fprintf(stderr, "Error: Array instead of Object");
+        Platform::exitProgram(-22);
+    }
 }
 
 std::vector<Variable> VM::createVariableForDescriptor(char* descriptor)
@@ -159,7 +217,7 @@ void VM::updateVariableFromOperand(Variable* variable, char* descriptor, StackFr
     // TODO: implement setting of field data for double and long
     if (strcmp(descriptor, "I") == 0)
     {
-        if (variable->type != VariableType_INT)
+        if (variable->type != VariableType_UNDEFINED && variable->type != VariableType_INT)
         {
             fprintf(stderr, "Error: Type mismatch!\n");
             Platform::exitProgram(-78);
@@ -177,6 +235,7 @@ void VM::updateVariableFromOperand(Variable* variable, char* descriptor, StackFr
             Platform::exitProgram(-90);
         }
         variable->data = frame->operands[frame->operands.size()-1].data;
+        variable->type = VariableType_INT;
         frame->operands.pop_back();
     } else if (descriptor[0] == '[') {
 
@@ -294,6 +353,24 @@ void VM::executeLoop()
                 topFrame->operands.push_back(var);
                 break;
             }
+        case 0x2b: // aload_1
+            {
+                // TODO: Check if it is OK type and such
+                Variable var = topFrame->localVariables[1];
+                topFrame->operands.push_back(var);
+                break;
+            }
+        case 0x4c: // astore_1
+            {
+
+                Variable refVar = topFrame->operands.back();
+                topFrame->operands.pop_back();
+
+                Variable* var =  &topFrame->localVariables[1];
+                var->data = refVar.data;
+                var->type = refVar.type;
+                break;
+            }
         case 0xb3: // putstatic
             {
                 uint8_t indexByte1 = code[thread.pc++];
@@ -331,6 +408,48 @@ void VM::executeLoop()
                 copy.type = top.type;
                 copy.data = top.data;
                 topFrame->operands.push_back(copy);
+                break;
+            }
+        case 0xb5: // Put field
+            {
+                uint8_t indexByte1 = code[thread.pc++];
+                uint8_t indexByte2 = code[thread.pc++];
+                uint16_t index = (indexByte1 << 8) | indexByte2;
+
+                CPFieldRef* fieldRef = (CPFieldRef*) topFrame->constantPool->constants[index - 1];
+                CPClassInfo* cpClassInfo = topFrame->constantPool->getClassInfo(fieldRef->classIndex);
+                CPNameAndTypeInfo* nameAndType = (CPNameAndTypeInfo*) topFrame->constantPool->constants[fieldRef->nameAndTypeIndex-1];
+
+                const char* className = topFrame->constantPool->getString(cpClassInfo->nameIndex);
+                ClassInfo* targetClass = getClass(className);
+                const char* fieldName = topFrame->constantPool->getString(nameAndType->nameIndex);
+                const char* fieldDescr = topFrame->constantPool->getString(nameAndType->descriptorIndex);
+
+
+                // TODO: Get the object from the reference -> Done
+                // TODO: Get the correct field from the object ->
+                // TODO: Update the value of the object
+
+                Variable targetValue = topFrame->operands.back();
+                topFrame->operands.pop_back();
+
+                Variable referencePointer = topFrame->operands.back();
+                topFrame->operands.pop_back();
+
+                Object* targetObject = heap.getObject(referencePointer.data);
+
+                FieldData* fieldData = targetObject->getField(fieldName, fieldDescr);
+
+                if (targetValue.type != VariableType_INT)
+                {
+                    fprintf(stderr, "Error: Can't set fields other than int!");
+                    Platform::exitProgram(-32);
+                }
+                // TODO: Fix for types other than I
+                // TODO: Check for type descriptor
+                fieldData->data.data = targetValue.data;
+                fieldData->data.type = targetValue.type;
+
                 break;
             }
         case 0xb7: // Invoke special
@@ -545,6 +664,14 @@ void VM::runMain(const char* className)
 
     StackFrame stackFrame;
     stackFrame.localVariables.reserve(entryPoint->code->maxLocals);
+    // TODO: Init locals also for other method call paths
+    for (u2  currentLocal = 0; currentLocal < entryPoint->code->maxLocals; ++currentLocal)
+    {
+        Variable var;
+        var.type = VariableType_UNDEFINED;
+        var.data = 0;
+        stackFrame.localVariables.push_back(var);
+    }
     stackFrame.operands.reserve(entryPoint->code->maxStack);
     stackFrame.constantPool = startupClass->constantPool;
     stackFrame.previousPc = 0;
