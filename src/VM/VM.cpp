@@ -85,6 +85,7 @@ uint16_t VM::getDescriptorVarCount(char* descriptor)
 
 void VM::initStaticFields(ClassInfo* class_info)
 {
+    // TODO: Do it recursive as well
     u2 staticFieldsCount = 0;
     for (u2 currentField = 0; currentField < class_info->fieldsCount; ++currentField)
     {
@@ -264,26 +265,20 @@ void VM::executeLoop()
         case 0x4c: // astore_1
             {
 
-                Variable refVar = topFrame->operands.back();
-                topFrame->operands.pop_back();
+                Variable refVar = topFrame->popOperand();
 
                 Variable* var =  &topFrame->localVariables[1];
                 var->data = refVar.data;
                 var->type = refVar.type;
                 break;
             }
-        case 0xb3: // putstatic
+        case 0x59: // dup
             {
-                uint8_t indexByte1 = code[thread.pc++];
-                uint8_t indexByte2 = code[thread.pc++];
-                uint16_t index = (indexByte1 << 8) | indexByte2;
-                CPFieldRef* fieldRef =  (CPFieldRef*) topFrame->constantPool->constants[index-1];
-                CPClassInfo* classInfo =  topFrame->constantPool->getClassInfo(fieldRef->classIndex);
-                CPNameAndTypeInfo* nameAndType = (CPNameAndTypeInfo*) topFrame->constantPool->constants[fieldRef->nameAndTypeIndex-1];
-                const char* className = topFrame->constantPool->getString(classInfo->nameIndex);
-                ClassInfo* targetClass = getClass(className);
-                FieldInfo* targetField = targetClass->findField(topFrame->constantPool->getString(nameAndType->nameIndex), topFrame->constantPool->getString(nameAndType->descriptorIndex));
-                updateVariableFromOperand(targetField->staticData, topFrame->constantPool->getString(nameAndType->descriptorIndex), topFrame);
+                Variable top = topFrame->peekOperand();
+                Variable copy = {};
+                copy.type = top.type;
+                copy.data = top.data;
+                topFrame->operands.push_back(copy);
                 break;
             }
         case 0xb1: // return
@@ -302,16 +297,21 @@ void VM::executeLoop()
                 }
                 break;
             }
-        case 0x59: // dup
+        case 0xb3: // putstatic
             {
-                Variable top = topFrame->operands.back();
-                Variable copy = {};
-                copy.type = top.type;
-                copy.data = top.data;
-                topFrame->operands.push_back(copy);
+                uint8_t indexByte1 = code[thread.pc++];
+                uint8_t indexByte2 = code[thread.pc++];
+                uint16_t index = (indexByte1 << 8) | indexByte2;
+                CPFieldRef* fieldRef =  (CPFieldRef*) topFrame->constantPool->constants[index-1];
+                CPClassInfo* classInfo =  topFrame->constantPool->getClassInfo(fieldRef->classIndex);
+                CPNameAndTypeInfo* nameAndType = (CPNameAndTypeInfo*) topFrame->constantPool->constants[fieldRef->nameAndTypeIndex-1];
+                const char* className = topFrame->constantPool->getString(classInfo->nameIndex);
+                ClassInfo* targetClass = getClass(className);
+                FieldInfo* targetField = targetClass->findField(topFrame->constantPool->getString(nameAndType->nameIndex), topFrame->constantPool->getString(nameAndType->descriptorIndex));
+                updateVariableFromOperand(targetField->staticData, topFrame->constantPool->getString(nameAndType->descriptorIndex), topFrame);
                 break;
             }
-        case 0xb5: // Put field
+        case 0xb5: // Putfield
             {
                 uint8_t indexByte1 = code[thread.pc++];
                 uint8_t indexByte2 = code[thread.pc++];
@@ -328,14 +328,12 @@ void VM::executeLoop()
 
 
                 // TODO: Get the object from the reference -> Done
-                // TODO: Get the correct field from the object ->
-                // TODO: Update the value of the object
+                // TODO: Get the correct field from the object -> Done
+                // TODO: Update the value of the object -> Basic Done
 
-                Variable targetValue = topFrame->operands.back();
-                topFrame->operands.pop_back();
+                Variable targetValue = topFrame->popOperand();
 
-                Variable referencePointer = topFrame->operands.back();
-                topFrame->operands.pop_back();
+                Variable referencePointer = topFrame->popOperand();
 
                 Object* targetObject = heap.getObject(referencePointer.data);
 
@@ -372,38 +370,8 @@ void VM::executeLoop()
                 if (strcmp(methodName, "<init>") ==0)
                 {
                     // TODO: Check argument types
+                    pushStackFrameVirtual(targetClassInfo, methodInfo, topFrame);
 
-                    StackFrame* previousFrame = topFrame;
-                    StackFrame stackFrame;
-                    stackFrame.localVariables.reserve(methodInfo->code->maxLocals);
-                    stackFrame.operands.reserve(methodInfo->code->maxStack);
-                    stackFrame.constantPool = targetClassInfo->constantPool;
-                    stackFrame.previousPc = thread.pc;
-                    stackFrame.previousClass = thread.currentClass;
-                    stackFrame.previousMethod = thread.currentMethod;
-
-                    thread.pc = 0;
-                    thread.currentClass = targetClassInfo;
-                    thread.currentMethod = methodInfo;
-
-                    thread.stack.frames.push_back(stackFrame);
-                    thread.currentFrame = &thread.stack.frames[thread.stack.frames.size()-1];
-
-                    for (int i = 0; i <= methodInfo->argsCount; ++i)
-                    {
-                        Variable var;
-                        var.data = 0;
-                        var.type = VariableType_UNDEFINED;
-                        thread.currentFrame->localVariables.push_back(var);
-                    }
-
-                    for (int i = methodInfo->argsCount; i > 0; --i) {
-                        thread.currentFrame->localVariables[i] = previousFrame->operands.back();
-                        previousFrame->operands.pop_back();
-                    }
-
-                    thread.currentFrame->localVariables[0] = previousFrame->operands.back();
-                    previousFrame->operands.pop_back();
                     printf("> Created new stack frame for constructor call on: %s\n", className);
                 } else
                 {
@@ -427,8 +395,10 @@ void VM::executeLoop()
 
                 if (!methodInfo->isStatic())
                 {
+                    // TODO: Do method call by pushing stack frame
                     fprintf(stderr, "Error: Running non-static method as static\n");
                     Platform::exitProgram(-10);
+                    pushStackFrameStatic(targetClass, methodInfo, topFrame);
                 }
 
                 if (methodInfo->isNative())
@@ -441,7 +411,7 @@ void VM::executeLoop()
                 }
                 break;
             }
-        case 0xbb:
+        case 0xbb: // new
             {
                 uint8_t indexByte1 = code[thread.pc++];
                 uint8_t indexByte2 = code[thread.pc++];
@@ -451,7 +421,7 @@ void VM::executeLoop()
                 ClassInfo* targetClass = getClass(topFrame->constantPool->getString(cpClasInfo->nameIndex));
 
                 uint32_t reference = heap.createObject(targetClass);
-                Variable variable;
+                Variable variable = {};
                 variable.type = VariableType_REFERENCE;
                 variable.data = reference;
 
@@ -468,9 +438,7 @@ void VM::executeLoop()
                 CPClassInfo* cpclassInfo = topFrame->constantPool->getClassInfo(index);
                 ClassInfo* classInfo = getClass(topFrame->constantPool->getString(cpclassInfo->nameIndex));
 
-                int32_t size = topFrame->operands[topFrame->operands.size()-1].data;
-
-                topFrame->operands.pop_back();
+                int32_t size = topFrame->popOperand().data;
 
                 if (size < 0)
                 {
@@ -495,6 +463,59 @@ void VM::executeLoop()
     }
 }
 
+void VM::pushStackFrameWithoutParams(ClassInfo* classInfo, MethodInfo* methodInfo)
+{
+    StackFrame stackFrame;
+    stackFrame.localVariables.reserve(methodInfo->code->maxLocals);
+    for (u2  currentLocal = 0; currentLocal < methodInfo->code->maxLocals; ++currentLocal)
+    {
+        Variable var = {};
+        var.type = VariableType_UNDEFINED;
+        var.data = 0;
+        stackFrame.localVariables.push_back(var);
+    }
+    stackFrame.operands.reserve(methodInfo->code->maxStack);
+    stackFrame.constantPool = classInfo->constantPool;
+    stackFrame.previousPc = thread.pc;
+    stackFrame.previousClass = thread.currentClass;
+    stackFrame.previousMethod = thread.currentMethod;
+
+
+    thread.pc = 0;
+    thread.currentClass = classInfo;
+    thread.currentMethod = methodInfo;
+
+    thread.stack.frames.push_back(stackFrame);
+    thread.currentFrame = &thread.stack.frames[thread.stack.frames.size()-1];
+}
+
+void VM::pushStackFrameVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame)
+{
+    pushStackFrameWithoutParams(classInfo, methodInfo);
+    if (previousFrame != 0)
+    {
+        // The arguments and the pointer to the object
+        for (int i = methodInfo->argsCount; i >= 0; --i)
+        {
+            thread.currentFrame->localVariables[i] = previousFrame->popOperand();
+        }
+    }
+}
+
+void VM::pushStackFrameStatic(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame)
+{
+    pushStackFrameWithoutParams(classInfo, methodInfo);
+
+    if (previousFrame != 0)
+    {
+        // The arguments
+        for (int i = methodInfo->argsCount; i > 0; --i)
+        {
+            thread.currentFrame->localVariables[i-1] = previousFrame->popOperand();
+        }
+    }
+}
+
 void VM::runStaticInitializer(ClassInfo* classInfo)
 {
     MethodInfo* entryPoint = classInfo->findMethodWithNameAndDescriptor("<clinit>", "()V");
@@ -505,21 +526,7 @@ void VM::runStaticInitializer(ClassInfo* classInfo)
         return;
     }
 
-    StackFrame stackFrame;
-    stackFrame.localVariables.reserve(entryPoint->code->maxLocals);
-    stackFrame.operands.reserve(entryPoint->code->maxStack);
-    stackFrame.constantPool = classInfo->constantPool;
-    stackFrame.previousPc = thread.pc;
-    stackFrame.previousClass = thread.currentClass;
-    stackFrame.previousMethod = thread.currentMethod;
-
-
-    thread.pc = 0;
-    thread.currentClass = classInfo;
-    thread.currentMethod = entryPoint;
-
-    thread.stack.frames.push_back(stackFrame);
-    thread.currentFrame = &thread.stack.frames[thread.stack.frames.size()-1];
+    pushStackFrameStatic(classInfo, entryPoint, 0);
 
     printf("Executing static initializers...\n");
     executeLoop();
@@ -562,24 +569,9 @@ void VM::runMain(const char* className)
     thread.currentClass = startupClass;
     thread.currentMethod = entryPoint;
 
-    StackFrame stackFrame;
-    stackFrame.localVariables.reserve(entryPoint->code->maxLocals);
-    // TODO: Init locals also for other method call paths
-    for (u2  currentLocal = 0; currentLocal < entryPoint->code->maxLocals; ++currentLocal)
-    {
-        Variable var;
-        var.type = VariableType_UNDEFINED;
-        var.data = 0;
-        stackFrame.localVariables.push_back(var);
-    }
-    stackFrame.operands.reserve(entryPoint->code->maxStack);
-    stackFrame.constantPool = startupClass->constantPool;
-    stackFrame.previousPc = 0;
-    stackFrame.previousClass = 0;
-    stackFrame.previousMethod = 0;
+    pushStackFrameStatic(startupClass, entryPoint, 0);
 
-    thread.stack.frames.push_back(stackFrame);
-    thread.currentFrame = &thread.stack.frames[thread.stack.frames.size()-1];
+    // TODO: Put string array in local variable with index 0
 
     printf("Executing main method...\n");
     executeLoop();

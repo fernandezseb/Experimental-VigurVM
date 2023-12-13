@@ -23,6 +23,18 @@ struct StackFrame {
 
     ClassInfo* previousClass;
     MethodInfo* previousMethod;
+
+    Variable popOperand()
+    {
+        Variable var = operands.back();
+        operands.pop_back();
+        return var;
+    }
+
+    Variable peekOperand()
+    {
+        return operands.back();
+    }
 };
 
 class JavaStack {
@@ -54,6 +66,9 @@ private:
     void initStaticFields(ClassInfo* class_info);
     void updateVariableFromOperand(Variable* variable, char* get_string, StackFrame* stack_frame);
     void executeLoop();
+    void pushStackFrameStatic(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame);
+    void pushStackFrameWithoutParams(ClassInfo* classInfo, MethodInfo* methodInfo);
+    void pushStackFrameVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame);
     void runStaticInitializer(ClassInfo* class_info);
 public:
     VM();
