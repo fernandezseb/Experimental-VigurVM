@@ -43,6 +43,7 @@ PlatformFile* Platform::getFile(const char* name)
 	file->fd = open(name, O_RDONLY);
 
 	if (file->fd < 0) {
+        freeMemory(file);
 		return 0;
 	}
 
