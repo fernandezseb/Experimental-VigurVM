@@ -14,10 +14,6 @@ void VM::start(Configuration configuration)
 {
     this->configuration = configuration;
 
-    // We don't want the heap to return reference 0,
-    // because this would be considered a null pointer
-    heap.objects.push_back(0);
-
     thread.name = "main";
     thread.stack.frames.reserve(200);
     thread.pc = 0;
@@ -28,101 +24,6 @@ void VM::start(Configuration configuration)
     getClass("java/lang/VirtualMachineError");
     getClass("java/lang/Object");
     getClass("java/lang/String");
-}
-
-ClassInfo* VM::getClassByName(const char* class_name)
-{
-    for (size_t currentClass = 0; currentClass < heap.methodArea.classes.getSize() ; currentClass++)
-    {
-        ClassInfo* classInfo = heap.methodArea.classes.get(currentClass);
-        if (strcmp(classInfo->getName(), class_name) == 0)
-        {
-            return classInfo;
-        }
-    }
-    return 0;
-}
-
-uint32_t JavaHeap::createArray(ArrayType type, uint64_t size)
-{
-    Array* array = (Array*) Platform::allocateMemory(sizeof(Array), 0);
-    array->length = size;
-    array->type = ARRAY;
-    array->arrayType = AT_REFERENCE;
-    array->data = (uint32_t*) Platform::allocateMemory(sizeof(uint32_t) * size, 0);
-    for (int i = 0; i < size; ++i)
-    {
-        array->data[i] = 0;
-    }
-    objects.push_back(array);
-    return objects.size()-1;
-}
-
-uint32_t JavaHeap::createObject(ClassInfo* class_info)
-{
-    Object* object = (Object*) Platform::allocateMemory(sizeof(Array), 0);
-
-
-    u2 fieldsCount = 0;
-
-    for (u2 currentField = 0; currentField < class_info->fieldsCount; ++currentField)
-    {
-        FieldInfo* fieldInfo = class_info->fields[currentField];
-        if (!fieldInfo->isStatic())
-        {
-            ++fieldsCount;
-        }
-    }
-
-    object->classInfo = class_info;
-    object->type = OBJECT;
-    object->fields = 0;
-    if (fieldsCount > 0)
-    {
-        object->fields = (FieldData*) Platform::allocateMemory(sizeof(FieldData) * fieldsCount, 0);
-    }
-    object->fieldsCount = fieldsCount;
-
-    fieldsCount = 0;
-    for (u2 currentField = 0; currentField < class_info->fieldsCount; ++currentField)
-    {
-        FieldInfo* fieldInfo = class_info->fields[currentField];
-        if (!fieldInfo->isStatic())
-        {
-            Variable var = {};
-            var.data = 0;
-            var.type = VariableType_UNDEFINED;
-            FieldData data = {};
-            data.descriptorIndex = fieldInfo->descriptorIndex;
-            data.nameIndex = fieldInfo->nameIndex;
-            data.data = var;
-            object->fields[fieldsCount++] = data;
-        }
-    }
-
-    // TODO: Initialize the fields resursive
-
-    objects.push_back(object);
-    return objects.size()-1;
-}
-
-Object* JavaHeap::getObject(uint32_t id)
-{
-    if (id == 0)
-    {
-        // Nullpointer
-        fprintf(stderr, "Error: Null pointer exception!");
-        Platform::exitProgram(-1);
-    }
-    Reference* ref = objects[id];
-    if (ref->type == OBJECT)
-    {
-        return (Object*) objects[id];
-    } else
-    {
-        fprintf(stderr, "Error: Array instead of Object");
-        Platform::exitProgram(-22);
-    }
 }
 
 std::vector<Variable> VM::createVariableForDescriptor(char* descriptor)
@@ -626,14 +527,13 @@ void VM::runStaticInitializer(ClassInfo* classInfo)
 
 ClassInfo* VM::getClass(const char* className)
 {
-    ClassInfo* classInfo = getClassByName(className);
+    ClassInfo* classInfo = heap.getClassByName(className);
     if (classInfo == NULL) {
         Memory *memory = new Memory(2000, MIB(20));
         printf("Loading class %s...\n", className);
         ClassInfo *classInfo = bootstrapClassLoader.readClass(className, memory, configuration.classPath);
         initStaticFields(classInfo);
-        // TODO: Run static initializers (clinit)
-        heap.methodArea.classes.add(classInfo);
+        heap.addClassInfo(classInfo);
         runStaticInitializer(classInfo);
         return classInfo;
     }

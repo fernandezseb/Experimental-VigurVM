@@ -28,6 +28,8 @@ add_executable(${PROJECT_NAME}
         src/VM/VM.cpp
         src/VM/VM.h
         src/VM/Configuration.h
+        src/VM/JavaHeap.h
+        src/VM/JavaHeap.cpp
 
         src/Data/Attribute.h
         src/Data/Attribute.cpp
