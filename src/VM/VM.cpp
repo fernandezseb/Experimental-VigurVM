@@ -5,6 +5,7 @@
 
 #include "Configuration.h"
 #include "../Memory.h"
+#include "ConstantInstructions.h"
 
 VM::VM()
 {
@@ -162,51 +163,36 @@ void VM::executeLoop(VMThread* thread)
         uint8_t* code = thread->currentMethod->code->code;
         uint8_t opcode = code[thread->pc++];
         printf("Running instruction with opcode: 0x%0x\n", opcode);
+
+        bool found = false;
+
+        for (const Instruction& instruction : instructions) {
+            if (((u1)instruction.opcode) == opcode)
+            {
+                uint8_t* args = 0;
+                if (instruction.args > 0) {
+                    args = (uint8_t*)Platform::allocateMemory(instruction.args, 0);
+                    for (u2 currentArg = 0; currentArg < instruction.args; ++currentArg)
+                    {
+                        args[currentArg] = code[thread->pc++];
+                    }
+                }
+                if (instruction.instructionFunction != NULL) {
+                    found = true;
+                    instruction.instructionFunction(args, instruction.args, instruction.arg, &heap, thread);
+                    break;
+                }
+            }
+        }
+        if (found)
+        {
+            break;
+        }
+
         switch (opcode)
         {
-        case 0x1: // aconst_null
-            {
-                Variable reference = {};
-                reference.type = VariableType_REFERENCE;
-                reference.data = 0;
-                topFrame->operands.push_back(reference);
-                break;
-            }
-        case 0x2: //iconst_m1
-            {
-                Variable variable;
-                variable.type = VariableType_INT;
-                variable.data = ((int32_t)-1);
-                topFrame->operands.push_back(variable);
-                break;
-            }
-        case 0x3: //iconst_0
-            {
-                Variable variable;
-                variable.type = VariableType_INT;
-                variable.data = 0;
-                topFrame->operands.push_back(variable);
-                break;
-            }
-        case 0x4: //iconst_1
-            {
-                Variable variable;
-                variable.type = VariableType_INT;
-                variable.data = ((int32_t)1);
-                topFrame->operands.push_back(variable);
-                break;
-            }
-        case 0x5: //iconst_2
-            {
-                Variable variable;
-                variable.type = VariableType_INT;
-                variable.data = ((int32_t)2);
-                topFrame->operands.push_back(variable);
-                break;
-            }
         case 0x10: // bipush: push byte
             {
-
                 uint8_t byte = code[thread->pc++];
                 Variable variable;
                 variable.type = VariableType_INT;

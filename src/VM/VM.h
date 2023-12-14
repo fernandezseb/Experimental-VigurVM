@@ -9,6 +9,8 @@
 
 #include <vector>
 
+#include "ConstantInstructions.h"
+
 struct StackFrame {
     // Local variable array
     std::vector<Variable> localVariables;
@@ -61,8 +63,40 @@ public:
     char* name;
 };
 
+struct VM;
+
+struct Instruction
+{
+    Opcode opcode;
+    u1 args;
+    const char* name;
+    i1 arg;
+    void(*instructionFunction)(u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread);
+};
+
+
 class VM {
 private:
+    Instruction instructions[13] =
+        {
+        // Constants
+            {i_aconst_null, 0, "aconst_null", 0, aconst_null},
+            {i_iconst_m1, 0, "iconst_m1", -1, iconst_i},
+            {i_iconst_0, 0, "iconst_0", 0, iconst_i},
+            {i_iconst_1, 0, "iconst_1", 1, iconst_i},
+            {i_iconst_2, 0, "iconst_2", 2, iconst_i},
+            {i_iconst_3, 0, "iconst_3", 3, iconst_i},
+            {i_iconst_4, 0, "iconst_4", 4, iconst_i},
+            {i_iconst_5, 0, "iconst_5", 5, iconst_i},
+            {i_lconst_0, 0, "lconst_0", 0, lconst_i},
+            {i_lconst_1, 0, "lconst_1", 1, lconst_i},
+            {i_fconst_0, 0, "fconst_0", 0, fconst_i},
+            {i_fconst_1, 0, "fconst_1", 1, fconst_i},
+            {i_fconst_2, 0, "fconst_2", 2, fconst_i},
+        //dconst_0
+        //dconst_1
+
+        };
     ClassLoader bootstrapClassLoader;
     JavaHeap heap;
     VMThread thread;
@@ -83,10 +117,4 @@ public:
     void runMain(const char* className);
 };
 
-struct Instruction
-{
-    Opcode opcode;
-    u1 args;
-    const char* name;
-    void(*instructionFunction)(u1* args, u2 argsCount, JavaHeap* heap, VMThread* thread);
-};
+

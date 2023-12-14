@@ -46,6 +46,8 @@ add_executable(${PROJECT_NAME}
         src/ClassLoader/ClassLoader.cpp
         src/ClassLoader/DescriptorParser.h
         src/ClassLoader/DescriptorParser.cpp
+        src/VM/ConstantInstructions.h
+        src/VM/ConstantInstructions.cpp
 
 
 )
