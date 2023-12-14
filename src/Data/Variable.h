@@ -12,7 +12,8 @@ enum VariableType
     VariableType_BYTE,
     VariableType_INT,
     VariableType_FLOAT,
-    VariableType_LONG
+    VariableType_LONG,
+    VariableType_DOUBLE
 };
 
 enum ArrayType : char {

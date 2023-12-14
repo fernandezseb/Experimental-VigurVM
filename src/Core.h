@@ -27,10 +27,12 @@
 #define u1 uint8_t
 #define u2 uint16_t
 #define u4 uint32_t
+#define u8 uint64_t
 
 #define i1 int8_t
 #define i2 int16_t
 #define i4 int32_t
+#define i8 int64_t
 
 // Memory sizes
 #define KIB(x)   ((size_t) (x) << 10)

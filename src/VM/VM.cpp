@@ -186,20 +186,11 @@ void VM::executeLoop(VMThread* thread)
         }
         if (found)
         {
-            break;
+            continue;
         }
 
         switch (opcode)
         {
-        case 0x10: // bipush: push byte
-            {
-                uint8_t byte = code[thread->pc++];
-                Variable variable;
-                variable.type = VariableType_INT;
-                variable.data = byte;
-                topFrame->operands.push_back(variable);
-                break;
-            }
         case 0x2a: // aload_0
             {
                 // TODO: Check if it is OK type and such

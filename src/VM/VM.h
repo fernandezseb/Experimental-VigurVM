@@ -77,26 +77,31 @@ struct Instruction
 
 class VM {
 private:
-    Instruction instructions[13] =
-        {
+    Instruction instructions[21] =
+    {
         // Constants
-            {i_aconst_null, 0, "aconst_null", 0, aconst_null},
-            {i_iconst_m1, 0, "iconst_m1", -1, iconst_i},
-            {i_iconst_0, 0, "iconst_0", 0, iconst_i},
-            {i_iconst_1, 0, "iconst_1", 1, iconst_i},
-            {i_iconst_2, 0, "iconst_2", 2, iconst_i},
-            {i_iconst_3, 0, "iconst_3", 3, iconst_i},
-            {i_iconst_4, 0, "iconst_4", 4, iconst_i},
-            {i_iconst_5, 0, "iconst_5", 5, iconst_i},
-            {i_lconst_0, 0, "lconst_0", 0, lconst_i},
-            {i_lconst_1, 0, "lconst_1", 1, lconst_i},
-            {i_fconst_0, 0, "fconst_0", 0, fconst_i},
-            {i_fconst_1, 0, "fconst_1", 1, fconst_i},
-            {i_fconst_2, 0, "fconst_2", 2, fconst_i},
-        //dconst_0
-        //dconst_1
-
-        };
+        {i_nop, 0, "nop", 0, nop},
+        {i_aconst_null, 0, "aconst_null", 0, aconst_null},
+        {i_iconst_m1, 0, "iconst_m1", -1, iconst_i},
+        {i_iconst_0, 0, "iconst_0", 0, iconst_i},
+        {i_iconst_1, 0, "iconst_1", 1, iconst_i},
+        {i_iconst_2, 0, "iconst_2", 2, iconst_i},
+        {i_iconst_3, 0, "iconst_3", 3, iconst_i},
+        {i_iconst_4, 0, "iconst_4", 4, iconst_i},
+        {i_iconst_5, 0, "iconst_5", 5, iconst_i},
+        {i_lconst_0, 0, "lconst_0", 0, lconst_i},
+        {i_lconst_1, 0, "lconst_1", 1, lconst_i},
+        {i_fconst_0, 0, "fconst_0", 0, fconst_i},
+        {i_fconst_1, 0, "fconst_1", 1, fconst_i},
+        {i_fconst_2, 0, "fconst_2", 2, fconst_i},
+        {i_dconst_0, 0, "dconst_0", 0, dconst_i},
+        {i_dconst_1, 0, "dconst_1", 1, dconst_i},
+        {i_bipush, 1, "bipush", 0, bipush},
+        {i_sipush, 2, "sipush", 0, sipush},
+        {i_ldc, 1, "ldc", 0, ldc},
+        {i_ldc_w, 2, "ldc_w", 0, ldc_w},
+        {i_ldc2_w, 2, "ldc2_w", 0, ldc2_w},
+    };
     ClassLoader bootstrapClassLoader;
     JavaHeap heap;
     VMThread thread;
