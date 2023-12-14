@@ -26,12 +26,17 @@ struct StackFrame {
 
     Variable popOperand()
     {
+        if (operands.empty())
+        {
+            fprintf(stderr, "Error: No operands on stack found!\n");
+            Platform::exitProgram(-78);
+        }
         Variable var = operands.back();
         operands.pop_back();
         return var;
     }
 
-    Variable peekOperand()
+    Variable peekOperand() const
     {
         return operands.back();
     }
@@ -64,7 +69,7 @@ private:
     static std::vector<Variable> createVariableForDescriptor(char* descriptor);
     static uint16_t getDescriptorVarCount(char* get_string);
     void initStaticFields(ClassInfo* class_info);
-    void updateVariableFromOperand(Variable* variable, char* get_string, StackFrame* stack_frame);
+    void updateVariableFromVariable(Variable* variable, char* descriptor, Variable operand);
     void executeLoop();
     void pushStackFrameStatic(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame);
     void pushStackFrameWithoutParams(ClassInfo* classInfo, MethodInfo* methodInfo);

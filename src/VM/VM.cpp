@@ -114,32 +114,26 @@ void VM::initStaticFields(ClassInfo* class_info)
     }
 }
 
-void VM::updateVariableFromOperand(Variable* variable, char* descriptor, StackFrame* frame)
+void VM::updateVariableFromVariable(Variable* variable, char* descriptor, Variable operand)
 {
     // TODO: implement setting of field data for double and long
     if (strcmp(descriptor, "I") == 0)
     {
-        if (variable->type != VariableType_UNDEFINED && variable->type != VariableType_INT)
+        if (variable->type != VariableType_INT)
         {
             fprintf(stderr, "Error: Type mismatch!\n");
             Platform::exitProgram(-78);
         }
 
-        if (frame->operands.size() <= 0)
-        {
-            fprintf(stderr, "Error: No operands on stack found!\n");
-            Platform::exitProgram(-78);
-        }
-
-        if (frame->operands[frame->operands.size()-1].type != VariableType_INT)
+        if (operand.type != VariableType_INT)
         {
             fprintf(stderr, "Error: Operand on stack is of the wrong type!\n");
             Platform::exitProgram(-90);
         }
-        variable->data = frame->operands[frame->operands.size()-1].data;
+
+        variable->data = operand.data;
         variable->type = VariableType_INT;
-        frame->operands.pop_back();
-    } else if (descriptor[0] == '[') {
+    } else if (descriptor[0] == '[' || descriptor[0] == 'L') {
 
         if (variable->type != VariableType_REFERENCE)
         {
@@ -147,40 +141,12 @@ void VM::updateVariableFromOperand(Variable* variable, char* descriptor, StackFr
             Platform::exitProgram(-78);
         }
 
-        if (frame->operands.size() <= 0)
-        {
-            fprintf(stderr, "Error: No operands on stack found!\n");
-            Platform::exitProgram(-78);
-        }
-
-        if (frame->operands[frame->operands.size()-1].type != VariableType_REFERENCE)
+        if (operand.type != VariableType_REFERENCE)
         {
             fprintf(stderr, "Error: Operand on stack is of the wrong type!\n");
             Platform::exitProgram(-90);
         }
-        variable->data = frame->operands[frame->operands.size()-1].data;
-        frame->operands.pop_back();
-    } else if (descriptor[0] == 'L') {
-
-        if (variable->type != VariableType_REFERENCE)
-        {
-            fprintf(stderr, "Error: Type mismatch!\n");
-            Platform::exitProgram(-78);
-        }
-
-        if (frame->operands.size() <= 0)
-        {
-            fprintf(stderr, "Error: No operands on stack found!\n");
-            Platform::exitProgram(-78);
-        }
-
-        if (frame->operands[frame->operands.size()-1].type != VariableType_REFERENCE)
-        {
-            fprintf(stderr, "Error: Operand on stack is of the wrong type!\n");
-            Platform::exitProgram(-90);
-        }
-        variable->data = frame->operands[frame->operands.size()-1].data;
-        frame->operands.pop_back();
+        variable->data = operand.data;
     } else
     {
         fprintf(stderr, "Error: Setting of variable of type with descriptor: %s not implemented yet!\n", descriptor);
@@ -283,9 +249,10 @@ void VM::executeLoop()
             }
         case 0xb1: // return
             {
-                thread.pc = topFrame->previousPc;
-                thread.currentClass = topFrame->previousClass;
-                thread.currentMethod = topFrame->previousMethod;
+                StackFrame* stackFrame = &thread.stack.frames.back();
+                thread.pc = stackFrame->previousPc;
+                thread.currentClass = stackFrame->previousClass;
+                thread.currentMethod = stackFrame->previousMethod;
                 thread.stack.frames.pop_back();
                 if (thread.stack.frames.size() > 0)
                 {
@@ -295,7 +262,7 @@ void VM::executeLoop()
                 {
                     thread.currentFrame = 0;
                 }
-                break;
+                return;
             }
         case 0xb3: // putstatic
             {
@@ -308,7 +275,8 @@ void VM::executeLoop()
                 const char* className = topFrame->constantPool->getString(classInfo->nameIndex);
                 ClassInfo* targetClass = getClass(className);
                 FieldInfo* targetField = targetClass->findField(topFrame->constantPool->getString(nameAndType->nameIndex), topFrame->constantPool->getString(nameAndType->descriptorIndex));
-                updateVariableFromOperand(targetField->staticData, topFrame->constantPool->getString(nameAndType->descriptorIndex), topFrame);
+                Variable var = topFrame->popOperand();
+                updateVariableFromVariable(targetField->staticData, topFrame->constantPool->getString(nameAndType->descriptorIndex), var);
                 break;
             }
         case 0xb5: // Putfield
@@ -332,7 +300,6 @@ void VM::executeLoop()
                 // TODO: Update the value of the object -> Basic Done
 
                 Variable targetValue = topFrame->popOperand();
-
                 Variable referencePointer = topFrame->popOperand();
 
                 Object* targetObject = heap.getObject(referencePointer.data);
@@ -526,7 +493,7 @@ void VM::runStaticInitializer(ClassInfo* classInfo)
         return;
     }
 
-    pushStackFrameStatic(classInfo, entryPoint, 0);
+    pushStackFrameWithoutParams(classInfo, entryPoint);
 
     printf("Executing static initializers...\n");
     executeLoop();
@@ -573,7 +540,8 @@ void VM::runMain(const char* className)
 
     // TODO: Put string array in local variable with index 0
 
-    printf("Executing main method...\n");
+    printf("> Executing main method...\n");
     executeLoop();
-    printf("Done executing\n");
+    ClassInfo* clasInfo = heap.getClassByName("Brol");
+    printf("> Done executing\n");
 }
