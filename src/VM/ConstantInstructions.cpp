@@ -34,8 +34,9 @@ void lconst_i(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMT
 
 void fconst_i(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread)
 {
+    // TODO: Check this
     Variable variable;
     variable.type = VariableType_FLOAT;
-    variable.data = ((float_t)arg);
+    variable.data = ((float)arg);
     thread->currentFrame->operands.push_back(variable);
 }
