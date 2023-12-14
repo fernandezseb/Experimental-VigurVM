@@ -4,6 +4,7 @@
 #include "Configuration.h"
 #include "ClassLoader/ClassLoader.h"
 #include "Data/Variable.h"
+#include "Data/Opcode.h"
 #include "JavaHeap.h"
 
 #include <vector>
@@ -70,14 +71,22 @@ private:
     static uint16_t getDescriptorVarCount(char* get_string);
     void initStaticFields(ClassInfo* class_info);
     void updateVariableFromVariable(Variable* variable, char* descriptor, Variable operand);
-    void executeLoop();
-    void pushStackFrameStatic(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame);
-    void pushStackFrameWithoutParams(ClassInfo* classInfo, MethodInfo* methodInfo);
-    void pushStackFrameVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame);
-    void runStaticInitializer(ClassInfo* class_info);
+    void executeLoop(VMThread* thread);
+    void pushStackFrameStatic(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame, VMThread* thread);
+    void pushStackFrameWithoutParams(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread* thread);
+    void pushStackFrameVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame, VMThread* thread);
+    void runStaticInitializer(ClassInfo* classInfo, VMThread* thread);
 public:
     VM();
     void start(Configuration configuration);
-    ClassInfo* getClass(const char* className);
+    ClassInfo* getClass(const char* className, VMThread* thread);
     void runMain(const char* className);
+};
+
+struct Instruction
+{
+    Opcode opcode;
+    u1 args;
+    const char* name;
+    void(*instructionFunction)(u1* args, u2 argsCount, JavaHeap* heap, VMThread* thread);
 };

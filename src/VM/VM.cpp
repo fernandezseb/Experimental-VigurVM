@@ -20,10 +20,10 @@ void VM::start(Configuration configuration)
     thread.currentClass = nullptr;
     thread.currentMethod = nullptr;
 
-    getClass("java/lang/OutOfMemoryError");
-    getClass("java/lang/VirtualMachineError");
-    getClass("java/lang/Object");
-    getClass("java/lang/String");
+    getClass("java/lang/OutOfMemoryError", &thread);
+    getClass("java/lang/VirtualMachineError", &thread);
+    getClass("java/lang/Object", &thread);
+    getClass("java/lang/String", &thread);
 }
 
 std::vector<Variable> VM::createVariableForDescriptor(char* descriptor)
@@ -154,13 +154,13 @@ void VM::updateVariableFromVariable(Variable* variable, char* descriptor, Variab
     }
 }
 
-void VM::executeLoop()
+void VM::executeLoop(VMThread* thread)
 {
-    while(!thread.stack.frames.empty())
+    while(!thread->stack.frames.empty())
     {
-        StackFrame* topFrame = &thread.stack.frames[thread.stack.frames.size()-1];
-        uint8_t* code = thread.currentMethod->code->code;
-        uint8_t opcode = code[thread.pc++];
+        StackFrame* topFrame = thread->currentFrame;
+        uint8_t* code = thread->currentMethod->code->code;
+        uint8_t opcode = code[thread->pc++];
         printf("Running instruction with opcode: 0x%0x\n", opcode);
         switch (opcode)
         {
@@ -207,7 +207,7 @@ void VM::executeLoop()
         case 0x10: // bipush: push byte
             {
 
-                uint8_t byte = code[thread.pc++];
+                uint8_t byte = code[thread->pc++];
                 Variable variable;
                 variable.type = VariableType_INT;
                 variable.data = byte;
@@ -230,9 +230,7 @@ void VM::executeLoop()
             }
         case 0x4c: // astore_1
             {
-
                 Variable refVar = topFrame->popOperand();
-
                 Variable* var =  &topFrame->localVariables[1];
                 var->data = refVar.data;
                 var->type = refVar.type;
@@ -249,31 +247,31 @@ void VM::executeLoop()
             }
         case 0xb1: // return
             {
-                StackFrame* stackFrame = &thread.stack.frames.back();
-                thread.pc = stackFrame->previousPc;
-                thread.currentClass = stackFrame->previousClass;
-                thread.currentMethod = stackFrame->previousMethod;
-                thread.stack.frames.pop_back();
-                if (thread.stack.frames.size() > 0)
+                StackFrame* stackFrame = &thread->stack.frames.back();
+                thread->pc = stackFrame->previousPc;
+                thread->currentClass = stackFrame->previousClass;
+                thread->currentMethod = stackFrame->previousMethod;
+                thread->stack.frames.pop_back();
+                if (thread->stack.frames.size() > 0)
                 {
-                    StackFrame* previousStackFrame = &thread.stack.frames[thread.stack.frames.size()-1];
-                    thread.currentFrame = previousStackFrame;
+                    StackFrame* previousStackFrame = &thread->stack.frames[thread->stack.frames.size()-1];
+                    thread->currentFrame = previousStackFrame;
                 } else
                 {
-                    thread.currentFrame = 0;
+                    thread->currentFrame = 0;
                 }
                 return;
             }
         case 0xb3: // putstatic
             {
-                uint8_t indexByte1 = code[thread.pc++];
-                uint8_t indexByte2 = code[thread.pc++];
+                uint8_t indexByte1 = code[thread->pc++];
+                uint8_t indexByte2 = code[thread->pc++];
                 uint16_t index = (indexByte1 << 8) | indexByte2;
                 CPFieldRef* fieldRef =  (CPFieldRef*) topFrame->constantPool->constants[index-1];
                 CPClassInfo* classInfo =  topFrame->constantPool->getClassInfo(fieldRef->classIndex);
                 CPNameAndTypeInfo* nameAndType = (CPNameAndTypeInfo*) topFrame->constantPool->constants[fieldRef->nameAndTypeIndex-1];
                 const char* className = topFrame->constantPool->getString(classInfo->nameIndex);
-                ClassInfo* targetClass = getClass(className);
+                ClassInfo* targetClass = getClass(className, thread);
                 FieldInfo* targetField = targetClass->findField(topFrame->constantPool->getString(nameAndType->nameIndex), topFrame->constantPool->getString(nameAndType->descriptorIndex));
                 Variable var = topFrame->popOperand();
                 updateVariableFromVariable(targetField->staticData, topFrame->constantPool->getString(nameAndType->descriptorIndex), var);
@@ -281,8 +279,8 @@ void VM::executeLoop()
             }
         case 0xb5: // Putfield
             {
-                uint8_t indexByte1 = code[thread.pc++];
-                uint8_t indexByte2 = code[thread.pc++];
+                uint8_t indexByte1 = code[thread->pc++];
+                uint8_t indexByte2 = code[thread->pc++];
                 uint16_t index = (indexByte1 << 8) | indexByte2;
 
                 CPFieldRef* fieldRef = (CPFieldRef*) topFrame->constantPool->constants[index - 1];
@@ -290,7 +288,7 @@ void VM::executeLoop()
                 CPNameAndTypeInfo* nameAndType = (CPNameAndTypeInfo*) topFrame->constantPool->constants[fieldRef->nameAndTypeIndex-1];
 
                 const char* className = topFrame->constantPool->getString(cpClassInfo->nameIndex);
-                ClassInfo* targetClass = getClass(className);
+                ClassInfo* targetClass = getClass(className, thread);
                 const char* fieldName = topFrame->constantPool->getString(nameAndType->nameIndex);
                 const char* fieldDescr = topFrame->constantPool->getString(nameAndType->descriptorIndex);
 
@@ -320,8 +318,8 @@ void VM::executeLoop()
             }
         case 0xb7: // Invoke special
             {
-                uint8_t indexByte1 = code[thread.pc++];
-                uint8_t indexByte2 = code[thread.pc++];
+                uint8_t indexByte1 = code[thread->pc++];
+                uint8_t indexByte2 = code[thread->pc++];
                 uint16_t index = (indexByte1 << 8) | indexByte2;
                 CPMethodRef* methodRef = (CPMethodRef*) topFrame->constantPool->constants[index-1];
                 CPClassInfo* cpClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
@@ -329,7 +327,7 @@ void VM::executeLoop()
                 const char* methodName = topFrame->constantPool->getString(nameAndTypeInfo->nameIndex);
                 const char* methodDescriptor = topFrame->constantPool->getString(nameAndTypeInfo->descriptorIndex);
                 const char* className = topFrame->constantPool->getString(cpClassInfo->nameIndex);
-                ClassInfo* targetClassInfo = getClass(className);
+                ClassInfo* targetClassInfo = getClass(className, thread);
                 MethodInfo* methodInfo = targetClassInfo->findMethodWithNameAndDescriptor(methodName, methodDescriptor);
                 // TODO: Implement argument passing (including subclass argument)
                 // TODO: Check correct parsing of descriptors with subclasses
@@ -337,7 +335,7 @@ void VM::executeLoop()
                 if (strcmp(methodName, "<init>") ==0)
                 {
                     // TODO: Check argument types
-                    pushStackFrameVirtual(targetClassInfo, methodInfo, topFrame);
+                    pushStackFrameVirtual(targetClassInfo, methodInfo, topFrame, thread);
 
                     printf("> Created new stack frame for constructor call on: %s\n", className);
                 } else
@@ -350,13 +348,13 @@ void VM::executeLoop()
             }
         case 0xb8: // invoke static
             {
-                uint8_t indexByte1 = code[thread.pc++];
-                uint8_t indexByte2 = code[thread.pc++];
+                uint8_t indexByte1 = code[thread->pc++];
+                uint8_t indexByte2 = code[thread->pc++];
                 uint16_t index = (indexByte1 << 8) | indexByte2;
                 CPMethodRef* methodRef = (CPMethodRef*) topFrame->constantPool->constants[index-1];
                 CPClassInfo* targetClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
                 CPNameAndTypeInfo* nameAndTypeInfo = (CPNameAndTypeInfo*) topFrame->constantPool->constants[methodRef->nameAndTypeIndex-1];
-                ClassInfo* targetClass = getClass(topFrame->constantPool->getString(targetClassInfo->nameIndex));
+                ClassInfo* targetClass = getClass(topFrame->constantPool->getString(targetClassInfo->nameIndex), thread);
                 // TODO: Take in account descriptor of method as well, for overriding and such
                 MethodInfo* methodInfo = targetClass->findMethodWithName(topFrame->constantPool->getString(nameAndTypeInfo->nameIndex));
 
@@ -365,7 +363,7 @@ void VM::executeLoop()
                     // TODO: Do method call by pushing stack frame
                     fprintf(stderr, "Error: Running non-static method as static\n");
                     Platform::exitProgram(-10);
-                    pushStackFrameStatic(targetClass, methodInfo, topFrame);
+                    pushStackFrameStatic(targetClass, methodInfo, topFrame, thread);
                 }
 
                 if (methodInfo->isNative())
@@ -380,12 +378,12 @@ void VM::executeLoop()
             }
         case 0xbb: // new
             {
-                uint8_t indexByte1 = code[thread.pc++];
-                uint8_t indexByte2 = code[thread.pc++];
+                uint8_t indexByte1 = code[thread->pc++];
+                uint8_t indexByte2 = code[thread->pc++];
                 uint16_t index = (indexByte1 << 8) | indexByte2;
 
                 CPClassInfo* cpClasInfo = topFrame->constantPool->getClassInfo(index);
-                ClassInfo* targetClass = getClass(topFrame->constantPool->getString(cpClasInfo->nameIndex));
+                ClassInfo* targetClass = getClass(topFrame->constantPool->getString(cpClasInfo->nameIndex), thread);
 
                 uint32_t reference = heap.createObject(targetClass);
                 Variable variable = {};
@@ -398,12 +396,12 @@ void VM::executeLoop()
             }
         case 0xbd: // anewarray
             {
-                uint8_t indexByte1 = code[thread.pc++];
-                uint8_t indexByte2 = code[thread.pc++];
+                uint8_t indexByte1 = code[thread->pc++];
+                uint8_t indexByte2 = code[thread->pc++];
                 uint16_t index = (indexByte1 << 8) | indexByte2;
 
                 CPClassInfo* cpclassInfo = topFrame->constantPool->getClassInfo(index);
-                ClassInfo* classInfo = getClass(topFrame->constantPool->getString(cpclassInfo->nameIndex));
+                ClassInfo* classInfo = getClass(topFrame->constantPool->getString(cpclassInfo->nameIndex), thread);
 
                 int32_t size = topFrame->popOperand().data;
 
@@ -430,7 +428,7 @@ void VM::executeLoop()
     }
 }
 
-void VM::pushStackFrameWithoutParams(ClassInfo* classInfo, MethodInfo* methodInfo)
+void VM::pushStackFrameWithoutParams(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread* thread)
 {
     StackFrame stackFrame;
     stackFrame.localVariables.reserve(methodInfo->code->maxLocals);
@@ -443,47 +441,47 @@ void VM::pushStackFrameWithoutParams(ClassInfo* classInfo, MethodInfo* methodInf
     }
     stackFrame.operands.reserve(methodInfo->code->maxStack);
     stackFrame.constantPool = classInfo->constantPool;
-    stackFrame.previousPc = thread.pc;
-    stackFrame.previousClass = thread.currentClass;
-    stackFrame.previousMethod = thread.currentMethod;
+    stackFrame.previousPc = thread->pc;
+    stackFrame.previousClass = thread->currentClass;
+    stackFrame.previousMethod = thread->currentMethod;
 
 
-    thread.pc = 0;
-    thread.currentClass = classInfo;
-    thread.currentMethod = methodInfo;
+    thread->pc = 0;
+    thread->currentClass = classInfo;
+    thread->currentMethod = methodInfo;
 
-    thread.stack.frames.push_back(stackFrame);
-    thread.currentFrame = &thread.stack.frames[thread.stack.frames.size()-1];
+    thread->stack.frames.push_back(stackFrame);
+    thread->currentFrame = &thread->stack.frames[thread->stack.frames.size()-1];
 }
 
-void VM::pushStackFrameVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame)
+void VM::pushStackFrameVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame, VMThread* thread)
 {
-    pushStackFrameWithoutParams(classInfo, methodInfo);
+    pushStackFrameWithoutParams(classInfo, methodInfo, thread);
     if (previousFrame != 0)
     {
         // The arguments and the pointer to the object
         for (int i = methodInfo->argsCount; i >= 0; --i)
         {
-            thread.currentFrame->localVariables[i] = previousFrame->popOperand();
+            thread->currentFrame->localVariables[i] = previousFrame->popOperand();
         }
     }
 }
 
-void VM::pushStackFrameStatic(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame)
+void VM::pushStackFrameStatic(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame, VMThread* thread)
 {
-    pushStackFrameWithoutParams(classInfo, methodInfo);
+    pushStackFrameWithoutParams(classInfo, methodInfo, thread);
 
     if (previousFrame != 0)
     {
         // The arguments
         for (int i = methodInfo->argsCount; i > 0; --i)
         {
-            thread.currentFrame->localVariables[i-1] = previousFrame->popOperand();
+            thread->currentFrame->localVariables[i-1] = previousFrame->popOperand();
         }
     }
 }
 
-void VM::runStaticInitializer(ClassInfo* classInfo)
+void VM::runStaticInitializer(ClassInfo* classInfo, VMThread* thread)
 {
     MethodInfo* entryPoint = classInfo->findMethodWithNameAndDescriptor("<clinit>", "()V");
 
@@ -493,13 +491,13 @@ void VM::runStaticInitializer(ClassInfo* classInfo)
         return;
     }
 
-    pushStackFrameWithoutParams(classInfo, entryPoint);
+    pushStackFrameWithoutParams(classInfo, entryPoint, thread);
 
     printf("Executing static initializers...\n");
-    executeLoop();
+    executeLoop(thread);
 }
 
-ClassInfo* VM::getClass(const char* className)
+ClassInfo* VM::getClass(const char* className, VMThread* thread)
 {
     ClassInfo* classInfo = heap.getClassByName(className);
     if (classInfo == NULL) {
@@ -508,7 +506,7 @@ ClassInfo* VM::getClass(const char* className)
         ClassInfo *classInfo = bootstrapClassLoader.readClass(className, memory, configuration.classPath);
         initStaticFields(classInfo);
         heap.addClassInfo(classInfo);
-        runStaticInitializer(classInfo);
+        runStaticInitializer(classInfo, thread);
         return classInfo;
     }
     return classInfo;
@@ -516,6 +514,7 @@ ClassInfo* VM::getClass(const char* className)
 
 void VM::runMain(const char* className)
 {
+    VMThread* mainThread = &thread;
     if (className == 0)
     {
         fprintf(stderr, "Error: Class name of starting class not defined..\n");
@@ -523,7 +522,7 @@ void VM::runMain(const char* className)
     }
 
     Memory memory(1000, KIB(5));
-    ClassInfo* startupClass = getClass(className);
+    ClassInfo* startupClass = getClass(className, mainThread);
     MethodInfo* entryPoint = startupClass->findMethodWithNameAndDescriptor("main", "([Ljava/lang/String;)V");
 
     if (entryPoint == 0)
@@ -532,16 +531,16 @@ void VM::runMain(const char* className)
         Platform::exitProgram(-6);
     }
 
-    thread.pc = 0;
-    thread.currentClass = startupClass;
-    thread.currentMethod = entryPoint;
+    mainThread->pc = 0;
+    mainThread->currentClass = startupClass;
+    mainThread->currentMethod = entryPoint;
 
-    pushStackFrameStatic(startupClass, entryPoint, 0);
+    pushStackFrameStatic(startupClass, entryPoint, 0, mainThread);
 
     // TODO: Put string array in local variable with index 0
 
     printf("> Executing main method...\n");
-    executeLoop();
+    executeLoop(mainThread);
     ClassInfo* clasInfo = heap.getClassByName("Brol");
     printf("> Done executing\n");
 }
