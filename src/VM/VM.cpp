@@ -194,7 +194,7 @@ void VM::executeLoop(VMThread* thread)
 
         switch (opcode)
         {
-        case 0x59: // dup
+        case i_dup:
             {
                 Variable top = topFrame->peekOperand();
                 Variable copy = {};
@@ -203,7 +203,7 @@ void VM::executeLoop(VMThread* thread)
                 topFrame->operands.push_back(copy);
                 break;
             }
-        case 0xb1: // return
+        case i_return:
             {
                 StackFrame* stackFrame = &thread->stack.frames.back();
                 thread->pc = stackFrame->previousPc;
@@ -220,7 +220,7 @@ void VM::executeLoop(VMThread* thread)
                 }
                 return;
             }
-        case 0xb3: // putstatic
+        case i_putstatic:
             {
                 uint8_t indexByte1 = code[thread->pc++];
                 uint8_t indexByte2 = code[thread->pc++];
@@ -235,7 +235,7 @@ void VM::executeLoop(VMThread* thread)
                 updateVariableFromVariable(targetField->staticData, topFrame->constantPool->getString(nameAndType->descriptorIndex), var);
                 break;
             }
-        case 0xb5: // Putfield
+        case i_putfield:
             {
                 uint8_t indexByte1 = code[thread->pc++];
                 uint8_t indexByte2 = code[thread->pc++];
@@ -274,7 +274,7 @@ void VM::executeLoop(VMThread* thread)
 
                 break;
             }
-        case 0xb7: // Invoke special
+        case i_invokespecial:
             {
                 uint8_t indexByte1 = code[thread->pc++];
                 uint8_t indexByte2 = code[thread->pc++];
@@ -304,7 +304,7 @@ void VM::executeLoop(VMThread* thread)
 
                 break;
             }
-        case 0xb8: // invoke static
+        case i_invokestatic:
             {
                 uint8_t indexByte1 = code[thread->pc++];
                 uint8_t indexByte2 = code[thread->pc++];
@@ -334,7 +334,7 @@ void VM::executeLoop(VMThread* thread)
                 }
                 break;
             }
-        case 0xbb: // new
+        case i_new:
             {
                 uint8_t indexByte1 = code[thread->pc++];
                 uint8_t indexByte2 = code[thread->pc++];
@@ -352,7 +352,7 @@ void VM::executeLoop(VMThread* thread)
 
                 break;
             }
-        case 0xbd: // anewarray
+        case i_anewarray:
             {
                 uint8_t indexByte1 = code[thread->pc++];
                 uint8_t indexByte2 = code[thread->pc++];
