@@ -21,11 +21,10 @@ void iconst_i(uint8_t* args, uint16_t argsCount, i1 arg, JavaHeap* heap, VMThrea
 
 void lconst_i(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread)
 {
-    // TODO: Check this
-    Variable variableHigh;
+    Variable variableHigh = {};
     variableHigh.type = VariableType_LONG;
     variableHigh.data = ((int32_t)0);
-    Variable variableLow;
+    Variable variableLow = {};
     variableLow.type = VariableType_LONG;
     variableLow.data = ((int32_t)arg);
     thread->currentFrame->operands.push_back(variableHigh);
@@ -34,9 +33,10 @@ void lconst_i(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMT
 
 void fconst_i(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread)
 {
-    // TODO: Check this
-    Variable variable;
+    Variable variable = {};
     variable.type = VariableType_FLOAT;
-    variable.data = ((float)arg);
+    float f = arg;
+    u4 casted = *((u4*)(&f));
+    variable.data = (casted);
     thread->currentFrame->operands.push_back(variable);
 }
