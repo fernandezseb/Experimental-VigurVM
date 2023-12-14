@@ -25,6 +25,7 @@ void VM::start(Configuration configuration)
     getClass("java/lang/VirtualMachineError", &thread);
     getClass("java/lang/Object", &thread);
     getClass("java/lang/String", &thread);
+    getClass("java/lang/System", &thread);
 }
 
 std::vector<Variable> VM::createVariableForDescriptor(char* descriptor)
