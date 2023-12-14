@@ -162,13 +162,15 @@ void VM::executeLoop(VMThread* thread)
         StackFrame* topFrame = thread->currentFrame;
         uint8_t* code = thread->currentMethod->code->code;
         uint8_t opcode = code[thread->pc++];
-        printf("Running instruction with opcode: 0x%0x\n", opcode);
+        printf("Running instruction with opcode: 0x%0x ", opcode);
 
         bool found = false;
 
         for (const Instruction& instruction : instructions) {
             if (((u1)instruction.opcode) == opcode)
             {
+                found = true;
+                printf("%s", instruction.name);
                 uint8_t* args = 0;
                 if (instruction.args > 0) {
                     args = (uint8_t*)Platform::allocateMemory(instruction.args, 0);
@@ -178,12 +180,13 @@ void VM::executeLoop(VMThread* thread)
                     }
                 }
                 if (instruction.instructionFunction != NULL) {
-                    found = true;
                     instruction.instructionFunction(args, instruction.args, instruction.arg, &heap, thread);
-                    break;
                 }
+                break;
             }
         }
+
+        printf("\n");
         if (found)
         {
             continue;
