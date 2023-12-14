@@ -10,6 +10,8 @@
 #include <vector>
 
 #include "ConstantInstructions.h"
+#include "LoadInstructions.h"
+#include "StoreInstructions.h"
 
 struct StackFrame {
     // Local variable array
@@ -77,7 +79,7 @@ struct Instruction
 
 class VM {
 private:
-    Instruction instructions[21] =
+    Instruction instructions[29] =
     {
         // Constants
         {i_nop, 0, "nop", 0, nop},
@@ -101,6 +103,16 @@ private:
         {i_ldc, 1, "ldc", 0, ldc},
         {i_ldc_w, 2, "ldc_w", 0, ldc_w},
         {i_ldc2_w, 2, "ldc2_w", 0, ldc2_w},
+        // Loads
+        {i_aload_0, 0, "aload_0", 0, aload_i},
+        {i_aload_1, 0, "aload_1", 1, aload_i},
+        {i_aload_2, 0, "aload_2", 2, aload_i},
+        {i_aload_3, 0, "aload_3", 3, aload_i},
+        // Stores
+        {i_astore_0, 0, "astore_0", 0, astore_i},
+        {i_astore_1, 0, "astore_1", 1, astore_i},
+        {i_astore_2, 0, "astore_2", 2, astore_i},
+        {i_astore_3, 0, "astore_3", 3, astore_i},
     };
     ClassLoader bootstrapClassLoader;
     JavaHeap heap;

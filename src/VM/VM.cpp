@@ -5,7 +5,6 @@
 
 #include "Configuration.h"
 #include "../Memory.h"
-#include "ConstantInstructions.h"
 
 VM::VM()
 {
@@ -195,28 +194,6 @@ void VM::executeLoop(VMThread* thread)
 
         switch (opcode)
         {
-        case 0x2a: // aload_0
-            {
-                // TODO: Check if it is OK type and such
-                Variable var = topFrame->localVariables[0];
-                topFrame->operands.push_back(var);
-                break;
-            }
-        case 0x2b: // aload_1
-            {
-                // TODO: Check if it is OK type and such
-                Variable var = topFrame->localVariables[1];
-                topFrame->operands.push_back(var);
-                break;
-            }
-        case 0x4c: // astore_1
-            {
-                Variable refVar = topFrame->popOperand();
-                Variable* var =  &topFrame->localVariables[1];
-                var->data = refVar.data;
-                var->type = refVar.type;
-                break;
-            }
         case 0x59: // dup
             {
                 Variable top = topFrame->peekOperand();
