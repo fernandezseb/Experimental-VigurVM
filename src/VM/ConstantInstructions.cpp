@@ -82,7 +82,7 @@ void sipush(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThr
     thread->currentFrame->operands.push_back(variable);
 }
 
-void loadConstant(VMThread* thread, u4 index)
+void loadConstant(VMThread* thread, u4 index, JavaHeap* heap)
 {
     ConstantPoolItem* cpItem = thread->currentFrame->constantPool->constants[index-1];
     if (cpItem->getType() == CT_INTEGER)
@@ -92,6 +92,27 @@ void loadConstant(VMThread* thread, u4 index)
         var.type = VariableType_INT;
         var.data = integerInfo->bytes;
         thread->currentFrame->operands.push_back(var);
+    } else if (cpItem->getType() == CT_STRING)
+    {
+        CPStringInfo* stringInfo = (CPStringInfo*) cpItem;
+        const char* utf8String = thread->currentClass->constantPool->getString(stringInfo->stringIndex);
+
+        u4 strObjectId = heap->createObject(heap->getClassByName("java/lang/String"));
+        Object* strObject = heap->getObject(strObjectId);
+
+        u4 arrId = heap->createArray(AT_CHAR, strlen(utf8String));
+        Array* charArray = heap->getArray(arrId);
+        strcpy((char*)charArray->data, utf8String);
+
+        Variable var = {};
+        var.type = VariableType_REFERENCE;
+        var.data = arrId;
+        strObject->fields[0].data = var;
+
+        Variable strVar = {};
+        strVar.type = VariableType_REFERENCE;
+        strVar.data = strObjectId;
+        thread->currentFrame->operands.push_back(strVar);
     } else
     {
         fprintf(stderr, "Error: LDC not implemented yet for type: %d\n", cpItem->getType());
@@ -131,13 +152,13 @@ void loadConstant2(VMThread* thread, u4 index)
 void ldc(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread)
 {
     u1 index = args[0];
-    loadConstant(thread, index);
+    loadConstant(thread, index, heap);
 }
 
 void ldc_w(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread)
 {
     u2 index = (args[0] << 8) | args[1];
-    loadConstant(thread, index);
+    loadConstant(thread, index, heap);
 }
 
 void ldc2_w(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread)

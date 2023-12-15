@@ -75,7 +75,7 @@ public:
     };
     ArrayType arrayType;
     uint64_t length;
-    uint32_t* data;
+    u1* data;
 };
 
 class MethodArea {
@@ -96,6 +96,7 @@ public:
     uint32_t createArray(ArrayType type, uint64_t size);
     uint32_t createObject(ClassInfo* class_info);
     Object* getObject(uint32_t id);
+    Array* getArray(u4 id);
     void addClassInfo(ClassInfo* classInfo);
     ClassInfo* getClassByName(const char* className);
 };

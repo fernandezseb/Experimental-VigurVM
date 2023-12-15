@@ -221,6 +221,34 @@ void VM::executeLoop(VMThread* thread)
                 }
                 break;
             }
+        case i_getstatic:
+            {
+                uint8_t indexByte1 = code[thread->pc++];
+                uint8_t indexByte2 = code[thread->pc++];
+                uint16_t index = (indexByte1 << 8) | indexByte2;
+                CPFieldRef* fieldRef =  (CPFieldRef*) topFrame->constantPool->constants[index-1];
+                CPClassInfo* classInfo =  topFrame->constantPool->getClassInfo(fieldRef->classIndex);
+                CPNameAndTypeInfo* nameAndType = (CPNameAndTypeInfo*) topFrame->constantPool->constants[fieldRef->nameAndTypeIndex-1];
+                const char* className = topFrame->constantPool->getString(classInfo->nameIndex);
+                ClassInfo* targetClass = getClass(className, thread);
+                FieldInfo* targetField = targetClass->findField(topFrame->constantPool->getString(nameAndType->nameIndex), topFrame->constantPool->getString(nameAndType->descriptorIndex));
+                const char* descriptor = topFrame->constantPool->getString(nameAndType->descriptorIndex);
+                u2 varCount = getDescriptorVarCount((char*)descriptor);
+                if (varCount != 1)
+                {
+                    fprintf(stderr, "Error: getstatic not implemented for double length values\n");
+                    Platform::exitProgram(-56);
+                }
+                // TODO: Check type, this can also be unitialized
+                Variable *var = targetField->staticData;
+                if (var->type == VariableType_UNDEFINED)
+                {
+                    fprintf(stderr, "Error: Unitialized field not supported in getstatic yet\n");
+                    Platform::exitProgram(-56);
+                }
+                topFrame->operands.push_back(*var);
+                break;
+            }
         case i_putstatic:
             {
                 uint8_t indexByte1 = code[thread->pc++];

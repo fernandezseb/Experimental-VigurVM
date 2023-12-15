@@ -14,7 +14,7 @@ uint32_t JavaHeap::createArray(ArrayType type, uint64_t size)
     array->length = size;
     array->type = ARRAY;
     array->arrayType = AT_REFERENCE;
-    array->data = (uint32_t*) Platform::allocateMemory(sizeof(uint32_t) * size, 0);
+    array->data = (u1*) Platform::allocateMemory(sizeof(uint32_t) * size, 0);
     for (int i = 0; i < size; ++i)
     {
         array->data[i] = 0;
@@ -83,6 +83,25 @@ Object* JavaHeap::getObject(uint32_t id)
     if (ref->type == OBJECT)
     {
         return (Object*) objects[id];
+    } else
+    {
+        fprintf(stderr, "Error: Array instead of Object");
+        Platform::exitProgram(-22);
+    }
+}
+
+Array* JavaHeap::getArray(uint32_t id)
+{
+    if (id == 0)
+    {
+        // Nullpointer
+        fprintf(stderr, "Error: Null pointer exception!");
+        Platform::exitProgram(-1);
+    }
+    Reference* ref = objects[id];
+    if (ref->type == ARRAY)
+    {
+        return (Array*) objects[id];
     } else
     {
         fprintf(stderr, "Error: Array instead of Object");
