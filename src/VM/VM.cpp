@@ -19,6 +19,7 @@ void VM::start(Configuration configuration)
     thread.pc = 0;
     thread.currentClass = nullptr;
     thread.currentMethod = nullptr;
+    thread.currentFrame = nullptr;
 
     getClass("java/lang/OutOfMemoryError", &thread);
     getClass("java/lang/VirtualMachineError", &thread);
@@ -218,7 +219,7 @@ void VM::executeLoop(VMThread* thread)
                 {
                     thread->currentFrame = 0;
                 }
-                return;
+                break;
             }
         case i_putstatic:
             {
@@ -321,7 +322,6 @@ void VM::executeLoop(VMThread* thread)
                     // TODO: Do method call by pushing stack frame
                     fprintf(stderr, "Error: Running non-static method as static\n");
                     Platform::exitProgram(-10);
-                    pushStackFrameStatic(targetClass, methodInfo, topFrame, thread);
                 }
 
                 if (methodInfo->isNative())
@@ -329,8 +329,9 @@ void VM::executeLoop(VMThread* thread)
                     printf("Running native code of method: %s\n", methodInfo->name);
                 } else
                 {
-                    fprintf(stderr, "Error: Running static methods not implemented yet\n");
-                    Platform::exitProgram(-10);
+                    pushStackFrameStatic(targetClass, methodInfo, topFrame, thread);
+                    printf("> Created new stack frame for constructor call on: %s\n",
+                        topFrame->constantPool->getString(targetClassInfo->nameIndex));
                 }
                 break;
             }
@@ -449,10 +450,24 @@ void VM::runStaticInitializer(ClassInfo* classInfo, VMThread* thread)
         return;
     }
 
+    JavaStack oldStack = thread->stack;
+    u4 oldPc = thread->pc;
+    ClassInfo* oldCurrentClass = thread->currentClass;
+    MethodInfo* oldCurrentMethod = thread->currentMethod;
+    StackFrame* oldFrame = thread->currentFrame;
+    thread->stack.frames = std::vector<StackFrame>();
+    thread->stack.frames.reserve(200);
+
     pushStackFrameWithoutParams(classInfo, entryPoint, thread);
 
     printf("Executing static initializers...\n");
     executeLoop(thread);
+
+    thread->pc = oldPc;
+    thread->currentClass = oldCurrentClass;
+    thread->currentMethod = oldCurrentMethod;
+    thread->stack.frames = oldStack.frames;
+    thread->currentFrame = oldFrame;
 }
 
 ClassInfo* VM::getClass(const char* className, VMThread* thread)
@@ -499,6 +514,5 @@ void VM::runMain(const char* className)
 
     printf("> Executing main method...\n");
     executeLoop(mainThread);
-    ClassInfo* clasInfo = heap.getClassByName("Brol");
     printf("> Done executing\n");
 }
