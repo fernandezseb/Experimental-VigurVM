@@ -102,7 +102,7 @@ void loadConstant(VMThread* thread, u4 index, JavaHeap* heap)
 
         u4 arrId = heap->createArray(AT_CHAR, strlen(utf8String));
         Array* charArray = heap->getArray(arrId);
-        strcpy((char*)charArray->data, utf8String);
+        memcpy((char*)charArray->data, utf8String, strlen(utf8String));
 
         Variable var = {};
         var.type = VariableType_REFERENCE;
