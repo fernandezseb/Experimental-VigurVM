@@ -287,7 +287,7 @@ void VM::executeLoop(VMThread* thread)
                 Variable targetValue = topFrame->popOperand();
                 Variable referencePointer = topFrame->popOperand();
 
-                Object* targetObject = heap.getObject(referencePointer.data);
+                Object* targetObject = heap.getChildObject(referencePointer.data, targetClass);
 
                 FieldData* fieldData = targetObject->getField(fieldName, fieldDescr);
 
@@ -371,6 +371,15 @@ void VM::executeLoop(VMThread* thread)
 
                 CPClassInfo* cpClasInfo = topFrame->constantPool->getClassInfo(index);
                 ClassInfo* targetClass = getClass(topFrame->constantPool->getString(cpClasInfo->nameIndex), thread);
+
+                const char* superClassName = targetClass->constantPool->getString(
+                targetClass->constantPool->getClassInfo(targetClass->superClass)->nameIndex);
+                while (strcmp(superClassName, "java/lang/Object") != 0)
+                {
+                    ClassInfo* superClass =  getClass(superClassName, thread);
+                    superClassName = superClass->constantPool->getString(
+                superClass->constantPool->getClassInfo(superClass->superClass)->nameIndex);
+                }
 
                 uint32_t reference = heap.createObject(targetClass);
                 Variable variable = {};
@@ -542,5 +551,5 @@ void VM::runMain(const char* className)
 
     printf("> Executing main method...\n");
     executeLoop(mainThread);
-    printf("> Done executing\n");
+   printf("> Done executing\n");
 }

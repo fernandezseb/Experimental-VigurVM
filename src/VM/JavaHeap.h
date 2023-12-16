@@ -53,6 +53,7 @@ public:
     FieldData* fields;
     uint16_t fieldsCount;
     ClassInfo* classInfo;
+    u4 superClassObject;
     FieldData* getField(const char* name, const char* descriptor)
     {
         for (u2 currentField = 0; currentField < fieldsCount; ++currentField)
@@ -96,6 +97,7 @@ public:
     uint32_t createArray(ArrayType type, uint64_t size);
     uint32_t createObject(ClassInfo* class_info);
     Object* getObject(uint32_t id);
+    Object* getChildObject(uint32_t id, ClassInfo* classInfo);
     Array* getArray(u4 id);
     void addClassInfo(ClassInfo* classInfo);
     ClassInfo* getClassByName(const char* className);

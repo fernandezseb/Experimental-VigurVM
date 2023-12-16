@@ -1,6 +1,5 @@
 #include "JavaHeap.h"
 
-
 JavaHeap::JavaHeap()
 {
     // We don't want the heap to return reference 0,
@@ -40,10 +39,7 @@ uint32_t JavaHeap::createArray(ArrayType type, uint64_t size)
 uint32_t JavaHeap::createObject(ClassInfo* class_info)
 {
     Object* object = (Object*) Platform::allocateMemory(sizeof(Array), 0);
-
-
     u2 fieldsCount = 0;
-
     for (u2 currentField = 0; currentField < class_info->fieldsCount; ++currentField)
     {
         FieldInfo* fieldInfo = class_info->fields[currentField];
@@ -61,6 +57,7 @@ uint32_t JavaHeap::createObject(ClassInfo* class_info)
         object->fields = (FieldData*) Platform::allocateMemory(sizeof(FieldData) * fieldsCount, 0);
     }
     object->fieldsCount = fieldsCount;
+    object->superClassObject = 0;
 
     fieldsCount = 0;
     for (u2 currentField = 0; currentField < class_info->fieldsCount; ++currentField)
@@ -79,7 +76,14 @@ uint32_t JavaHeap::createObject(ClassInfo* class_info)
         }
     }
 
-    // TODO: Initialize the fields resursive
+
+    const char* superClassName = class_info->constantPool->getString(class_info->constantPool->getClassInfo(class_info->superClass)->nameIndex);
+    if (strcmp(superClassName, "java/lang/Object") != 0)
+    {
+        ClassInfo* superClass = getClassByName(superClassName);
+        u4 superClassObject = createObject(superClass);
+        object->superClassObject = superClassObject;
+    }
 
     objects.push_back(object);
     return objects.size()-1;
@@ -90,7 +94,7 @@ Object* JavaHeap::getObject(uint32_t id)
     if (id == 0)
     {
         // Nullpointer
-        fprintf(stderr, "Error: Null pointer exception!");
+        fprintf(stderr, "Error: Null pointer exception!\n");
         Platform::exitProgram(-1);
     }
     Reference* ref = objects[id];
@@ -99,9 +103,26 @@ Object* JavaHeap::getObject(uint32_t id)
         return (Object*) objects[id];
     } else
     {
-        fprintf(stderr, "Error: Array instead of Object");
+        fprintf(stderr, "Error: Array instead of Object\n");
         Platform::exitProgram(-22);
     }
+}
+
+Object* JavaHeap::getChildObject(uint32_t id, ClassInfo* classInfo)
+{
+    Object* o = getObject(id);
+    if (strcmp(o->classInfo->getName(), classInfo->getName()) != 0)
+    {
+        if (o->superClassObject != 0)
+        {
+            return getChildObject(o->superClassObject, classInfo);
+        } else
+        {
+            fprintf(stderr, "Error: Object not found at reference with class: %s\n", classInfo->getName());
+            Platform::exitProgram(-22);
+        }
+    }
+    return o;
 }
 
 Array* JavaHeap::getArray(uint32_t id)
