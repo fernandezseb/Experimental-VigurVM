@@ -8,7 +8,7 @@
 Configuration parseArguments(int argc, char** argv)
 {
     Configuration config;
-
+    bool mainNameFound = false;
     for (int currentArg = 1; currentArg < argc; ++currentArg)
     {
         if (strcmp(argv[currentArg], "-classpath") == 0 )
@@ -21,7 +21,14 @@ Configuration parseArguments(int argc, char** argv)
         }
         else
         {
-            config.mainClassName = argv[currentArg];
+            if (!mainNameFound)
+            {
+                config.mainClassName = argv[currentArg];
+                mainNameFound = true;
+            } else
+            {
+                config.args.push_back(argv[currentArg]);
+            }
         }
     }
 
