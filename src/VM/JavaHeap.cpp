@@ -13,12 +13,26 @@ uint32_t JavaHeap::createArray(ArrayType type, uint64_t size)
     Array* array = (Array*) Platform::allocateMemory(sizeof(Array), 0);
     array->length = size;
     array->type = ARRAY;
-    array->arrayType = AT_REFERENCE;
-    array->data = (u1*) Platform::allocateMemory(sizeof(uint32_t) * size, 0);
-    for (int i = 0; i < size; ++i)
+    array->arrayType = type;
+    array->data = 0;
+    if (size > 0 )
     {
-        array->data[i] = 0;
+        u1 bytes = 4;
+        if (type == AT_CHAR)
+        {
+            bytes = 1;
+        }
+        else if (type == AT_LONG || type == AT_DOUBLE)
+        {
+            bytes = 8;
+        }
+        array->data = (u1*) Platform::allocateMemory(bytes * size, 0);
+        for (int i = 0; i < size; ++i)
+        {
+            array->data[i] = 0;
+        }
     }
+
     objects.push_back(array);
     return objects.size()-1;
 }

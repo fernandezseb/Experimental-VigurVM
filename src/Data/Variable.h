@@ -23,6 +23,7 @@ enum ArrayType : char {
     AT_SHORT,
     AT_INT,
     AT_LONG, // 2 are needed for this
+    AT_DOUBLE,
     AT_REFERENCE,
     AT_UNDEFINED,
     AT_END
