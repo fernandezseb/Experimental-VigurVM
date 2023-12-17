@@ -111,7 +111,13 @@ void VM::initStaticFields(ClassInfo* class_info)
             for (Variable variable : variables) {
                 class_info->staticFields[currentStaticField++] = variable;
             }
-            field->staticData = &class_info->staticFields[currentStaticField-variables.size()];
+            u4 index = currentStaticField-variables.size();
+            if (index > staticFieldsCount-1 || index < 0)
+            {
+                fprintf(stderr, "Error: Going outside of index!\n");
+                Platform::exitProgram(-69);
+            }
+            field->staticData = &class_info->staticFields[index];
         }
     }
 }
