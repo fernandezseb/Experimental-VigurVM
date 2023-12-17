@@ -199,7 +199,7 @@ void VM::executeLoop(VMThread* thread)
                     }
                 }
                 if (instruction.instructionFunction != NULL) {
-                    instruction.instructionFunction(args, instruction.args, instruction.arg, &heap, thread);
+                    instruction.instructionFunction(args, instruction.args, instruction.arg, &heap, thread, this);
                 }
                 break;
             }
@@ -213,15 +213,6 @@ void VM::executeLoop(VMThread* thread)
 
         switch (opcode)
         {
-        case i_dup:
-            {
-                Variable top = topFrame->peekOperand();
-                Variable copy = {};
-                copy.type = top.type;
-                copy.data = top.data;
-                topFrame->operands.push_back(copy);
-                break;
-            }
         case i_return:
             {
                 StackFrame* stackFrame = &thread->stack.frames.back();
@@ -237,81 +228,6 @@ void VM::executeLoop(VMThread* thread)
                 {
                     thread->currentFrame = 0;
                 }
-                break;
-            }
-        case i_getstatic:
-            {
-                uint16_t index = readShort(thread);
-                CPFieldRef* fieldRef =  topFrame->constantPool->getFieldRef(index);
-                CPClassInfo* classInfo =  topFrame->constantPool->getClassInfo(fieldRef->classIndex);
-                CPNameAndTypeInfo* nameAndType = topFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
-                const char* className = topFrame->constantPool->getString(classInfo->nameIndex);
-                ClassInfo* targetClass = getClass(className, thread);
-                FieldInfo* targetField = targetClass->findField(topFrame->constantPool->getString(nameAndType->nameIndex), topFrame->constantPool->getString(nameAndType->descriptorIndex));
-                const char* descriptor = topFrame->constantPool->getString(nameAndType->descriptorIndex);
-                u2 varCount = getDescriptorVarCount((char*)descriptor);
-                if (varCount != 1)
-                {
-                    fprintf(stderr, "Error: getstatic not implemented for double length values\n");
-                    Platform::exitProgram(-56);
-                }
-                // TODO: Check type, this can also be unitialized
-                Variable *var = targetField->staticData;
-                if (var->type == VariableType_UNDEFINED)
-                {
-                    fprintf(stderr, "Error: Unitialized field not supported in getstatic yet\n");
-                    Platform::exitProgram(-56);
-                }
-                topFrame->operands.push_back(*var);
-                break;
-            }
-        case i_putstatic:
-            {
-                uint16_t index = readShort(thread);
-                CPFieldRef* fieldRef =  topFrame->constantPool->getFieldRef(index);
-                CPClassInfo* classInfo =  topFrame->constantPool->getClassInfo(fieldRef->classIndex);
-                CPNameAndTypeInfo* nameAndType = topFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
-                const char* className = topFrame->constantPool->getString(classInfo->nameIndex);
-                ClassInfo* targetClass = getClass(className, thread);
-                FieldInfo* targetField = targetClass->findField(topFrame->constantPool->getString(nameAndType->nameIndex), topFrame->constantPool->getString(nameAndType->descriptorIndex));
-                Variable var = topFrame->popOperand();
-                updateVariableFromVariable(targetField->staticData, topFrame->constantPool->getString(nameAndType->descriptorIndex), var);
-                break;
-            }
-        case i_putfield:
-            {
-                uint16_t index = readShort(thread);
-                CPFieldRef* fieldRef = topFrame->constantPool->getFieldRef(index);
-                CPClassInfo* cpClassInfo = topFrame->constantPool->getClassInfo(fieldRef->classIndex);
-                CPNameAndTypeInfo* nameAndType = topFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
-
-                const char* className = topFrame->constantPool->getString(cpClassInfo->nameIndex);
-                ClassInfo* targetClass = getClass(className, thread);
-                const char* fieldName = topFrame->constantPool->getString(nameAndType->nameIndex);
-                const char* fieldDescr = topFrame->constantPool->getString(nameAndType->descriptorIndex);
-
-
-                // TODO: Get the object from the reference -> Done
-                // TODO: Get the correct field from the object -> Done
-                // TODO: Update the value of the object -> Basic Done
-
-                Variable targetValue = topFrame->popOperand();
-                Variable referencePointer = topFrame->popOperand();
-
-                Object* targetObject = heap.getChildObject(referencePointer.data, targetClass);
-
-                FieldData* fieldData = targetObject->getField(fieldName, fieldDescr);
-
-                if (targetValue.type != VariableType_INT)
-                {
-                    fprintf(stderr, "Error: Can't set fields other than int!");
-                    Platform::exitProgram(-32);
-                }
-                // TODO: Fix for types other than I
-                // TODO: Check for type descriptor
-                fieldData->data.data = targetValue.data;
-                fieldData->data.type = targetValue.type;
-
                 break;
             }
         case i_invokespecial:

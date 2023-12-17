@@ -3,11 +3,11 @@
 #include "Data/Variable.h"
 #include "VM.h"
 
-void nop(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread)
+void nop(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
 }
 
-void aconst_null(uint8_t* args, uint16_t argsCount, i1 arg, JavaHeap* heap, VMThread* thread)
+void aconst_null(uint8_t* args, uint16_t argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     Variable reference = {};
     reference.type = VariableType_REFERENCE;
@@ -15,7 +15,7 @@ void aconst_null(uint8_t* args, uint16_t argsCount, i1 arg, JavaHeap* heap, VMTh
     thread->currentFrame->operands.push_back(reference);
 }
 
-void iconst_i(uint8_t* args, uint16_t argsCount, i1 arg, JavaHeap* heap, VMThread* thread)
+void iconst_i(uint8_t* args, uint16_t argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     Variable variable;
     variable.type = VariableType_INT;
@@ -23,7 +23,7 @@ void iconst_i(uint8_t* args, uint16_t argsCount, i1 arg, JavaHeap* heap, VMThrea
     thread->currentFrame->operands.push_back(variable);
 }
 
-void lconst_i(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread)
+void lconst_i(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     Variable variableHigh = {};
     variableHigh.type = VariableType_LONG;
@@ -35,7 +35,7 @@ void lconst_i(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMT
     thread->currentFrame->operands.push_back(variableLow);
 }
 
-void fconst_i(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread)
+void fconst_i(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     Variable variable = {};
     variable.type = VariableType_FLOAT;
@@ -45,7 +45,7 @@ void fconst_i(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMT
     thread->currentFrame->operands.push_back(variable);
 }
 
-void dconst_i(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread)
+void dconst_i(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     double d = arg;
     u4 lowBytes =  *((u8*)(&d));
@@ -63,7 +63,7 @@ void dconst_i(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMT
     thread->currentFrame->operands.push_back(variableLow);
 }
 
-void bipush(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread)
+void bipush(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     uint8_t byte = args[0];
     Variable variable = {};
@@ -72,7 +72,7 @@ void bipush(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThr
     thread->currentFrame->operands.push_back(variable);
 }
 
-void sipush(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread)
+void sipush(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     i2 shortValue = (args[0] << 8) | args[1];
     i4 intValue = shortValue;
@@ -149,19 +149,19 @@ void loadConstant2(VMThread* thread, u4 index)
     }
 }
 
-void ldc(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread)
+void ldc(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     u1 index = args[0];
     loadConstant(thread, index, heap);
 }
 
-void ldc_w(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread)
+void ldc_w(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     u2 index = (args[0] << 8) | args[1];
     loadConstant(thread, index, heap);
 }
 
-void ldc2_w(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread)
+void ldc2_w(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     u2 index = (args[0] << 8) | args[1];
     loadConstant2(thread, index);

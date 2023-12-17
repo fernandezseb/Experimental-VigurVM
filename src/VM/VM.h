@@ -11,7 +11,9 @@
 
 #include "ConstantInstructions.h"
 #include "LoadInstructions.h"
+#include "ReferenceInstructions.h"
 #include "StoreInstructions.h"
+#include "StackInstructions.h"
 
 struct StackFrame {
     // Local variable array
@@ -73,13 +75,13 @@ struct Instruction
     u1 args;
     const char* name;
     i1 arg;
-    void(*instructionFunction)(u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread);
+    void(*instructionFunction)(u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM);
 };
 
 
 class VM {
 private:
-    Instruction instructions[29] =
+    Instruction instructions[33] =
     {
         // Constants
         {i_nop, 0, "nop", 0, nop},
@@ -113,22 +115,29 @@ private:
         {i_astore_1, 0, "astore_1", 1, astore_i},
         {i_astore_2, 0, "astore_2", 2, astore_i},
         {i_astore_3, 0, "astore_3", 3, astore_i},
+        // Stack
+        {i_dup, 0, "dup", 0, dup},
+        // Reference
+        {i_getstatic, 0, "getstatic", 0, getstatic},
+        {i_putstatic, 0, "putstatic", 0, putstatic},
+        {i_putfield, 0, "putfield", 0, putfield},
+
     };
     ClassLoader bootstrapClassLoader;
     JavaHeap heap;
     VMThread thread;
     Configuration configuration;
     static std::vector<Variable> createVariableForDescriptor(char* descriptor);
-    static uint16_t getDescriptorVarCount(char* get_string);
     void initStaticFields(ClassInfo* class_info);
-    void updateVariableFromVariable(Variable* variable, char* descriptor, Variable operand);
     void executeLoop(VMThread* thread);
     void pushStackFrameStatic(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame, VMThread* thread);
     void pushStackFrameWithoutParams(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread* thread);
     void pushStackFrameVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame, VMThread* thread);
     void runStaticInitializer(ClassInfo* classInfo, VMThread* thread);
 public:
+    void updateVariableFromVariable(Variable* variable, char* descriptor, Variable operand);
     VM();
+    static uint16_t getDescriptorVarCount(char* get_string);
     void start(Configuration configuration);
     ClassInfo* getClass(const char* className, VMThread* thread);
     void runMain(const char* className);
