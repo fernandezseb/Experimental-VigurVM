@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "ConstantInstructions.h"
+#include "ControlInstructions.h"
 #include "LoadInstructions.h"
 #include "ReferenceInstructions.h"
 #include "StoreInstructions.h"
@@ -81,7 +82,7 @@ struct Instruction
 
 class VM {
 private:
-    Instruction instructions[33] =
+    Instruction instructions[38] =
     {
         // Constants
         {i_nop, 0, "nop", 0, nop},
@@ -117,11 +118,16 @@ private:
         {i_astore_3, 0, "astore_3", 3, astore_i},
         // Stack
         {i_dup, 0, "dup", 0, dup},
-        // Reference
+        // References
         {i_getstatic, 0, "getstatic", 0, getstatic},
         {i_putstatic, 0, "putstatic", 0, putstatic},
         {i_putfield, 0, "putfield", 0, putfield},
-
+        {i_invokespecial, 0, "invokespecial", 0, invokespecial},
+        {i_invokestatic, 0, "invokestatic", 0, invokestatic},
+        {i_new, 0, "new", 0, newInstruction},
+        {i_anewarray, 0, "anewarray", 0, anewarray},
+        // Control
+        {i_return, 0, "return", 0, returnInstruction},
     };
     ClassLoader bootstrapClassLoader;
     JavaHeap heap;
@@ -130,11 +136,11 @@ private:
     static std::vector<Variable> createVariableForDescriptor(char* descriptor);
     void initStaticFields(ClassInfo* class_info);
     void executeLoop(VMThread* thread);
-    void pushStackFrameStatic(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame, VMThread* thread);
     void pushStackFrameWithoutParams(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread* thread);
-    void pushStackFrameVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame, VMThread* thread);
     void runStaticInitializer(ClassInfo* classInfo, VMThread* thread);
 public:
+    void pushStackFrameStatic(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame, VMThread* thread);
+    void pushStackFrameVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame, VMThread* thread);
     void updateVariableFromVariable(Variable* variable, char* descriptor, Variable operand);
     VM();
     static uint16_t getDescriptorVarCount(char* get_string);

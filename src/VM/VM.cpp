@@ -179,7 +179,6 @@ void VM::executeLoop(VMThread* thread)
 {
     while(!thread->stack.frames.empty())
     {
-        StackFrame* topFrame = thread->currentFrame;
         uint8_t opcode = readByte(thread);
         printf("Running instruction with opcode: 0x%0x ", opcode);
 
@@ -189,7 +188,7 @@ void VM::executeLoop(VMThread* thread)
             if (((u1)instruction.opcode) == opcode)
             {
                 found = true;
-                printf("%s", instruction.name);
+                printf("%s\n", instruction.name);
                 uint8_t* args = 0;
                 if (instruction.args > 0) {
                     args = (uint8_t*)Platform::allocateMemory(instruction.args, 0);
@@ -205,139 +204,16 @@ void VM::executeLoop(VMThread* thread)
             }
         }
 
-        printf("\n");
         if (found)
         {
             continue;
-        }
-
-        switch (opcode)
+        } else
         {
-        case i_return:
-            {
-                StackFrame* stackFrame = &thread->stack.frames.back();
-                thread->pc = stackFrame->previousPc;
-                thread->currentClass = stackFrame->previousClass;
-                thread->currentMethod = stackFrame->previousMethod;
-                thread->stack.frames.pop_back();
-                if (thread->stack.frames.size() > 0)
-                {
-                    StackFrame* previousStackFrame = &thread->stack.frames[thread->stack.frames.size()-1];
-                    thread->currentFrame = previousStackFrame;
-                } else
-                {
-                    thread->currentFrame = 0;
-                }
-                break;
-            }
-        case i_invokespecial:
-            {
-                uint16_t index = readShort(thread);
-                CPMethodRef* methodRef = topFrame->constantPool->getMethodRef(index);
-                CPClassInfo* cpClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
-                CPNameAndTypeInfo* nameAndTypeInfo = topFrame->constantPool->getNameAndTypeInfo(methodRef->nameAndTypeIndex);
-                const char* methodName = topFrame->constantPool->getString(nameAndTypeInfo->nameIndex);
-                const char* methodDescriptor = topFrame->constantPool->getString(nameAndTypeInfo->descriptorIndex);
-                const char* className = topFrame->constantPool->getString(cpClassInfo->nameIndex);
-                ClassInfo* targetClassInfo = getClass(className, thread);
-                MethodInfo* methodInfo = targetClassInfo->findMethodWithNameAndDescriptor(methodName, methodDescriptor);
-                // TODO: Implement argument passing (including subclass argument)
-                // TODO: Check correct parsing of descriptors with subclasses
-
-                if (strcmp(methodName, "<init>") ==0)
-                {
-                    // TODO: Check argument types
-                    pushStackFrameVirtual(targetClassInfo, methodInfo, topFrame, thread);
-
-                    printf("> Created new stack frame for constructor call on: %s\n", className);
-                } else
-                {
-                    fprintf(stderr, "Error: Invokespecial not implemented for other cases than constructors\n");
-                    Platform::exitProgram(-30);
-                }
-
-                break;
-            }
-        case i_invokestatic:
-            {
-                uint16_t index = readShort(thread);
-                CPMethodRef* methodRef = topFrame->constantPool->getMethodRef(index);
-                CPClassInfo* targetClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
-                CPNameAndTypeInfo* nameAndTypeInfo = topFrame->constantPool->getNameAndTypeInfo(methodRef->nameAndTypeIndex);
-                ClassInfo* targetClass = getClass(topFrame->constantPool->getString(targetClassInfo->nameIndex), thread);
-                // TODO: Take in account descriptor of method as well, for overriding and such
-                MethodInfo* methodInfo = targetClass->findMethodWithName(topFrame->constantPool->getString(nameAndTypeInfo->nameIndex));
-
-                if (!methodInfo->isStatic())
-                {
-                    // TODO: Do method call by pushing stack frame
-                    fprintf(stderr, "Error: Running non-static method as static\n");
-                    Platform::exitProgram(-10);
-                }
-
-                if (methodInfo->isNative())
-                {
-                    printf("Running native code of method: %s\n", methodInfo->name);
-                } else
-                {
-                    pushStackFrameStatic(targetClass, methodInfo, topFrame, thread);
-                    printf("> Created new stack frame for constructor call on: %s\n",
-                        topFrame->constantPool->getString(targetClassInfo->nameIndex));
-                }
-                break;
-            }
-        case i_new:
-            {
-                uint16_t index = readShort(thread);
-                CPClassInfo* cpClasInfo = topFrame->constantPool->getClassInfo(index);
-                ClassInfo* targetClass = getClass(topFrame->constantPool->getString(cpClasInfo->nameIndex), thread);
-
-                const char* superClassName = targetClass->constantPool->getString(
-                targetClass->constantPool->getClassInfo(targetClass->superClass)->nameIndex);
-                while (strcmp(superClassName, "java/lang/Object") != 0)
-                {
-                    ClassInfo* superClass =  getClass(superClassName, thread);
-                    superClassName = superClass->constantPool->getString(
-                superClass->constantPool->getClassInfo(superClass->superClass)->nameIndex);
-                }
-
-                uint32_t reference = heap.createObject(targetClass);
-                Variable variable = {};
-                variable.type = VariableType_REFERENCE;
-                variable.data = reference;
-
-                topFrame->operands.push_back(variable);
-
-                break;
-            }
-        case i_anewarray:
-            {
-                uint16_t index = readShort(thread);
-                CPClassInfo* cpclassInfo = topFrame->constantPool->getClassInfo(index);
-                ClassInfo* classInfo = getClass(topFrame->constantPool->getString(cpclassInfo->nameIndex), thread);
-
-                int32_t size = topFrame->popOperand().data;
-
-                if (size < 0)
-                {
-                    fprintf(stderr, "Error: Can't create an array with negative size\n");
-                    Platform::exitProgram(-6);
-                }
-
-                uint32_t reference = heap.createArray(AT_REFERENCE, size);
-                Variable variable;
-                variable.type = VariableType_REFERENCE;
-                variable.data = reference;
-
-                topFrame->operands.push_back(variable);
-                break;
-            }
-        default:
-            {
-                fprintf(stderr, "Unrecognized opcode detected: 0x%0x", opcode);
-                Platform::exitProgram(-3);
-            }
+            printf("\n");
         }
+
+        fprintf(stderr, "Unrecognized opcode detected: 0x%0x", opcode);
+        Platform::exitProgram(-3);
     }
 }
 

@@ -56,6 +56,8 @@ add_executable(${PROJECT_NAME}
         src/VM/StackInstructions.cpp
         src/VM/ReferenceInstructions.h
         src/VM/ReferenceInstructions.cpp
+        src/VM/ControlInstructions.h
+        src/VM/ControlInstructions.cpp
 
 
 )

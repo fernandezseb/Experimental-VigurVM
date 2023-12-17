@@ -85,3 +85,108 @@ void putfield(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMT
     fieldData->data.data = targetValue.data;
     fieldData->data.type = targetValue.type;
 }
+
+void invokespecial(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+{
+    StackFrame* topFrame = thread->currentFrame;
+    uint16_t index = readShort(thread);
+    CPMethodRef* methodRef = topFrame->constantPool->getMethodRef(index);
+    CPClassInfo* cpClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
+    CPNameAndTypeInfo* nameAndTypeInfo = topFrame->constantPool->getNameAndTypeInfo(methodRef->nameAndTypeIndex);
+    const char* methodName = topFrame->constantPool->getString(nameAndTypeInfo->nameIndex);
+    const char* methodDescriptor = topFrame->constantPool->getString(nameAndTypeInfo->descriptorIndex);
+    const char* className = topFrame->constantPool->getString(cpClassInfo->nameIndex);
+    ClassInfo* targetClassInfo = VM->getClass(className, thread);
+    MethodInfo* methodInfo = targetClassInfo->findMethodWithNameAndDescriptor(methodName, methodDescriptor);
+    // TODO: Implement argument passing (including subclass argument)
+    // TODO: Check correct parsing of descriptors with subclasses
+
+    if (strcmp(methodName, "<init>") ==0)
+    {
+        // TODO: Check argument types
+        VM->pushStackFrameVirtual(targetClassInfo, methodInfo, topFrame, thread);
+
+        printf("> Created new stack frame for constructor call on: %s\n", className);
+    } else
+    {
+        fprintf(stderr, "Error: Invokespecial not implemented for other cases than constructors\n");
+        Platform::exitProgram(-30);
+    }
+
+}
+
+void invokestatic(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+{
+    StackFrame* topFrame = thread->currentFrame;
+    uint16_t index = readShort(thread);
+    CPMethodRef* methodRef = topFrame->constantPool->getMethodRef(index);
+    CPClassInfo* targetClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
+    CPNameAndTypeInfo* nameAndTypeInfo = topFrame->constantPool->getNameAndTypeInfo(methodRef->nameAndTypeIndex);
+    ClassInfo* targetClass = VM->getClass(topFrame->constantPool->getString(targetClassInfo->nameIndex), thread);
+    // TODO: Take in account descriptor of method as well, for overriding and such
+    MethodInfo* methodInfo = targetClass->findMethodWithName(topFrame->constantPool->getString(nameAndTypeInfo->nameIndex));
+
+    if (!methodInfo->isStatic())
+    {
+        // TODO: Do method call by pushing stack frame
+        fprintf(stderr, "Error: Running non-static method as static\n");
+        Platform::exitProgram(-10);
+    }
+
+    if (methodInfo->isNative())
+    {
+        printf("Running native code of method: %s\n", methodInfo->name);
+    } else
+    {
+        VM->pushStackFrameStatic(targetClass, methodInfo, topFrame, thread);
+        printf("> Created new stack frame for constructor call on: %s\n",
+            topFrame->constantPool->getString(targetClassInfo->nameIndex));
+    }
+}
+
+void newInstruction(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+{
+    StackFrame* topFrame = thread->currentFrame;
+    uint16_t index = readShort(thread);
+    CPClassInfo* cpClasInfo = topFrame->constantPool->getClassInfo(index);
+    ClassInfo* targetClass = VM->getClass(topFrame->constantPool->getString(cpClasInfo->nameIndex), thread);
+
+    const char* superClassName = targetClass->constantPool->getString(
+    targetClass->constantPool->getClassInfo(targetClass->superClass)->nameIndex);
+    while (strcmp(superClassName, "java/lang/Object") != 0)
+    {
+        ClassInfo* superClass = VM->getClass(superClassName, thread);
+        superClassName = superClass->constantPool->getString(
+            superClass->constantPool->getClassInfo(superClass->superClass)->nameIndex);
+    }
+
+    uint32_t reference = heap->createObject(targetClass);
+    Variable variable = {};
+    variable.type = VariableType_REFERENCE;
+    variable.data = reference;
+
+    topFrame->operands.push_back(variable);
+}
+
+void anewarray(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+{
+    StackFrame* topFrame = thread->currentFrame;
+    uint16_t index = readShort(thread);
+    CPClassInfo* cpclassInfo = topFrame->constantPool->getClassInfo(index);
+    ClassInfo* classInfo = VM->getClass(topFrame->constantPool->getString(cpclassInfo->nameIndex), thread);
+
+    int32_t size = topFrame->popOperand().data;
+
+    if (size < 0)
+    {
+        fprintf(stderr, "Error: Can't create an array with negative size\n");
+        Platform::exitProgram(-6);
+    }
+
+    uint32_t reference = heap->createArray(AT_REFERENCE, size);
+    Variable variable;
+    variable.type = VariableType_REFERENCE;
+    variable.data = reference;
+
+    topFrame->operands.push_back(variable);
+}
