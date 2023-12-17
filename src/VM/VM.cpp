@@ -162,13 +162,25 @@ void VM::updateVariableFromVariable(Variable* variable, char* descriptor, Variab
     }
 }
 
+static u1 readByte(VMThread* thread)
+{
+    return thread->currentMethod->code->code[thread->pc++];
+}
+
+static u2 readShort(VMThread* thread)
+{
+    uint8_t indexByte1 = thread->currentMethod->code->code[thread->pc++];
+    uint8_t indexByte2 = thread->currentMethod->code->code[thread->pc++];
+    uint16_t shortCombined = (indexByte1 << 8) | indexByte2;
+    return shortCombined;
+}
+
 void VM::executeLoop(VMThread* thread)
 {
     while(!thread->stack.frames.empty())
     {
         StackFrame* topFrame = thread->currentFrame;
-        uint8_t* code = thread->currentMethod->code->code;
-        uint8_t opcode = code[thread->pc++];
+        uint8_t opcode = readByte(thread);
         printf("Running instruction with opcode: 0x%0x ", opcode);
 
         bool found = false;
@@ -183,7 +195,7 @@ void VM::executeLoop(VMThread* thread)
                     args = (uint8_t*)Platform::allocateMemory(instruction.args, 0);
                     for (u2 currentArg = 0; currentArg < instruction.args; ++currentArg)
                     {
-                        args[currentArg] = code[thread->pc++];
+                        args[currentArg] = readByte(thread);
                     }
                 }
                 if (instruction.instructionFunction != NULL) {
@@ -229,9 +241,7 @@ void VM::executeLoop(VMThread* thread)
             }
         case i_getstatic:
             {
-                uint8_t indexByte1 = code[thread->pc++];
-                uint8_t indexByte2 = code[thread->pc++];
-                uint16_t index = (indexByte1 << 8) | indexByte2;
+                uint16_t index = readShort(thread);
                 CPFieldRef* fieldRef =  topFrame->constantPool->getFieldRef(index);
                 CPClassInfo* classInfo =  topFrame->constantPool->getClassInfo(fieldRef->classIndex);
                 CPNameAndTypeInfo* nameAndType = topFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
@@ -257,9 +267,7 @@ void VM::executeLoop(VMThread* thread)
             }
         case i_putstatic:
             {
-                uint8_t indexByte1 = code[thread->pc++];
-                uint8_t indexByte2 = code[thread->pc++];
-                uint16_t index = (indexByte1 << 8) | indexByte2;
+                uint16_t index = readShort(thread);
                 CPFieldRef* fieldRef =  topFrame->constantPool->getFieldRef(index);
                 CPClassInfo* classInfo =  topFrame->constantPool->getClassInfo(fieldRef->classIndex);
                 CPNameAndTypeInfo* nameAndType = topFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
@@ -272,10 +280,7 @@ void VM::executeLoop(VMThread* thread)
             }
         case i_putfield:
             {
-                uint8_t indexByte1 = code[thread->pc++];
-                uint8_t indexByte2 = code[thread->pc++];
-                uint16_t index = (indexByte1 << 8) | indexByte2;
-
+                uint16_t index = readShort(thread);
                 CPFieldRef* fieldRef = topFrame->constantPool->getFieldRef(index);
                 CPClassInfo* cpClassInfo = topFrame->constantPool->getClassInfo(fieldRef->classIndex);
                 CPNameAndTypeInfo* nameAndType = topFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
@@ -311,9 +316,7 @@ void VM::executeLoop(VMThread* thread)
             }
         case i_invokespecial:
             {
-                uint8_t indexByte1 = code[thread->pc++];
-                uint8_t indexByte2 = code[thread->pc++];
-                uint16_t index = (indexByte1 << 8) | indexByte2;
+                uint16_t index = readShort(thread);
                 CPMethodRef* methodRef = topFrame->constantPool->getMethodRef(index);
                 CPClassInfo* cpClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
                 CPNameAndTypeInfo* nameAndTypeInfo = topFrame->constantPool->getNameAndTypeInfo(methodRef->nameAndTypeIndex);
@@ -341,9 +344,7 @@ void VM::executeLoop(VMThread* thread)
             }
         case i_invokestatic:
             {
-                uint8_t indexByte1 = code[thread->pc++];
-                uint8_t indexByte2 = code[thread->pc++];
-                uint16_t index = (indexByte1 << 8) | indexByte2;
+                uint16_t index = readShort(thread);
                 CPMethodRef* methodRef = topFrame->constantPool->getMethodRef(index);
                 CPClassInfo* targetClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
                 CPNameAndTypeInfo* nameAndTypeInfo = topFrame->constantPool->getNameAndTypeInfo(methodRef->nameAndTypeIndex);
@@ -371,10 +372,7 @@ void VM::executeLoop(VMThread* thread)
             }
         case i_new:
             {
-                uint8_t indexByte1 = code[thread->pc++];
-                uint8_t indexByte2 = code[thread->pc++];
-                uint16_t index = (indexByte1 << 8) | indexByte2;
-
+                uint16_t index = readShort(thread);
                 CPClassInfo* cpClasInfo = topFrame->constantPool->getClassInfo(index);
                 ClassInfo* targetClass = getClass(topFrame->constantPool->getString(cpClasInfo->nameIndex), thread);
 
@@ -398,10 +396,7 @@ void VM::executeLoop(VMThread* thread)
             }
         case i_anewarray:
             {
-                uint8_t indexByte1 = code[thread->pc++];
-                uint8_t indexByte2 = code[thread->pc++];
-                uint16_t index = (indexByte1 << 8) | indexByte2;
-
+                uint16_t index = readShort(thread);
                 CPClassInfo* cpclassInfo = topFrame->constantPool->getClassInfo(index);
                 ClassInfo* classInfo = getClass(topFrame->constantPool->getString(cpclassInfo->nameIndex), thread);
 
