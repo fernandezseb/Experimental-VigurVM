@@ -38,3 +38,48 @@ CPClassInfo* ConstantPool::getClassInfo(uint16_t index) const
 		return cpClassInfo;
 	}
 }
+
+CPMethodRef* ConstantPool::getMethodRef(u2 index) const
+{
+	checkIndex(index);
+
+	ConstantPoolItem* item = this->constants[index - 1];
+	if (item->getType() != CT_METHODREF) {
+		fprintf(stderr, "Error: Trying to read method ref at non method ref item in constant pool at: #%" PRIu16 "\n", index);
+		Platform::exitProgram(1);
+	}
+	else {
+		CPMethodRef* cpMethodRef = (CPMethodRef*)item;
+		return cpMethodRef;
+	}
+}
+
+CPNameAndTypeInfo* ConstantPool::getNameAndTypeInfo(u2 index) const
+{
+	checkIndex(index);
+
+	ConstantPoolItem* item = this->constants[index - 1];
+	if (item->getType() != CT_NAMEANDTYPE) {
+		fprintf(stderr, "Error: Trying to read name and type at non name and type item in constant pool at: #%" PRIu16 "\n", index);
+		Platform::exitProgram(1);
+	}
+	else {
+		CPNameAndTypeInfo* cpNameAndType = (CPNameAndTypeInfo*)item;
+		return cpNameAndType;
+	}
+}
+
+CPFieldRef* ConstantPool::getFieldRef(uint16_t index) const
+{
+	checkIndex(index);
+
+	ConstantPoolItem* item = this->constants[index - 1];
+	if (item->getType() != CT_FIELDREF) {
+		fprintf(stderr, "Error: Trying to read field ref at non field ref item in constant pool at: #%" PRIu16 "\n", index);
+		Platform::exitProgram(1);
+	}
+	else {
+		CPFieldRef* cpFieldRef = (CPFieldRef*)item;
+		return cpFieldRef;
+	}
+}

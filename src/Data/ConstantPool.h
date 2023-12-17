@@ -124,4 +124,7 @@ public:
 public:
 	char* getString(uint16_t index) const;
 	CPClassInfo* getClassInfo(uint16_t index) const;
+	CPMethodRef* getMethodRef(u2 index) const;
+	CPNameAndTypeInfo* getNameAndTypeInfo(u2 index) const;
+	CPFieldRef* getFieldRef(u2 index) const;
 };

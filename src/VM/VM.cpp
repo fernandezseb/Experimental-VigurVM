@@ -232,9 +232,9 @@ void VM::executeLoop(VMThread* thread)
                 uint8_t indexByte1 = code[thread->pc++];
                 uint8_t indexByte2 = code[thread->pc++];
                 uint16_t index = (indexByte1 << 8) | indexByte2;
-                CPFieldRef* fieldRef =  (CPFieldRef*) topFrame->constantPool->constants[index-1];
+                CPFieldRef* fieldRef =  topFrame->constantPool->getFieldRef(index);
                 CPClassInfo* classInfo =  topFrame->constantPool->getClassInfo(fieldRef->classIndex);
-                CPNameAndTypeInfo* nameAndType = (CPNameAndTypeInfo*) topFrame->constantPool->constants[fieldRef->nameAndTypeIndex-1];
+                CPNameAndTypeInfo* nameAndType = topFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
                 const char* className = topFrame->constantPool->getString(classInfo->nameIndex);
                 ClassInfo* targetClass = getClass(className, thread);
                 FieldInfo* targetField = targetClass->findField(topFrame->constantPool->getString(nameAndType->nameIndex), topFrame->constantPool->getString(nameAndType->descriptorIndex));
@@ -260,9 +260,9 @@ void VM::executeLoop(VMThread* thread)
                 uint8_t indexByte1 = code[thread->pc++];
                 uint8_t indexByte2 = code[thread->pc++];
                 uint16_t index = (indexByte1 << 8) | indexByte2;
-                CPFieldRef* fieldRef =  (CPFieldRef*) topFrame->constantPool->constants[index-1];
+                CPFieldRef* fieldRef =  topFrame->constantPool->getFieldRef(index);
                 CPClassInfo* classInfo =  topFrame->constantPool->getClassInfo(fieldRef->classIndex);
-                CPNameAndTypeInfo* nameAndType = (CPNameAndTypeInfo*) topFrame->constantPool->constants[fieldRef->nameAndTypeIndex-1];
+                CPNameAndTypeInfo* nameAndType = topFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
                 const char* className = topFrame->constantPool->getString(classInfo->nameIndex);
                 ClassInfo* targetClass = getClass(className, thread);
                 FieldInfo* targetField = targetClass->findField(topFrame->constantPool->getString(nameAndType->nameIndex), topFrame->constantPool->getString(nameAndType->descriptorIndex));
@@ -276,9 +276,9 @@ void VM::executeLoop(VMThread* thread)
                 uint8_t indexByte2 = code[thread->pc++];
                 uint16_t index = (indexByte1 << 8) | indexByte2;
 
-                CPFieldRef* fieldRef = (CPFieldRef*) topFrame->constantPool->constants[index - 1];
+                CPFieldRef* fieldRef = topFrame->constantPool->getFieldRef(index);
                 CPClassInfo* cpClassInfo = topFrame->constantPool->getClassInfo(fieldRef->classIndex);
-                CPNameAndTypeInfo* nameAndType = (CPNameAndTypeInfo*) topFrame->constantPool->constants[fieldRef->nameAndTypeIndex-1];
+                CPNameAndTypeInfo* nameAndType = topFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
 
                 const char* className = topFrame->constantPool->getString(cpClassInfo->nameIndex);
                 ClassInfo* targetClass = getClass(className, thread);
@@ -314,9 +314,9 @@ void VM::executeLoop(VMThread* thread)
                 uint8_t indexByte1 = code[thread->pc++];
                 uint8_t indexByte2 = code[thread->pc++];
                 uint16_t index = (indexByte1 << 8) | indexByte2;
-                CPMethodRef* methodRef = (CPMethodRef*) topFrame->constantPool->constants[index-1];
+                CPMethodRef* methodRef = topFrame->constantPool->getMethodRef(index);
                 CPClassInfo* cpClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
-                CPNameAndTypeInfo* nameAndTypeInfo = (CPNameAndTypeInfo*) topFrame->constantPool->constants[methodRef->nameAndTypeIndex-1];
+                CPNameAndTypeInfo* nameAndTypeInfo = topFrame->constantPool->getNameAndTypeInfo(methodRef->nameAndTypeIndex);
                 const char* methodName = topFrame->constantPool->getString(nameAndTypeInfo->nameIndex);
                 const char* methodDescriptor = topFrame->constantPool->getString(nameAndTypeInfo->descriptorIndex);
                 const char* className = topFrame->constantPool->getString(cpClassInfo->nameIndex);
@@ -344,9 +344,9 @@ void VM::executeLoop(VMThread* thread)
                 uint8_t indexByte1 = code[thread->pc++];
                 uint8_t indexByte2 = code[thread->pc++];
                 uint16_t index = (indexByte1 << 8) | indexByte2;
-                CPMethodRef* methodRef = (CPMethodRef*) topFrame->constantPool->constants[index-1];
+                CPMethodRef* methodRef = topFrame->constantPool->getMethodRef(index);
                 CPClassInfo* targetClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
-                CPNameAndTypeInfo* nameAndTypeInfo = (CPNameAndTypeInfo*) topFrame->constantPool->constants[methodRef->nameAndTypeIndex-1];
+                CPNameAndTypeInfo* nameAndTypeInfo = topFrame->constantPool->getNameAndTypeInfo(methodRef->nameAndTypeIndex);
                 ClassInfo* targetClass = getClass(topFrame->constantPool->getString(targetClassInfo->nameIndex), thread);
                 // TODO: Take in account descriptor of method as well, for overriding and such
                 MethodInfo* methodInfo = targetClass->findMethodWithName(topFrame->constantPool->getString(nameAndTypeInfo->nameIndex));
