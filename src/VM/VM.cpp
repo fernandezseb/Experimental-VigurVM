@@ -552,5 +552,5 @@ void VM::runMain(const char* className)
 
     printf("> Executing main method...\n");
     executeLoop(mainThread);
-   printf("> Done executing\n");
+    printf("> Done executing\n");
 }
