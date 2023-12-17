@@ -38,7 +38,7 @@ uint32_t JavaHeap::createArray(ArrayType type, uint64_t size)
 
 uint32_t JavaHeap::createObject(ClassInfo* class_info)
 {
-    Object* object = (Object*) Platform::allocateMemory(sizeof(Array), 0);
+    Object* object = (Object*) Platform::allocateMemory(sizeof(Object), 0);
     u2 fieldsCount = 0;
     for (u2 currentField = 0; currentField < class_info->fieldsCount; ++currentField)
     {
