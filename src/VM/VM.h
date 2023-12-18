@@ -85,7 +85,7 @@ struct Instruction
 
 class VM {
 private:
-    Instruction instructions[70] =
+    Instruction instructions[71] =
     {
         // Constants
         {i_nop, 0, "nop", 0, nop},
@@ -121,6 +121,7 @@ private:
         {i_aload_3, 0, "aload_3", 3, aload_i},
         {i_iaload, 0, "iaload", 0, iaload},
         // Stores
+        {i_istore, 1, "istore", 0, istore},
         {i_istore_0, 0, "astore_0", 0, istore_i},
         {i_istore_1, 0, "astore_1", 1, istore_i},
         {i_istore_2, 0, "astore_2", 2, istore_i},
