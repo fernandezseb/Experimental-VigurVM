@@ -19,3 +19,24 @@ void astore_i(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMT
     var->data = refVar.data;
     var->type = refVar.type;
 }
+
+void iastore(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+{
+    Variable value = thread->currentFrame->popOperand();
+    Variable index = thread->currentFrame->popOperand();
+    Variable arrayref = thread->currentFrame->popOperand();
+
+    Array* array = heap->getArray(arrayref.data);
+    i4* intArray = (i4*) array->data;
+    intArray[index.data] = (i4) value.data;
+}
+
+void castore(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+{
+    Variable value = thread->currentFrame->popOperand();
+    Variable index = thread->currentFrame->popOperand();
+    Variable arrayref = thread->currentFrame->popOperand();
+
+    Array* array = heap->getArray(arrayref.data);
+    array->data[index.data] = value.data;
+}

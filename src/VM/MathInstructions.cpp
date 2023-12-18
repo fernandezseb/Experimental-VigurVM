@@ -24,3 +24,28 @@ void isub(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThrea
     added.data = (i4)var1.data - (i4)var2.data;
     thread->currentFrame->operands.push_back(added);
 }
+
+void ishl(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+{
+    Variable value2 = thread->currentFrame->popOperand();
+    Variable value1 = thread->currentFrame->popOperand();
+
+    i4 s = ((i4)value2.data) & 0x1f;
+
+    i4 resultVal = value1.data << s;
+
+    Variable result = {};
+    result.type = VariableType_INT;
+    result.data = resultVal;
+
+    thread->currentFrame->operands.push_back(result);
+}
+
+void iinc(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+{
+    u1 index = args[0];
+    i1* argsArr = ((i1*)args);
+    i1 constData = argsArr[1];
+    Variable* var =  &thread->currentFrame->localVariables[index];
+    var->data += constData;
+}

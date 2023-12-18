@@ -113,6 +113,8 @@ void loadConstant(VMThread* thread, u4 index, JavaHeap* heap)
         strVar.type = VariableType_REFERENCE;
         strVar.data = strObjectId;
         thread->currentFrame->operands.push_back(strVar);
+        // TODO: If type is 7, check if a Class reference has already been created,
+        // TODO: if not, create this object and initialize the fields correctly
     } else
     {
         fprintf(stderr, "Error: LDC not implemented yet for type: %d\n", cpItem->getType());

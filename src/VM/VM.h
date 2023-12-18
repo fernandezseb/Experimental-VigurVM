@@ -85,7 +85,7 @@ struct Instruction
 
 class VM {
 private:
-    Instruction instructions[58] =
+    Instruction instructions[70] =
     {
         // Constants
         {i_nop, 0, "nop", 0, nop},
@@ -110,6 +110,7 @@ private:
         {i_ldc_w, 2, "ldc_w", 0, ldc_w},
         {i_ldc2_w, 2, "ldc2_w", 0, ldc2_w},
         // Loads
+        {i_iload, 1, "iload", 0, iload},
         {i_iload_0, 0, "iload_0", 0, iload_i},
         {i_iload_1, 0, "iload_1", 1, iload_i},
         {i_iload_2, 0, "iload_2", 2, iload_i},
@@ -118,6 +119,7 @@ private:
         {i_aload_1, 0, "aload_1", 1, aload_i},
         {i_aload_2, 0, "aload_2", 2, aload_i},
         {i_aload_3, 0, "aload_3", 3, aload_i},
+        {i_iaload, 0, "iaload", 0, iaload},
         // Stores
         {i_istore_0, 0, "astore_0", 0, istore_i},
         {i_istore_1, 0, "astore_1", 1, istore_i},
@@ -127,14 +129,22 @@ private:
         {i_astore_1, 0, "astore_1", 1, astore_i},
         {i_astore_2, 0, "astore_2", 2, astore_i},
         {i_astore_3, 0, "astore_3", 3, astore_i},
+        {i_iastore, 0, "iastore", 0, iastore},
+        {i_castore, 0, "castore", 0, castore},
         // Stack
+        {i_pop, 0, "pop", 0, pop},
         {i_dup, 0, "dup", 0, dup},
         // Math
         {i_iadd, 0, "iadd", 0, iadd},
         {i_isub, 0, "isub", 0, isub},
+        {i_ishl, 0, "ishl", 0, ishl},
+        {i_iinc, 2, "iinc", 0, iinc},
         // Comparisons
         {i_ifge, 2, "ifge", 0, ifge},
         {i_ifle, 2, "ifle", 0, ifle},
+        {i_if_icmpne, 2, "if_icmpne", 0, if_icmpne},
+        {i_if_icmpgt, 2, "if_icmpgt", 0, if_icmpgt},
+        {i_if_icmple, 2, "if_icmple", 0, if_icmple},
         // References
         {i_getstatic, 0, "getstatic", 0, getstatic},
         {i_putstatic, 0, "putstatic", 0, putstatic},
@@ -150,7 +160,9 @@ private:
         {i_monitorenter, 0, "monitorenter", 0, monitorenter},
         {i_monitorexit, 0, "monitorexit", 0, monitorexit},
         // Control
+        {i_goto, 2, "goto", 0, gotoInstruction},
         {i_ireturn, 0, "ireturn", 0, ireturnInstruction},
+        {i_areturn, 0, "areturn", 0, areturnInstruction},
         {i_return, 0, "return", 0, returnInstruction},
         // Extended
         {i_ifnonnull, 0, "ifnonnull", 0, ifnonnull},

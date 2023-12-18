@@ -38,6 +38,12 @@ std::vector<Variable> VM::createVariableForDescriptor(char* descriptor)
         variable.type = VariableType_INT;
         variable.data = ((int32_t)0);
         variables.push_back(variable);
+    } else if (strcmp(descriptor, "Z") == 0)
+    {
+        Variable variable;
+        variable.type = VariableType_BOOLEAN;
+        variable.data = ((int32_t)0);
+        variables.push_back(variable);
     } else if (strcmp(descriptor, "B") == 0)
     {
         Variable variable;
@@ -142,6 +148,23 @@ void VM::updateVariableFromVariable(Variable* variable, char* descriptor, Variab
 
         variable->data = operand.data;
         variable->type = VariableType_INT;
+
+    } else if (strcmp(descriptor, "Z") == 0)
+    {
+        if (variable->type != VariableType_BOOLEAN)
+        {
+            fprintf(stderr, "Error: Type mismatch!\n");
+            Platform::exitProgram(-78);
+        }
+
+        if (operand.type != VariableType_INT)
+        {
+            fprintf(stderr, "Error: Operand on stack is of the wrong type!\n");
+            Platform::exitProgram(-90);
+        }
+
+        variable->data = operand.data;
+        variable->type = VariableType_BOOLEAN;
     } else if (descriptor[0] == '[' || descriptor[0] == 'L') {
 
         if (variable->type != VariableType_REFERENCE)
@@ -305,7 +328,7 @@ ClassInfo* VM::getClass(const char* className, VMThread* thread)
 {
     ClassInfo* classInfo = heap.getClassByName(className);
     if (classInfo == NULL) {
-        Memory *memory = new Memory(2000, MIB(20));
+        Memory *memory = new Memory(MIB(1), MIB(30));
         printf("Loading class %s...\n", className);
         ClassInfo *classInfo = bootstrapClassLoader.readClass(className, memory, configuration.classPath);
         initStaticFields(classInfo);
