@@ -17,13 +17,14 @@ enum VariableType
 };
 
 enum ArrayType : char {
-    AT_BOOLEAN,
-    AT_BYTE,
-    AT_CHAR,
-    AT_SHORT,
-    AT_INT,
-    AT_LONG, // 2 are needed for this
-    AT_DOUBLE,
+    AT_BOOLEAN = 4,
+    AT_BYTE = 8,
+    AT_CHAR = 5,
+    AT_SHORT = 9,
+    AT_INT = 10,
+    AT_LONG = 11, // 2 are needed for this
+    AT_DOUBLE = 7,
+    AT_FLOAT = 6,
     AT_REFERENCE,
     AT_UNDEFINED,
     AT_END

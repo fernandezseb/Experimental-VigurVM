@@ -58,6 +58,12 @@ add_executable(${PROJECT_NAME}
         src/VM/ReferenceInstructions.cpp
         src/VM/ControlInstructions.h
         src/VM/ControlInstructions.cpp
+        src/VM/ExtendedInstructions.h
+        src/VM/ExtendedInstructions.cpp
+        src/VM/MathInstructions.h
+        src/VM/MathInstructions.cpp
+        src/VM/ComparisonInstructions.h
+        src/VM/ComparisonInstructions.cpp
 
 
 )

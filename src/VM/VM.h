@@ -9,12 +9,15 @@
 
 #include <vector>
 
+#include "ComparisonInstructions.h"
 #include "ConstantInstructions.h"
 #include "ControlInstructions.h"
 #include "LoadInstructions.h"
 #include "ReferenceInstructions.h"
 #include "StoreInstructions.h"
 #include "StackInstructions.h"
+#include "ExtendedInstructions.h"
+#include "MathInstructions.h"
 
 struct StackFrame {
     // Local variable array
@@ -82,7 +85,7 @@ struct Instruction
 
 class VM {
 private:
-    Instruction instructions[38] =
+    Instruction instructions[58] =
     {
         // Constants
         {i_nop, 0, "nop", 0, nop},
@@ -107,27 +110,50 @@ private:
         {i_ldc_w, 2, "ldc_w", 0, ldc_w},
         {i_ldc2_w, 2, "ldc2_w", 0, ldc2_w},
         // Loads
+        {i_iload_0, 0, "iload_0", 0, iload_i},
+        {i_iload_1, 0, "iload_1", 1, iload_i},
+        {i_iload_2, 0, "iload_2", 2, iload_i},
+        {i_iload_3, 0, "iload_3", 3, iload_i},
         {i_aload_0, 0, "aload_0", 0, aload_i},
         {i_aload_1, 0, "aload_1", 1, aload_i},
         {i_aload_2, 0, "aload_2", 2, aload_i},
         {i_aload_3, 0, "aload_3", 3, aload_i},
         // Stores
+        {i_istore_0, 0, "astore_0", 0, istore_i},
+        {i_istore_1, 0, "astore_1", 1, istore_i},
+        {i_istore_2, 0, "astore_2", 2, istore_i},
+        {i_istore_3, 0, "astore_3", 3, istore_i},
         {i_astore_0, 0, "astore_0", 0, astore_i},
         {i_astore_1, 0, "astore_1", 1, astore_i},
         {i_astore_2, 0, "astore_2", 2, astore_i},
         {i_astore_3, 0, "astore_3", 3, astore_i},
         // Stack
         {i_dup, 0, "dup", 0, dup},
+        // Math
+        {i_iadd, 0, "iadd", 0, iadd},
+        {i_isub, 0, "isub", 0, isub},
+        // Comparisons
+        {i_ifge, 2, "ifge", 0, ifge},
+        {i_ifle, 2, "ifle", 0, ifle},
         // References
         {i_getstatic, 0, "getstatic", 0, getstatic},
         {i_putstatic, 0, "putstatic", 0, putstatic},
+        {i_getfield, 0, "getfield", 0, getfield},
         {i_putfield, 0, "putfield", 0, putfield},
+        {i_invokevirtual, 0, "invokevirtual", 0, invokevirtual},
         {i_invokespecial, 0, "invokespecial", 0, invokespecial},
         {i_invokestatic, 0, "invokestatic", 0, invokestatic},
         {i_new, 0, "new", 0, newInstruction},
+        {i_newarray, 1, "newarray", 0, newarray},
         {i_anewarray, 0, "anewarray", 0, anewarray},
+        {i_arraylength, 0, "arraylength", 0, arraylength},
+        {i_monitorenter, 0, "monitorenter", 0, monitorenter},
+        {i_monitorexit, 0, "monitorexit", 0, monitorexit},
         // Control
+        {i_ireturn, 0, "ireturn", 0, ireturnInstruction},
         {i_return, 0, "return", 0, returnInstruction},
+        // Extended
+        {i_ifnonnull, 0, "ifnonnull", 0, ifnonnull},
     };
     ClassLoader bootstrapClassLoader;
     JavaHeap heap;
@@ -147,6 +173,7 @@ public:
     void start(Configuration configuration);
     ClassInfo* getClass(const char* className, VMThread* thread);
     void runMain(const char* className);
+    void shutdown();
 };
 
 

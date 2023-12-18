@@ -12,8 +12,8 @@ class Platform {
 private:
 	inline static char* textBuffer = nullptr;
 	inline static OutputBuffer *outBuffer = nullptr;
-	static void print(const char* string, uint64_t length);
 public:
+	static void print(const char* string, uint64_t length);
 	static void initialize();
 	static void printModifiedUtf8String(char* string);
 	static int printModifiedUtf8StringFormatted(const char* string, ...);

@@ -51,6 +51,39 @@ void putstatic(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VM
     VM->updateVariableFromVariable(targetField->staticData, thread->currentFrame->constantPool->getString(nameAndType->descriptorIndex), var);
 }
 
+void getfield(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+{
+    uint16_t index = readShort(thread);
+    CPFieldRef* fieldRef = thread->currentFrame->constantPool->getFieldRef(index);
+    CPClassInfo* cpClassInfo = thread->currentFrame->constantPool->getClassInfo(fieldRef->classIndex);
+    CPNameAndTypeInfo* nameAndType = thread->currentFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
+
+    const char* className = thread->currentFrame->constantPool->getString(cpClassInfo->nameIndex);
+    ClassInfo* targetClass = VM->getClass(className, thread);
+    const char* fieldName = thread->currentFrame->constantPool->getString(nameAndType->nameIndex);
+    const char* fieldDescr = thread->currentFrame->constantPool->getString(nameAndType->descriptorIndex);
+
+    Variable referencePointer = thread->currentFrame->popOperand();
+
+    if (referencePointer.type != VariableType_REFERENCE)
+    {
+        fprintf(stderr, "Error: Expected object reference on stack\n");
+        Platform::exitProgram(-6);
+    }
+
+    if (referencePointer.data == 0)
+    {
+        fprintf(stderr, "Error: Nullpointer Exception\n");
+        Platform::exitProgram(-6);
+    }
+    else
+    {
+        Object* object = heap->getChildObject(referencePointer.data, targetClass);
+        FieldData* field = object->getField(fieldName, fieldDescr);
+        thread->currentFrame->operands.push_back(field->data);
+    }
+}
+
 void putfield(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     uint16_t index = readShort(thread);
@@ -75,15 +108,31 @@ void putfield(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMT
 
     FieldData* fieldData = targetObject->getField(fieldName, fieldDescr);
 
-    if (targetValue.type != VariableType_INT)
-    {
-        fprintf(stderr, "Error: Can't set fields other than int!");
-        Platform::exitProgram(-32);
-    }
+    // if (targetValue.type != VariableType_INT)
+    // {
+    //     fprintf(stderr, "Error: Can't set fields other than int!");
+    //     Platform::exitProgram(-32);
+    // }
     // TODO: Fix for types other than I
     // TODO: Check for type descriptor
     fieldData->data.data = targetValue.data;
     fieldData->data.type = targetValue.type;
+}
+
+void invokevirtual(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+{
+    StackFrame* topFrame = thread->currentFrame;
+    u2 index = readShort(thread);
+    CPMethodRef* methodRef = topFrame->constantPool->getMethodRef(index);
+    CPClassInfo* cpClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
+    CPNameAndTypeInfo* nameAndTypeInfo = topFrame->constantPool->getNameAndTypeInfo(methodRef->nameAndTypeIndex);
+    const char* methodName = topFrame->constantPool->getString(nameAndTypeInfo->nameIndex);
+    const char* methodDescriptor = topFrame->constantPool->getString(nameAndTypeInfo->descriptorIndex);
+    const char* className = topFrame->constantPool->getString(cpClassInfo->nameIndex);
+    ClassInfo* targetClassInfo = VM->getClass(className, thread);
+    MethodInfo* methodInfo = targetClassInfo->findMethodWithNameAndDescriptor(methodName, methodDescriptor);
+    VM->pushStackFrameVirtual(targetClassInfo, methodInfo, topFrame, thread);
+    printf("> Created new stack frame for virtual call on: %s\n", className);
 }
 
 void invokespecial(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
@@ -101,17 +150,17 @@ void invokespecial(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap
     // TODO: Implement argument passing (including subclass argument)
     // TODO: Check correct parsing of descriptors with subclasses
 
-    if (strcmp(methodName, "<init>") ==0)
-    {
+    // if (strcmp(methodName, "<init>") ==0)
+    // {
         // TODO: Check argument types
         VM->pushStackFrameVirtual(targetClassInfo, methodInfo, topFrame, thread);
 
-        printf("> Created new stack frame for constructor call on: %s\n", className);
-    } else
-    {
-        fprintf(stderr, "Error: Invokespecial not implemented for other cases than constructors\n");
-        Platform::exitProgram(-30);
-    }
+        printf("> Created new stack frame for method call %s on: %s\n", methodName, className);
+    // } else
+    // {
+        // fprintf(stderr, "Error: Invokespecial not implemented for other cases than constructors\n");
+        // Platform::exitProgram(-30);
+    // }
 
 }
 
@@ -135,7 +184,19 @@ void invokestatic(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap,
 
     if (methodInfo->isNative())
     {
+        const char* className = targetClass->getName();
         printf("Running native code of method: %s\n", methodInfo->name);
+        if (strcmp(targetClass->getName(), "Vigur/lang/System") == 0 &&
+            strcmp(methodInfo->name, "printLn") == 0)
+        {
+            Variable strVar = thread->currentFrame->popOperand();
+            Object* obj = heap->getObject(strVar.data);
+            FieldData* charArrRef = obj->getField("value", "[C");
+            Array* charArr = heap->getArray(charArrRef->data.data);
+            Platform::print((const char*)charArr->data, charArr->length);
+            Platform::print("\n", 1);
+            Platform::flush();
+        }
     } else
     {
         VM->pushStackFrameStatic(targetClass, methodInfo, topFrame, thread);
@@ -168,6 +229,23 @@ void newInstruction(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* hea
     topFrame->operands.push_back(variable);
 }
 
+void newarray(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+{
+    u1 typeArg = args[0];
+
+    ArrayType type = (ArrayType) typeArg;
+
+    // TODO: Ensure it is int
+    Variable countVar = thread->currentFrame->popOperand();
+
+    uint32_t reference = heap->createArray(type, countVar.data);
+    Variable variable;
+    variable.type = VariableType_REFERENCE;
+    variable.data = reference;
+
+    thread->currentFrame->operands.push_back(variable);
+}
+
 void anewarray(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     StackFrame* topFrame = thread->currentFrame;
@@ -189,4 +267,52 @@ void anewarray(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VM
     variable.data = reference;
 
     topFrame->operands.push_back(variable);
+}
+
+void arraylength(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+{
+    Variable arrayRef = thread->currentFrame->popOperand();
+    // TODO: Ensure ref is reference type
+    Array* array = heap->getArray(arrayRef.data);
+
+    Variable lengthVar = {};
+    lengthVar.type = VariableType_INT;
+    lengthVar.data = array->length;
+    thread->currentFrame->operands.push_back(lengthVar);
+}
+
+void monitorenter(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+{
+    // TODO: Implement when real threading is implemented
+    Variable ref = thread->currentFrame->popOperand();
+    if (ref.type != VariableType_REFERENCE)
+    {
+        fprintf(stderr, "Error: Expected object reference on stack\n");
+        Platform::exitProgram(-6);
+    }
+
+    if (ref.data == 0)
+    {
+        // TODO: Fix this
+        // fprintf(stderr, "Error: Nullpointer Exception\n");
+        // Platform::exitProgram(-6);
+    }
+}
+
+void monitorexit(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+{
+    // TODO: Implement when real threading is implemented
+    Variable ref = thread->currentFrame->popOperand();
+    if (ref.type != VariableType_REFERENCE)
+    {
+        fprintf(stderr, "Error: Expected object reference on stack\n");
+        Platform::exitProgram(-6);
+    }
+
+    if (ref.data == 0)
+    {
+        // TODO: Fix this
+        // fprintf(stderr, "Error: Nullpointer Exception\n");
+        // Platform::exitProgram(-6);
+    }
 }

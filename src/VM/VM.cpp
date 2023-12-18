@@ -12,6 +12,7 @@ VM::VM()
 
 void VM::start(Configuration configuration)
 {
+    Platform::initialize();
     this->configuration = configuration;
 
     thread.name = "main";
@@ -345,4 +346,9 @@ void VM::runMain(const char* className)
     printf("> Executing main method...\n");
     executeLoop(mainThread);
     printf("> Done executing\n");
+}
+
+void VM::shutdown()
+{
+    Platform::cleanup();
 }

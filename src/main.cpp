@@ -43,5 +43,6 @@ int main(int argc, char* argv[])
 
     vm.start(config);
     vm.runMain(config.mainClassName);
+    vm.shutdown();
     return 0;
 }
