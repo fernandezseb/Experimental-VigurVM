@@ -68,7 +68,7 @@ public:
     MethodInfo* currentMethod;
     // current class
     ClassInfo* currentClass;
-    char* name;
+    const char* name;
 };
 
 struct VM;

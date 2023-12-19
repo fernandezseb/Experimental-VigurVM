@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.27)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 
@@ -9,8 +9,6 @@ project(VigurVM
         DESCRIPTION "A simple Java Virtual Machine for learning purposes"
         LANGUAGES CXX
 )
-
-set(CMAKE_CXX_STANDARD 17)
 
 add_executable(${PROJECT_NAME}
         src/main.cpp
