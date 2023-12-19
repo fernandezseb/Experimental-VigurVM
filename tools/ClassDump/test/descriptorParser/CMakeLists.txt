@@ -15,12 +15,12 @@ ${PROJECT_SOURCE_DIR}/src/OutputBuffer.cpp)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     target_link_directories(descriptor_test PRIVATE Windows)
-    target_link_libraries(descriptor_test Windows)
+    target_link_libraries(descriptor_test WindowsClassDump)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_link_directories(descriptor_test PRIVATE Linux)
-    target_link_libraries(descriptor_test Linux)
+    target_link_libraries(descriptor_test LinuxClassDump)
 endif()
 
 target_include_directories(descriptor_test PUBLIC ${PROJECT_SOURCE_DIR}/src/)
