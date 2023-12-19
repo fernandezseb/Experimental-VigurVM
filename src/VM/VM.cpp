@@ -375,3 +375,12 @@ void VM::shutdown()
 {
     Platform::cleanup();
 }
+
+void VM::checkType(Variable var, VariableType type)
+{
+    if (var.type != type)
+    {
+        fprintf(stderr, "Error: TypeMismatch\n");
+        Platform::exitProgram(-12);
+    }
+}

@@ -194,6 +194,7 @@ public:
     ClassInfo* getClass(const char* className, VMThread* thread);
     void runMain(const char* className);
     void shutdown();
+    void checkType(Variable var, VariableType type);
 };
 
 

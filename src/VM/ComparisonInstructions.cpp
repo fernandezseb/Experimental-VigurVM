@@ -10,9 +10,8 @@ void ifeq(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThrea
 
     i2 branchByte = (byte1 << 8) | byte2;
 
-
-    // TODO: Check if it is int
     Variable intVar = thread->currentFrame->popOperand();
+    VM->checkType(intVar, VariableType_INT);
     if (((i4)intVar.data) == 0)
     {
         thread->pc = thread->pc-3+branchByte;
@@ -26,9 +25,9 @@ void ifne(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThrea
 
     i2 branchByte = (byte1 << 8) | byte2;
 
-
-    // TODO: Check if it is int
     Variable intVar = thread->currentFrame->popOperand();
+    VM->checkType(intVar, VariableType_INT);
+
     if (((i4)intVar.data) != 0)
     {
         thread->pc = thread->pc-3+branchByte;
@@ -42,9 +41,9 @@ void ifge(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThrea
 
     i2 branchByte = (byte1 << 8) | byte2;
 
-
-    // TODO: Check if it is int
     Variable intVar = thread->currentFrame->popOperand();
+    VM->checkType(intVar, VariableType_INT);
+
     if (((i4)intVar.data) >= 0)
     {
         thread->pc = thread->pc-3+branchByte;
@@ -58,9 +57,9 @@ void ifgt(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThrea
 
     i2 branchByte = (byte1 << 8) | byte2;
 
-
-    // TODO: Check if it is int
     Variable intVar = thread->currentFrame->popOperand();
+    VM->checkType(intVar, VariableType_INT);
+
     if (((i4)intVar.data) > 0)
     {
         thread->pc = thread->pc-3+branchByte;
@@ -74,9 +73,9 @@ void ifle(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThrea
 
     i2 branchByte = (byte1 << 8) | byte2;
 
-
-    // TODO: Check if it is int
     Variable intVar = thread->currentFrame->popOperand();
+    VM->checkType(intVar, VariableType_INT);
+
     if (((i4)intVar.data) <= 0)
     {
         thread->pc = thread->pc-3+branchByte;
