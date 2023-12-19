@@ -63,6 +63,12 @@ void getfield(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMT
     const char* fieldName = thread->currentFrame->constantPool->getString(nameAndType->nameIndex);
     const char* fieldDescr = thread->currentFrame->constantPool->getString(nameAndType->descriptorIndex);
 
+    if (fieldDescr != 0 && fieldDescr[0] == 'J' || fieldDescr[1] == 'D')
+    {
+        fprintf(stderr, "Error: Getting field of category2 is not implemented yet!\n");
+        Platform::exitProgram(-12);
+    }
+
     Variable referencePointer = thread->currentFrame->popOperand();
 
     if (referencePointer.type != VariableType_REFERENCE)
@@ -79,7 +85,12 @@ void getfield(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMT
     else
     {
         Object* object = heap->getChildObject(referencePointer.data, targetClass);
-        FieldData* field = object->getField(fieldName, fieldDescr);
+        FieldData* field = object->getField(fieldName, fieldDescr, heap);
+        if (field == 0)
+        {
+            printf("Error: Field not found in object!");
+            Platform::exitProgram(-23);
+        }
         thread->currentFrame->operands.push_back(field->data);
     }
 }
@@ -106,7 +117,7 @@ void putfield(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMT
 
     Object* targetObject = heap->getChildObject(referencePointer.data, targetClass);
 
-    FieldData* fieldData = targetObject->getField(fieldName, fieldDescr);
+    FieldData* fieldData = targetObject->getField(fieldName, fieldDescr, heap);
 
     // if (targetValue.type != VariableType_INT)
     // {
@@ -132,7 +143,7 @@ void invokevirtual(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap
     ClassInfo* targetClassInfo = VM->getClass(className, thread);
     MethodInfo* methodInfo = targetClassInfo->findMethodWithNameAndDescriptor(methodName, methodDescriptor);
     VM->pushStackFrameVirtual(targetClassInfo, methodInfo, topFrame, thread);
-    printf("> Created new stack frame for virtual call on: %s\n", className);
+    printf("> Created new stack frame for virtual call on: %s.%s()\n", className, methodName);
 }
 
 void invokespecial(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
@@ -191,7 +202,7 @@ void invokestatic(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap,
         {
             Variable strVar = thread->currentFrame->popOperand();
             Object* obj = heap->getObject(strVar.data);
-            FieldData* charArrRef = obj->getField("value", "[C");
+            FieldData* charArrRef = obj->getField("value", "[C", heap);
             Array* charArr = heap->getArray(charArrRef->data.data);
             Platform::print((const char*)charArr->data, charArr->length);
             Platform::print("\n", 1);

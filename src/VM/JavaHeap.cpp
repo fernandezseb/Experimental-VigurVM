@@ -111,7 +111,7 @@ Object* JavaHeap::getObject(uint32_t id)
 Object* JavaHeap::getChildObject(uint32_t id, ClassInfo* classInfo)
 {
     Object* o = getObject(id);
-    if (strcmp(o->classInfo->getName(), classInfo->getName()) != 0)
+    if (o == 0 || strcmp(o->classInfo->getName(), classInfo->getName()) != 0)
     {
         if (o->superClassObject != 0)
         {
@@ -159,5 +159,31 @@ ClassInfo* JavaHeap::getClassByName(const char* className)
             return classInfo;
         }
     }
+    return 0;
+}
+
+FieldData* Object::getField(const char* name, const char* descriptor, JavaHeap* heap)
+{
+    bool found = false;
+    for (u2 currentField = 0; currentField < fieldsCount; ++currentField)
+    {
+        const char* targetName = classInfo->constantPool->getString(fields[currentField].nameIndex);
+        const char* targetDescriptor = classInfo->constantPool->getString(fields[currentField].descriptorIndex);
+
+        if (strcmp(name, targetName) == 0 && strcmp(targetDescriptor, descriptor) == 0)
+        {
+            found = true;
+            return &fields[currentField];
+        }
+    }
+    if (!found)
+    {
+        if (superClassObject != 0)
+        {
+            return heap->getObject(superClassObject)->getField(name, descriptor, heap);
+        }
+    }
+    fprintf(stderr, "Error: Field not resolved!");
+    Platform::exitProgram(-23);
     return 0;
 }

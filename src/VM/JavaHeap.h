@@ -7,6 +7,8 @@
 
 #include <vector>
 
+class JavaHeap;
+
 enum ReferenceType : char {
     OBJECT, ARRAY
 };
@@ -45,7 +47,6 @@ public:
     Variable data; // TODO: Implement this for longs
 };
 
-// TODO: Add superclass references
 class Object : public Reference {
 public:
     Object() : Reference(OBJECT) {
@@ -54,20 +55,7 @@ public:
     uint16_t fieldsCount;
     ClassInfo* classInfo;
     u4 superClassObject;
-    FieldData* getField(const char* name, const char* descriptor)
-    {
-        for (u2 currentField = 0; currentField < fieldsCount; ++currentField)
-        {
-            const char* targetName = classInfo->constantPool->getString(fields[currentField].nameIndex);
-            const char* targetDescriptor = classInfo->constantPool->getString(fields[currentField].descriptorIndex);
-
-            if (strcmp(name, targetName) == 0 && strcmp(targetDescriptor, descriptor) == 0)
-            {
-                return &fields[currentField];
-            }
-        }
-        return 0;
-    }
+    FieldData* getField(const char* name, const char* descriptor, JavaHeap* heap);
 };
 
 class Array : public Reference {

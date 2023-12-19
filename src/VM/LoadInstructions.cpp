@@ -38,3 +38,19 @@ void iaload(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThr
     dataVar.data = data;
     thread->currentFrame->operands.push_back(dataVar);
 }
+
+void caload(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+{
+    Variable index = thread->currentFrame->popOperand();
+    Variable arrayRef = thread->currentFrame->popOperand();
+
+    Array* array = heap->getArray(arrayRef.data);
+    i1* intArray = (i1*) array->data;
+
+    i1 data = intArray[index.data];
+
+    Variable dataVar = {};
+    dataVar.type = VariableType_INT;
+    dataVar.data = (i4)data;
+    thread->currentFrame->operands.push_back(dataVar);
+}

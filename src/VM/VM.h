@@ -85,7 +85,7 @@ struct Instruction
 
 class VM {
 private:
-    Instruction instructions[71] =
+    Instruction instructions[78] =
     {
         // Constants
         {i_nop, 0, "nop", 0, nop},
@@ -120,6 +120,7 @@ private:
         {i_aload_2, 0, "aload_2", 2, aload_i},
         {i_aload_3, 0, "aload_3", 3, aload_i},
         {i_iaload, 0, "iaload", 0, iaload},
+        {i_caload, 0, "caload", 0, caload},
         // Stores
         {i_istore, 1, "istore", 0, istore},
         {i_istore_0, 0, "astore_0", 0, istore_i},
@@ -138,12 +139,18 @@ private:
         // Math
         {i_iadd, 0, "iadd", 0, iadd},
         {i_isub, 0, "isub", 0, isub},
+        {i_imul, 0, "imul", 0, imul},
         {i_ishl, 0, "ishl", 0, ishl},
+        {i_iushr, 0, "iushr", 0, iushr},
         {i_iinc, 2, "iinc", 0, iinc},
         // Comparisons
+        {i_ifeq, 2, "ifeq", 0, ifeq},
+        {i_ifne, 2, "ifne", 0, ifne},
         {i_ifge, 2, "ifge", 0, ifge},
+        {i_ifgt, 2, "ifgt", 0, ifgt},
         {i_ifle, 2, "ifle", 0, ifle},
         {i_if_icmpne, 2, "if_icmpne", 0, if_icmpne},
+        {i_if_icmplt, 2, "if_icmplt", 0, if_icmplt},
         {i_if_icmpgt, 2, "if_icmpgt", 0, if_icmpgt},
         {i_if_icmple, 2, "if_icmple", 0, if_icmple},
         // References
