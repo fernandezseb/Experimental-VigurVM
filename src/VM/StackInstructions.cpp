@@ -10,9 +10,7 @@ void pop(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread
 
 void dup(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
-    Variable top = thread->currentFrame->peekOperand();
-    Variable copy = {};
-    copy.type = top.type;
-    copy.data = top.data;
-    thread->currentFrame->operands.push_back(copy);
+    const Variable top = thread->currentFrame->popOperand();
+    thread->currentFrame->operands.push_back(top);
+    thread->currentFrame->operands.push_back(top);
 }

@@ -29,49 +29,34 @@ void VM::start(Configuration configuration)
     getClass("java/lang/System", &thread);
 }
 
-std::vector<Variable> VM::createVariableForDescriptor(char* descriptor)
+std::vector<Variable> VM::createVariableForDescriptor(const char* descriptor)
 {
     std::vector<Variable> variables;
     if (strcmp(descriptor, "I") == 0)
     {
-        Variable variable;
-        variable.type = VariableType_INT;
-        variable.data = ((int32_t)0);
+        constexpr Variable variable{VariableType_INT};
         variables.push_back(variable);
     } else if (strcmp(descriptor, "Z") == 0)
     {
-        Variable variable;
-        variable.type = VariableType_BOOLEAN;
-        variable.data = ((int32_t)0);
+        constexpr Variable variable{VariableType_BOOLEAN};
         variables.push_back(variable);
     } else if (strcmp(descriptor, "B") == 0)
     {
-        Variable variable;
-        variable.type = VariableType_BYTE;
-        variable.data = ((int32_t)0);
+        constexpr Variable variable{VariableType_BYTE};
         variables.push_back(variable);
     } else if (strcmp(descriptor, "J") == 0)
     {
-        Variable variableLow;
-        variableLow.type = VariableType_LONG;
-        variableLow.data = ((int64_t) 0);
-
-        Variable variableHigh;
-        variableHigh.type = VariableType_LONG;
-        variableHigh.data = (((int64_t) 0) << 32);
+        constexpr Variable variableLow{VariableType_LONG};
+        constexpr Variable variableHigh{VariableType_LONG};
         variables.push_back(variableHigh);
         variables.push_back(variableLow);
     } else if (descriptor[0] == '[')
     {
-        Variable variable;
-        variable.type = VariableType_REFERENCE;
-        variable.data = 0;
+        constexpr Variable variable{VariableType_REFERENCE};
         variables.push_back(variable);
     } else if (descriptor[0] == 'L')
     {
-        Variable variable;
-        variable.type = VariableType_REFERENCE;
-        variable.data = 0;
+        constexpr Variable variable{VariableType_REFERENCE};
         variables.push_back(variable);
     }
     else
@@ -82,7 +67,7 @@ std::vector<Variable> VM::createVariableForDescriptor(char* descriptor)
     return variables;
 }
 
-uint16_t VM::getDescriptorVarCount(char* descriptor)
+constexpr u1 VM::getDescriptorVarCategory(const char* descriptor) noexcept
 {
     // Longs and doubles use two
     if (descriptor[0] == 'J' || descriptor[0] == 'D')
@@ -94,14 +79,15 @@ uint16_t VM::getDescriptorVarCount(char* descriptor)
 
 void VM::initStaticFields(ClassInfo* class_info)
 {
-    // TODO: Do it recursive as well
+    // TODO: Do it for superclasses as well?
     u2 staticFieldsCount = 0;
     for (u2 currentField = 0; currentField < class_info->fieldsCount; ++currentField)
     {
         FieldInfo* field = class_info->fields[currentField];
         if (field->isStatic())
         {
-            staticFieldsCount += getDescriptorVarCount(class_info->constantPool->getString(class_info->fields[currentField]->descriptorIndex));
+            const u1 varCount = getDescriptorVarCategory(class_info->constantPool->getString(class_info->fields[currentField]->descriptorIndex));
+            staticFieldsCount += varCount;
         }
     }
 
@@ -118,71 +104,53 @@ void VM::initStaticFields(ClassInfo* class_info)
             for (Variable variable : variables) {
                 class_info->staticFields[currentStaticField++] = variable;
             }
-            u4 index = currentStaticField-variables.size();
+            const i4 index = currentStaticField-variables.size();
             if (index > staticFieldsCount-1 || index < 0)
             {
-                fprintf(stderr, "Error: Going outside of index!\n");
-                Platform::exitProgram(-69);
+                internalError("Going outside of index!");
             }
             field->staticData = &class_info->staticFields[index];
         }
     }
 }
 
-void VM::updateVariableFromVariable(Variable* variable, char* descriptor, Variable operand)
+void VM::updateVariableFromVariable(Variable* variable, const char* descriptor, Variable operand, Variable operand2)
 {
-    // TODO: implement setting of field data for double and long
     if (strcmp(descriptor, "I") == 0)
     {
-        if (variable->type != VariableType_INT)
-        {
-            fprintf(stderr, "Error: Type mismatch!\n");
-            Platform::exitProgram(-78);
-        }
-
-        if (operand.type != VariableType_INT)
-        {
-            fprintf(stderr, "Error: Operand on stack is of the wrong type!\n");
-            Platform::exitProgram(-90);
-        }
+        checkType(*variable, VariableType_INT);
+        checkType(operand, VariableType_INT);
 
         variable->data = operand.data;
-        variable->type = VariableType_INT;
-
     } else if (strcmp(descriptor, "Z") == 0)
     {
-        if (variable->type != VariableType_BOOLEAN)
-        {
-            fprintf(stderr, "Error: Type mismatch!\n");
-            Platform::exitProgram(-78);
-        }
-
-        if (operand.type != VariableType_INT)
-        {
-            fprintf(stderr, "Error: Operand on stack is of the wrong type!\n");
-            Platform::exitProgram(-90);
-        }
+        checkType(*variable, VariableType_BOOLEAN);
+        checkType(operand, VariableType_INT);
 
         variable->data = operand.data;
-        variable->type = VariableType_BOOLEAN;
     } else if (descriptor[0] == '[' || descriptor[0] == 'L') {
 
-        if (variable->type != VariableType_REFERENCE)
-        {
-            fprintf(stderr, "Error: Type mismatch!\n");
-            Platform::exitProgram(-78);
-        }
+        checkType(*variable, VariableType_REFERENCE);
+        checkType(operand, VariableType_REFERENCE);
 
-        if (operand.type != VariableType_REFERENCE)
-        {
-            fprintf(stderr, "Error: Operand on stack is of the wrong type!\n");
-            Platform::exitProgram(-90);
-        }
         variable->data = operand.data;
+    } else if (descriptor[0] == 'J' || descriptor[0] == 'J')
+    {
+        checkType(*variable, VariableType_LONG);
+        checkType(operand, VariableType_LONG);
+        variable[0].data = operand2.data;
+        variable[1].data = operand.data;
+    } else if (descriptor[0] == 'D' || descriptor[0] == 'D')
+    {
+        checkType(*variable, VariableType_DOUBLE);
+        checkType(operand, VariableType_DOUBLE);
+        variable[0].data = operand2.data;
+        variable[1].data = operand.data;
     } else
     {
-        fprintf(stderr, "Error: Setting of variable of type with descriptor: %s not implemented yet!\n", descriptor);
-        Platform::exitProgram(-6);
+        char buffer[200];
+        snprintf(buffer, 200, "Error: Setting of variable of type with descriptor: %s not implemented yet!\n", descriptor);
+        internalError(buffer);
     }
 }
 
@@ -235,9 +203,9 @@ void VM::executeLoop(VMThread* thread)
         {
             printf("\n");
         }
-
-        fprintf(stderr, "Unrecognized opcode detected: 0x%0x", opcode);
-        Platform::exitProgram(-3);
+        char buffer[200];
+        snprintf(buffer, 200, "Unrecognized opcode detected: 0x%0x", opcode);
+        internalError(buffer);
     }
 }
 
@@ -247,9 +215,7 @@ void VM::pushStackFrameWithoutParams(ClassInfo* classInfo, MethodInfo* methodInf
     stackFrame.localVariables.reserve(methodInfo->code->maxLocals);
     for (u2  currentLocal = 0; currentLocal < methodInfo->code->maxLocals; ++currentLocal)
     {
-        Variable var = {};
-        var.type = VariableType_UNDEFINED;
-        var.data = 0;
+        constexpr Variable var{VariableType_UNDEFINED};
         stackFrame.localVariables.push_back(var);
     }
     stackFrame.operands.reserve(methodInfo->code->maxStack);
@@ -257,6 +223,8 @@ void VM::pushStackFrameWithoutParams(ClassInfo* classInfo, MethodInfo* methodInf
     stackFrame.previousPc = thread->pc;
     stackFrame.previousClass = thread->currentClass;
     stackFrame.previousMethod = thread->currentMethod;
+    stackFrame.className = classInfo->getName();
+    stackFrame.methodName = methodInfo->name;
 
 
     thread->pc = 0;
@@ -368,6 +336,7 @@ void VM::runMain(const char* className)
 
     printf("> Executing main method...\n");
     executeLoop(mainThread);
+    Object* object = heap.getObject(3);
     printf("> Done executing\n");
 }
 
@@ -380,7 +349,20 @@ void VM::checkType(Variable var, VariableType type)
 {
     if (var.type != type)
     {
-        fprintf(stderr, "Error: TypeMismatch\n");
-        Platform::exitProgram(-12);
+        internalError("Error: TypeMismatch");
     }
+}
+
+void VM::internalError(const char* error)
+{
+    fprintf(stdout, "Error: %s\n", error);
+    if (thread.stack.frames.size() > 0)
+    {
+        for (i4 currentFrame = thread.stack.frames.size()-1; currentFrame >= 0; --currentFrame)
+        {
+            StackFrame frame = thread.stack.frames[currentFrame];
+            printf("    at %s.%s\n", frame.className, frame.methodName);
+        }
+    }
+    Platform::exitProgram(-6);
 }

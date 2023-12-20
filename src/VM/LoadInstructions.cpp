@@ -1,5 +1,7 @@
 #include "LoadInstructions.h"
 
+#include <bit>
+
 #include "VM.h"
 #include "Data/Variable.h"
 
@@ -31,32 +33,28 @@ void iload_i(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMTh
 
 void iaload(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
-    Variable index = thread->currentFrame->popOperand();
-    Variable arrayRef = thread->currentFrame->popOperand();
+    const Variable index = thread->currentFrame->popOperand();
+    const Variable arrayRef = thread->currentFrame->popOperand();
 
-    Array* array = heap->getArray(arrayRef.data);
-    i4* intArray = (i4*) array->data;
+    const Array* array = heap->getArray(arrayRef.data);
+    const i4* intArray = (i4*) array->data;
 
-    i4 data = intArray[index.data];
+    const i4 data = intArray[index.data];
 
-    Variable dataVar = {};
-    dataVar.type = VariableType_INT;
-    dataVar.data = data;
+    const Variable dataVar{VariableType_INT, std::bit_cast<u4>(data)};
     thread->currentFrame->operands.push_back(dataVar);
 }
 
 void caload(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
-    Variable index = thread->currentFrame->popOperand();
-    Variable arrayRef = thread->currentFrame->popOperand();
+    const Variable index = thread->currentFrame->popOperand();
+    const Variable arrayRef = thread->currentFrame->popOperand();
 
-    Array* array = heap->getArray(arrayRef.data);
-    i1* intArray = (i1*) array->data;
+    const Array* array = heap->getArray(arrayRef.data);
+    const i1* intArray = (i1*) array->data;
 
-    i1 data = intArray[index.data];
+    const i1 data = intArray[index.data];
 
-    Variable dataVar = {};
-    dataVar.type = VariableType_INT;
-    dataVar.data = (i4)data;
+    Variable dataVar{VariableType_INT, static_cast<uint32_t>(static_cast<int32_t>(data))};
     thread->currentFrame->operands.push_back(dataVar);
 }

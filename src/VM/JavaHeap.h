@@ -7,6 +7,7 @@
 
 #include <vector>
 
+class VM;
 class JavaHeap;
 
 enum ReferenceType : char {
@@ -44,7 +45,8 @@ class FieldData {
 public:
     uint16_t nameIndex;
     uint16_t descriptorIndex;
-    Variable data; // TODO: Implement this for longs
+    Variable* data;
+    u1 dataSize;
 };
 
 class Object : public Reference {
@@ -83,7 +85,7 @@ public:
     JavaHeap();
 
     uint32_t createArray(ArrayType type, uint64_t size);
-    uint32_t createObject(ClassInfo* class_info);
+    uint32_t createObject(ClassInfo* classInfo, VM* VM);
     Object* getObject(uint32_t id);
     Object* getChildObject(uint32_t id, ClassInfo* classInfo);
     Array* getArray(u4 id);

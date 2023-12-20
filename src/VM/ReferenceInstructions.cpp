@@ -22,24 +22,22 @@ void getstatic(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VM
     FieldInfo* targetField = targetClass->findField(thread->currentFrame->constantPool->getString(nameAndType->nameIndex),
         thread->currentFrame->constantPool->getString(nameAndType->descriptorIndex));
     const char* descriptor = thread->currentFrame->constantPool->getString(nameAndType->descriptorIndex);
-    u2 varCount = VM->getDescriptorVarCount((char*)descriptor);
-    if (varCount != 1)
+    const u1 varCount = VM::getDescriptorVarCategory(descriptor);
+    // TODO: Check type
+    Variable *vars = targetField->staticData;
+    for (u1 currentVar = 0; currentVar < varCount; ++currentVar)
     {
-        fprintf(stderr, "Error: getstatic not implemented for double length values\n");
-        Platform::exitProgram(-56);
+        if (vars[currentVar].type == VariableType_UNDEFINED)
+        {
+            VM->internalError("Error: Unitialized field not supported in getstatic yet");
+        }
+        thread->currentFrame->operands.push_back(vars[currentVar]);
     }
-    // TODO: Check type, this can also be unitialized
-    Variable *var = targetField->staticData;
-    if (var->type == VariableType_UNDEFINED)
-    {
-        fprintf(stderr, "Error: Unitialized field not supported in getstatic yet\n");
-        Platform::exitProgram(-56);
-    }
-    thread->currentFrame->operands.push_back(*var);
 }
 
 void putstatic(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
-{uint16_t index = readShort(thread);
+{
+    uint16_t index = readShort(thread);
     CPFieldRef* fieldRef =  thread->currentFrame->constantPool->getFieldRef(index);
     CPClassInfo* classInfo =  thread->currentFrame->constantPool->getClassInfo(fieldRef->classIndex);
     CPNameAndTypeInfo* nameAndType = thread->currentFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
@@ -47,8 +45,15 @@ void putstatic(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VM
     ClassInfo* targetClass = VM->getClass(className, thread);
     FieldInfo* targetField = targetClass->findField(thread->currentFrame->constantPool->getString(nameAndType->nameIndex),
         thread->currentFrame->constantPool->getString(nameAndType->descriptorIndex));
+    const char* descriptor = thread->currentFrame->constantPool->getString(nameAndType->descriptorIndex);
+    const u1 varCount = VM::getDescriptorVarCategory(descriptor);
     Variable var = thread->currentFrame->popOperand();
-    VM->updateVariableFromVariable(targetField->staticData, thread->currentFrame->constantPool->getString(nameAndType->descriptorIndex), var);
+    Variable var2{VariableType_UNDEFINED};
+    if (varCount == 2)
+    {
+        var2 = thread->currentFrame->popOperand();
+    }
+    VM->updateVariableFromVariable(targetField->staticData, descriptor, var, var2);
 }
 
 void getfield(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
@@ -63,11 +68,6 @@ void getfield(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMT
     const char* fieldName = thread->currentFrame->constantPool->getString(nameAndType->nameIndex);
     const char* fieldDescr = thread->currentFrame->constantPool->getString(nameAndType->descriptorIndex);
 
-    if (fieldDescr != 0 && fieldDescr[0] == 'J' || fieldDescr[1] == 'D')
-    {
-        fprintf(stderr, "Error: Getting field of category2 is not implemented yet!\n");
-        Platform::exitProgram(-12);
-    }
 
     Variable referencePointer = thread->currentFrame->popOperand();
 
@@ -88,10 +88,13 @@ void getfield(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMT
         FieldData* field = object->getField(fieldName, fieldDescr, heap);
         if (field == 0)
         {
-            printf("Error: Field not found in object!");
-            Platform::exitProgram(-23);
+            VM->internalError("Error: Field not found in object!");
         }
-        thread->currentFrame->operands.push_back(field->data);
+        Variable* vars = field->data;
+        for (u1 currentVar = 0; currentVar < field->dataSize; ++currentVar)
+        {
+            thread->currentFrame->operands.push_back(vars[currentVar]);
+        }
     }
 }
 
@@ -107,27 +110,26 @@ void putfield(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMT
     const char* fieldName = thread->currentFrame->constantPool->getString(nameAndType->nameIndex);
     const char* fieldDescr = thread->currentFrame->constantPool->getString(nameAndType->descriptorIndex);
 
-
-    // TODO: Get the object from the reference -> Done
-    // TODO: Get the correct field from the object -> Done
-    // TODO: Update the value of the object -> Basic Done
-
     Variable targetValue = thread->currentFrame->popOperand();
+    Variable targetValue2{VariableType_UNDEFINED};
+    if (targetValue.getCategory() == 2)
+    {
+        targetValue2 = thread->currentFrame->popOperand();
+    }
     Variable referencePointer = thread->currentFrame->popOperand();
 
     Object* targetObject = heap->getChildObject(referencePointer.data, targetClass);
 
     FieldData* fieldData = targetObject->getField(fieldName, fieldDescr, heap);
 
-    // if (targetValue.type != VariableType_INT)
-    // {
-    //     fprintf(stderr, "Error: Can't set fields other than int!");
-    //     Platform::exitProgram(-32);
-    // }
-    // TODO: Fix for types other than I
     // TODO: Check for type descriptor
-    fieldData->data.data = targetValue.data;
-    fieldData->data.type = targetValue.type;
+    fieldData->data[0] = targetValue;
+    if (targetValue.getCategory() == 2 && fieldData->dataSize == 2)
+    {
+        // ARRAY: | MOST SIGN | LEAST SIGN |
+        fieldData->data[0] = targetValue2; // Most significant bits
+        fieldData->data[1] = targetValue;  // Least significant bits
+    }
 }
 
 void invokevirtual(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
@@ -161,17 +163,9 @@ void invokespecial(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap
     // TODO: Implement argument passing (including subclass argument)
     // TODO: Check correct parsing of descriptors with subclasses
 
-    // if (strcmp(methodName, "<init>") ==0)
-    // {
-        // TODO: Check argument types
-        VM->pushStackFrameVirtual(targetClassInfo, methodInfo, topFrame, thread);
-
-        printf("> Created new stack frame for method call %s on: %s\n", methodName, className);
-    // } else
-    // {
-        // fprintf(stderr, "Error: Invokespecial not implemented for other cases than constructors\n");
-        // Platform::exitProgram(-30);
-    // }
+    // TODO: Check argument types
+    VM->pushStackFrameVirtual(targetClassInfo, methodInfo, topFrame, thread);
+    printf("> Created new stack frame for method call %s on: %s\n", methodName, className);
 
 }
 
@@ -188,9 +182,7 @@ void invokestatic(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap,
 
     if (!methodInfo->isStatic())
     {
-        // TODO: Do method call by pushing stack frame
-        fprintf(stderr, "Error: Running non-static method as static\n");
-        Platform::exitProgram(-10);
+        VM->internalError("Error: Running non-static method as static");
     }
 
     if (methodInfo->isNative())
@@ -203,7 +195,7 @@ void invokestatic(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap,
             Variable strVar = thread->currentFrame->popOperand();
             Object* obj = heap->getObject(strVar.data);
             FieldData* charArrRef = obj->getField("value", "[C", heap);
-            Array* charArr = heap->getArray(charArrRef->data.data);
+            Array* charArr = heap->getArray(charArrRef->data[0].data);
             Platform::print((const char*)charArr->data, charArr->length);
             Platform::print("\n", 1);
             Platform::flush();
@@ -232,10 +224,8 @@ void newInstruction(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* hea
             superClass->constantPool->getClassInfo(superClass->superClass)->nameIndex);
     }
 
-    uint32_t reference = heap->createObject(targetClass);
-    Variable variable = {};
-    variable.type = VariableType_REFERENCE;
-    variable.data = reference;
+    const uint32_t reference = heap->createObject(targetClass, VM);
+    const Variable variable{VariableType_REFERENCE, reference};
 
     topFrame->operands.push_back(variable);
 }
@@ -246,13 +236,11 @@ void newarray(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMT
 
     ArrayType type = (ArrayType) typeArg;
 
-    // TODO: Ensure it is int
-    Variable countVar = thread->currentFrame->popOperand();
+    const Variable countVar = thread->currentFrame->popOperand();
+    VM->checkType(countVar, VariableType_INT);
 
-    uint32_t reference = heap->createArray(type, countVar.data);
-    Variable variable;
-    variable.type = VariableType_REFERENCE;
-    variable.data = reference;
+    const uint32_t reference = heap->createArray(type, countVar.data);
+    const Variable variable{VariableType_REFERENCE, reference};
 
     thread->currentFrame->operands.push_back(variable);
 }
@@ -268,27 +256,22 @@ void anewarray(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VM
 
     if (size < 0)
     {
-        fprintf(stderr, "Error: Can't create an array with negative size\n");
-        Platform::exitProgram(-6);
+        VM->internalError("Error: Can't create an array with negative size");
     }
 
     uint32_t reference = heap->createArray(AT_REFERENCE, size);
-    Variable variable;
-    variable.type = VariableType_REFERENCE;
-    variable.data = reference;
+    Variable variable{VariableType_REFERENCE, reference};
 
     topFrame->operands.push_back(variable);
 }
 
 void arraylength(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
-    Variable arrayRef = thread->currentFrame->popOperand();
-    // TODO: Ensure ref is reference type
-    Array* array = heap->getArray(arrayRef.data);
+    const Variable arrayRef = thread->currentFrame->popOperand();
+    VM->checkType(arrayRef, VariableType_REFERENCE);
+    const Array* array = heap->getArray(arrayRef.data);
 
-    Variable lengthVar = {};
-    lengthVar.type = VariableType_INT;
-    lengthVar.data = array->length;
+    const Variable lengthVar{VariableType_INT, static_cast<uint32_t>(array->length)};
     thread->currentFrame->operands.push_back(lengthVar);
 }
 
@@ -298,15 +281,12 @@ void monitorenter(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap,
     Variable ref = thread->currentFrame->popOperand();
     if (ref.type != VariableType_REFERENCE)
     {
-        fprintf(stderr, "Error: Expected object reference on stack\n");
-        Platform::exitProgram(-6);
+        VM->internalError("Expected object reference on stack");
     }
 
     if (ref.data == 0)
     {
-        // TODO: Fix this
-        // fprintf(stderr, "Error: Nullpointer Exception\n");
-        // Platform::exitProgram(-6);
+        VM->internalError("Nullpointer Exception");
     }
 }
 
@@ -320,10 +300,7 @@ void monitorexit(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, 
         Platform::exitProgram(-6);
     }
 
-    if (ref.data == 0)
-    {
-        // TODO: Fix this
-        // fprintf(stderr, "Error: Nullpointer Exception\n");
-        // Platform::exitProgram(-6);
+    if (ref.data == 0) {
+        VM->internalError("Nullpointer Exception");
     }
 }

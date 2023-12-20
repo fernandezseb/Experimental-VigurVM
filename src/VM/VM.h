@@ -35,6 +35,9 @@ struct StackFrame {
     ClassInfo* previousClass;
     MethodInfo* previousMethod;
 
+    const char* className;
+    const char* methodName;
+
     Variable popOperand()
     {
         if (operands.empty())
@@ -179,7 +182,6 @@ private:
     JavaHeap heap;
     VMThread thread;
     Configuration configuration;
-    static std::vector<Variable> createVariableForDescriptor(char* descriptor);
     void initStaticFields(ClassInfo* class_info);
     void executeLoop(VMThread* thread);
     void pushStackFrameWithoutParams(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread* thread);
@@ -187,14 +189,16 @@ private:
 public:
     void pushStackFrameStatic(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame, VMThread* thread);
     void pushStackFrameVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame, VMThread* thread);
-    void updateVariableFromVariable(Variable* variable, char* descriptor, Variable operand);
+    void updateVariableFromVariable(Variable* variable, const char* descriptor, Variable operand, Variable operand2);
     VM();
-    static uint16_t getDescriptorVarCount(char* get_string);
+    static std::vector<Variable> createVariableForDescriptor(const char* descriptor);
+    [[nodiscard]] static constexpr u1 getDescriptorVarCategory(const char* descriptor) noexcept;
     void start(Configuration configuration);
     ClassInfo* getClass(const char* className, VMThread* thread);
     void runMain(const char* className);
     void shutdown();
     void checkType(Variable var, VariableType type);
+    void internalError(const char* error);
 };
 
 

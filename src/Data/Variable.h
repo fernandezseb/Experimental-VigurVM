@@ -34,4 +34,24 @@ struct Variable
 {
     VariableType type;
     u4 data;
+
+    explicit constexpr Variable(const VariableType type) noexcept
+        : type(type), data(0)
+    {
+    }
+
+    explicit constexpr Variable(const VariableType type, const u4 data) noexcept
+        : type(type), data(data)
+    {
+    }
+
+    [[nodiscard]] constexpr u1 getCategory() const noexcept
+    {
+        if (type == VariableType_DOUBLE || type == VariableType_LONG)
+        {
+            return 2;
+        }
+
+        return 1;
+    }
 };

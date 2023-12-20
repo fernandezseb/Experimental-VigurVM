@@ -1,5 +1,7 @@
 #include "JavaHeap.h"
 
+#include "VM.h"
+
 JavaHeap::JavaHeap()
 {
     // We don't want the heap to return reference 0,
@@ -36,20 +38,20 @@ uint32_t JavaHeap::createArray(ArrayType type, uint64_t size)
     return objects.size()-1;
 }
 
-uint32_t JavaHeap::createObject(ClassInfo* class_info)
+uint32_t JavaHeap::createObject(ClassInfo* classInfo, VM* VM)
 {
     Object* object = (Object*) Platform::allocateMemory(sizeof(Object), 0);
     u2 fieldsCount = 0;
-    for (u2 currentField = 0; currentField < class_info->fieldsCount; ++currentField)
+    for (u2 currentField = 0; currentField < classInfo->fieldsCount; ++currentField)
     {
-        FieldInfo* fieldInfo = class_info->fields[currentField];
+        FieldInfo* fieldInfo = classInfo->fields[currentField];
         if (!fieldInfo->isStatic())
         {
             ++fieldsCount;
         }
     }
 
-    object->classInfo = class_info;
+    object->classInfo = classInfo;
     object->type = OBJECT;
     object->fields = 0;
     if (fieldsCount > 0)
@@ -60,28 +62,33 @@ uint32_t JavaHeap::createObject(ClassInfo* class_info)
     object->superClassObject = 0;
 
     fieldsCount = 0;
-    for (u2 currentField = 0; currentField < class_info->fieldsCount; ++currentField)
+    for (u2 currentField = 0; currentField < classInfo->fieldsCount; ++currentField)
     {
-        FieldInfo* fieldInfo = class_info->fields[currentField];
+        FieldInfo* fieldInfo = classInfo->fields[currentField];
         if (!fieldInfo->isStatic())
         {
-            Variable var = {};
-            var.data = 0;
-            var.type = VariableType_UNDEFINED;
             FieldData data = {};
             data.descriptorIndex = fieldInfo->descriptorIndex;
             data.nameIndex = fieldInfo->nameIndex;
-            data.data = var;
+            const char* descriptorText = classInfo->constantPool->getString(fieldInfo->descriptorIndex);
+            std::vector<Variable> vars = VM->createVariableForDescriptor(descriptorText);
+            Variable* varsAllocated = (Variable*) Platform::allocateMemory(sizeof(Variable) * vars.size(), 0);
+            for (u1 currentVar = 0; currentVar < vars.size(); ++currentVar)
+            {
+                varsAllocated[currentVar] = vars[currentVar];
+            }
+            data.dataSize = vars.size();
+            data.data = varsAllocated;
             object->fields[fieldsCount++] = data;
         }
     }
 
 
-    const char* superClassName = class_info->constantPool->getString(class_info->constantPool->getClassInfo(class_info->superClass)->nameIndex);
+    const char* superClassName = classInfo->constantPool->getString(classInfo->constantPool->getClassInfo(classInfo->superClass)->nameIndex);
     if (strcmp(superClassName, "java/lang/Object") != 0)
     {
         ClassInfo* superClass = getClassByName(superClassName);
-        u4 superClassObject = createObject(superClass);
+        u4 superClassObject = createObject(superClass, VM);
         object->superClassObject = superClassObject;
     }
 
