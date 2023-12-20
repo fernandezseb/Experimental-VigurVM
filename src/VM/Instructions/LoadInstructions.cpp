@@ -2,7 +2,7 @@
 
 #include <bit>
 
-#include "VM.h"
+#include "VM/VM.h"
 #include "Data/Variable.h"
 
 

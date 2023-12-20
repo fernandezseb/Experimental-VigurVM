@@ -1,6 +1,6 @@
 #include "StoreInstructions.h"
 
-#include "VM.h"
+#include "VM/VM.h"
 #include "Data/Variable.h"
 
 void istore(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)

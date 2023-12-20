@@ -1,6 +1,6 @@
 #include "ExtendedInstructions.h"
 
-#include "VM.h"
+#include "VM/VM.h"
 #include "Data/Variable.h"
 
 static u2 readShort(VMThread* thread)

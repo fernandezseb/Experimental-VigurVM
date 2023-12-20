@@ -9,15 +9,15 @@
 
 #include <vector>
 
-#include "ComparisonInstructions.h"
-#include "ConstantInstructions.h"
-#include "ControlInstructions.h"
-#include "LoadInstructions.h"
-#include "ReferenceInstructions.h"
-#include "StoreInstructions.h"
-#include "StackInstructions.h"
-#include "ExtendedInstructions.h"
-#include "MathInstructions.h"
+#include "Instructions/ComparisonInstructions.h"
+#include "Instructions/ConstantInstructions.h"
+#include "Instructions/ControlInstructions.h"
+#include "Instructions/LoadInstructions.h"
+#include "Instructions/ReferenceInstructions.h"
+#include "Instructions/StoreInstructions.h"
+#include "Instructions/StackInstructions.h"
+#include "Instructions/ExtendedInstructions.h"
+#include "Instructions/MathInstructions.h"
 
 struct StackFrame {
     // Local variable array

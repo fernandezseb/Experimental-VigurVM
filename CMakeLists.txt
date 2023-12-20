@@ -44,24 +44,24 @@ add_executable(${PROJECT_NAME}
         src/ClassLoader/ClassLoader.cpp
         src/ClassLoader/DescriptorParser.h
         src/ClassLoader/DescriptorParser.cpp
-        src/VM/ConstantInstructions.h
-        src/VM/ConstantInstructions.cpp
-        src/VM/LoadInstructions.h
-        src/VM/LoadInstructions.cpp
-        src/VM/StoreInstructions.h
-        src/VM/StoreInstructions.cpp
-        src/VM/StackInstructions.h
-        src/VM/StackInstructions.cpp
-        src/VM/ReferenceInstructions.h
-        src/VM/ReferenceInstructions.cpp
-        src/VM/ControlInstructions.h
-        src/VM/ControlInstructions.cpp
-        src/VM/ExtendedInstructions.h
-        src/VM/ExtendedInstructions.cpp
-        src/VM/MathInstructions.h
-        src/VM/MathInstructions.cpp
-        src/VM/ComparisonInstructions.h
-        src/VM/ComparisonInstructions.cpp
+        src/VM/Instructions/ConstantInstructions.h
+        src/VM/Instructions/ConstantInstructions.cpp
+        src/VM/Instructions/LoadInstructions.h
+        src/VM/Instructions/LoadInstructions.cpp
+        src/VM/Instructions/StoreInstructions.h
+        src/VM/Instructions/StoreInstructions.cpp
+        src/VM/Instructions/StackInstructions.h
+        src/VM/Instructions/StackInstructions.cpp
+        src/VM/Instructions/ReferenceInstructions.h
+        src/VM/Instructions/ReferenceInstructions.cpp
+        src/VM/Instructions/ControlInstructions.h
+        src/VM/Instructions/ControlInstructions.cpp
+        src/VM/Instructions/ExtendedInstructions.h
+        src/VM/Instructions/ExtendedInstructions.cpp
+        src/VM/Instructions/MathInstructions.h
+        src/VM/Instructions/MathInstructions.cpp
+        src/VM/Instructions/ComparisonInstructions.h
+        src/VM/Instructions/ComparisonInstructions.cpp
 
 
 )

@@ -3,7 +3,7 @@
 #include <bit>
 
 #include "Data/Variable.h"
-#include "VM.h"
+#include "VM/VM.h"
 
 void nop(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
