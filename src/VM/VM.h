@@ -192,7 +192,7 @@ public:
     void updateVariableFromVariable(Variable* variable, const char* descriptor, Variable operand, Variable operand2);
     VM();
     static std::vector<Variable> createVariableForDescriptor(const char* descriptor);
-    [[nodiscard]] static constexpr u1 getDescriptorVarCategory(const char* descriptor) noexcept;
+    [[nodiscard]] static u1 getDescriptorVarCategory(const char* descriptor) noexcept;
     void start(Configuration configuration);
     ClassInfo* getClass(const char* className, VMThread* thread);
     void runMain(const char* className);

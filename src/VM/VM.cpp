@@ -67,7 +67,7 @@ std::vector<Variable> VM::createVariableForDescriptor(const char* descriptor)
     return variables;
 }
 
-constexpr u1 VM::getDescriptorVarCategory(const char* descriptor) noexcept
+u1 VM::getDescriptorVarCategory(const char* descriptor) noexcept
 {
     // Longs and doubles use two
     if (descriptor[0] == 'J' || descriptor[0] == 'D')
