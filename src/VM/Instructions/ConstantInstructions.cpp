@@ -98,7 +98,7 @@ void loadConstant(const VMThread* thread, const u4 index, JavaHeap* heap, VM* VM
     {
         char buffer [200];
         snprintf(buffer, 200, "LDC not implemented yet for type: %d", cpItem->getType());
-        VM->internalError(buffer);
+        thread->internalError(buffer);
     }
 }
 

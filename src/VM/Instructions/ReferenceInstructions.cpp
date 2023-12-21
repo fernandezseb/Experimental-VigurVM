@@ -29,7 +29,7 @@ void getstatic(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VM
     {
         if (vars[currentVar].type == VariableType_UNDEFINED)
         {
-            VM->internalError("Error: Unitialized field not supported in getstatic yet");
+            thread->internalError("Error: Unitialized field not supported in getstatic yet");
         }
         thread->currentFrame->operands.push_back(vars[currentVar]);
     }
@@ -53,7 +53,7 @@ void putstatic(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VM
     {
         var2 = thread->currentFrame->popOperand();
     }
-    VM->updateVariableFromVariable(targetField->staticData, descriptor, var, var2);
+    VM->updateVariableFromVariable(targetField->staticData, descriptor, var, var2, thread);
 }
 
 void getfield(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
@@ -88,7 +88,7 @@ void getfield(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMT
         FieldData* field = object->getField(fieldName, fieldDescr, heap);
         if (field == 0)
         {
-            VM->internalError("Error: Field not found in object!");
+            thread->internalError("Error: Field not found in object!");
         }
         Variable* vars = field->data;
         for (u1 currentVar = 0; currentVar < field->dataSize; ++currentVar)
@@ -144,7 +144,7 @@ void invokevirtual(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap
     const char* className = topFrame->constantPool->getString(cpClassInfo->nameIndex);
     ClassInfo* targetClassInfo = VM->getClass(className, thread);
     MethodInfo* methodInfo = targetClassInfo->findMethodWithNameAndDescriptor(methodName, methodDescriptor);
-    VM->pushStackFrameVirtual(targetClassInfo, methodInfo, topFrame, thread);
+    thread->pushStackFrameVirtual(targetClassInfo, methodInfo, topFrame);
     printf("> Created new stack frame for virtual call on: %s.%s()\n", className, methodName);
 }
 
@@ -164,7 +164,7 @@ void invokespecial(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap
     // TODO: Check correct parsing of descriptors with subclasses
 
     // TODO: Check argument types
-    VM->pushStackFrameVirtual(targetClassInfo, methodInfo, topFrame, thread);
+    thread->pushStackFrameVirtual(targetClassInfo, methodInfo, topFrame);
     printf("> Created new stack frame for method call %s on: %s\n", methodName, className);
 
 }
@@ -182,7 +182,7 @@ void invokestatic(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap,
 
     if (!methodInfo->isStatic())
     {
-        VM->internalError("Error: Running non-static method as static");
+        thread->internalError("Error: Running non-static method as static");
     }
 
     if (methodInfo->isNative())
@@ -202,7 +202,7 @@ void invokestatic(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap,
         }
     } else
     {
-        VM->pushStackFrameStatic(targetClass, methodInfo, topFrame, thread);
+        thread->pushStackFrameStatic(targetClass, methodInfo, topFrame);
         printf("> Created new stack frame for constructor call on: %s\n",
             topFrame->constantPool->getString(targetClassInfo->nameIndex));
     }
@@ -237,7 +237,7 @@ void newarray(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMT
     ArrayType type = (ArrayType) typeArg;
 
     const Variable countVar = thread->currentFrame->popOperand();
-    VM->checkType(countVar, VariableType_INT);
+    VM->checkType(countVar, VariableType_INT, thread);
 
     const uint32_t reference = heap->createArray(type, countVar.data);
     const Variable variable{VariableType_REFERENCE, reference};
@@ -256,7 +256,7 @@ void anewarray(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VM
 
     if (size < 0)
     {
-        VM->internalError("Error: Can't create an array with negative size");
+        thread->internalError("Error: Can't create an array with negative size");
     }
 
     uint32_t reference = heap->createArray(AT_REFERENCE, size);
@@ -268,7 +268,7 @@ void anewarray(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VM
 void arraylength(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     const Variable arrayRef = thread->currentFrame->popOperand();
-    VM->checkType(arrayRef, VariableType_REFERENCE);
+    VM->checkType(arrayRef, VariableType_REFERENCE, thread);
     const Array* array = heap->getArray(arrayRef.data);
 
     const Variable lengthVar{VariableType_INT, static_cast<uint32_t>(array->length)};
@@ -281,12 +281,12 @@ void monitorenter(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap,
     Variable ref = thread->currentFrame->popOperand();
     if (ref.type != VariableType_REFERENCE)
     {
-        VM->internalError("Expected object reference on stack");
+        thread->internalError("Expected object reference on stack");
     }
 
     if (ref.data == 0)
     {
-        VM->internalError("Nullpointer Exception");
+        thread->internalError("Nullpointer Exception");
     }
 }
 
@@ -301,6 +301,6 @@ void monitorexit(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, 
     }
 
     if (ref.data == 0) {
-        VM->internalError("Nullpointer Exception");
+        thread->internalError("Nullpointer Exception");
     }
 }

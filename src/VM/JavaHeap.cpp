@@ -11,7 +11,7 @@ JavaHeap::JavaHeap()
 
 uint32_t JavaHeap::createArray(ArrayType type, uint64_t size)
 {
-    Array* array = (Array*) Platform::allocateMemory(sizeof(Array), 0);
+    Array* array = static_cast<Array*>(Platform::allocateMemory(sizeof(Array), 0));
     array->length = size;
     array->type = ARRAY;
     array->arrayType = type;
@@ -96,7 +96,7 @@ uint32_t JavaHeap::createObject(ClassInfo* classInfo, VM* VM)
     return objects.size()-1;
 }
 
-Object* JavaHeap::getObject(uint32_t id)
+Object* JavaHeap::getObject(const uint32_t id) const
 {
     if (id == 0)
     {
@@ -113,6 +113,7 @@ Object* JavaHeap::getObject(uint32_t id)
         fprintf(stderr, "Error: Array instead of Object\n");
         Platform::exitProgram(-22);
     }
+    return nullptr;
 }
 
 Object* JavaHeap::getChildObject(uint32_t id, ClassInfo* classInfo)
@@ -132,7 +133,7 @@ Object* JavaHeap::getChildObject(uint32_t id, ClassInfo* classInfo)
     return o;
 }
 
-Array* JavaHeap::getArray(uint32_t id)
+Array* JavaHeap::getArray(const uint32_t id) const
 {
     if (id == 0)
     {
@@ -143,12 +144,13 @@ Array* JavaHeap::getArray(uint32_t id)
     Reference* ref = objects[id];
     if (ref->type == ARRAY)
     {
-        return (Array*) objects[id];
+        return static_cast<Array*>(objects[id]);
     } else
     {
         fprintf(stderr, "Error: Array instead of Object");
         Platform::exitProgram(-22);
     }
+    return nullptr;
 }
 
 void JavaHeap::addClassInfo(ClassInfo* classInfo)
@@ -166,10 +168,10 @@ ClassInfo* JavaHeap::getClassByName(const char* className)
             return classInfo;
         }
     }
-    return 0;
+    return nullptr;
 }
 
-FieldData* Object::getField(const char* name, const char* descriptor, JavaHeap* heap)
+FieldData* Object::getField(const char* name, const char* descriptor, JavaHeap* heap) const
 {
     bool found = false;
     for (u2 currentField = 0; currentField < fieldsCount; ++currentField)
@@ -183,14 +185,11 @@ FieldData* Object::getField(const char* name, const char* descriptor, JavaHeap* 
             return &fields[currentField];
         }
     }
-    if (!found)
+    if (!found && superClassObject != 0)
     {
-        if (superClassObject != 0)
-        {
-            return heap->getObject(superClassObject)->getField(name, descriptor, heap);
-        }
+        return heap->getObject(superClassObject)->getField(name, descriptor, heap);
     }
     fprintf(stderr, "Error: Field not resolved!");
     Platform::exitProgram(-23);
-    return 0;
+    return nullptr;
 }

@@ -11,7 +11,7 @@ void ifeq(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThrea
     i2 branchByte = (byte1 << 8) | byte2;
 
     Variable intVar = thread->currentFrame->popOperand();
-    VM->checkType(intVar, VariableType_INT);
+    VM->checkType(intVar, VariableType_INT, thread);
     if (((i4)intVar.data) == 0)
     {
         thread->pc = thread->pc-3+branchByte;
@@ -26,7 +26,7 @@ void ifne(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThrea
     i2 branchByte = (byte1 << 8) | byte2;
 
     Variable intVar = thread->currentFrame->popOperand();
-    VM->checkType(intVar, VariableType_INT);
+    VM->checkType(intVar, VariableType_INT, thread);
 
     if (((i4)intVar.data) != 0)
     {
@@ -42,7 +42,7 @@ void ifge(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThrea
     i2 branchByte = (byte1 << 8) | byte2;
 
     Variable intVar = thread->currentFrame->popOperand();
-    VM->checkType(intVar, VariableType_INT);
+    VM->checkType(intVar, VariableType_INT, thread);
 
     if (((i4)intVar.data) >= 0)
     {
@@ -58,7 +58,7 @@ void ifgt(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThrea
     i2 branchByte = (byte1 << 8) | byte2;
 
     Variable intVar = thread->currentFrame->popOperand();
-    VM->checkType(intVar, VariableType_INT);
+    VM->checkType(intVar, VariableType_INT, thread);
 
     if (((i4)intVar.data) > 0)
     {
@@ -74,7 +74,7 @@ void ifle(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThrea
     i2 branchByte = (byte1 << 8) | byte2;
 
     Variable intVar = thread->currentFrame->popOperand();
-    VM->checkType(intVar, VariableType_INT);
+    VM->checkType(intVar, VariableType_INT, thread);
 
     if (((i4)intVar.data) <= 0)
     {

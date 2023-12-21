@@ -4,7 +4,7 @@
 
 struct Configuration
 {
-    const char* classPath = 0;
-    const char* mainClassName = 0;
+    const char* classPath = nullptr;
+    const char* mainClassName = nullptr;
     std::vector<const char*> args;
 };

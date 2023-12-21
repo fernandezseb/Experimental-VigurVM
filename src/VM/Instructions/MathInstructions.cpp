@@ -13,7 +13,7 @@ void iadd(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThrea
     const Variable added{VariableType_INT,
         std::bit_cast<u4>((i4)var1.data + (i4)var2.data)};
     thread->currentFrame->operands.push_back(added);
-    VM->internalError("test exception");
+    thread->internalError("test exception");
 }
 
 void isub(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)

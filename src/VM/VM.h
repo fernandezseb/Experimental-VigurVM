@@ -6,8 +6,7 @@
 #include "Data/Variable.h"
 #include "Data/Opcode.h"
 #include "JavaHeap.h"
-
-#include <vector>
+#include "VMThread.h"
 
 #include "Instructions/ComparisonInstructions.h"
 #include "Instructions/ConstantInstructions.h"
@@ -19,60 +18,7 @@
 #include "Instructions/ExtendedInstructions.h"
 #include "Instructions/MathInstructions.h"
 
-struct StackFrame {
-    // Local variable array
-    std::vector<Variable> localVariables;
-    // operand stack, where long and double are two values
-    std::vector<Variable> operands;
-
-    // reference to runtime constant pool, for the type of the current method
-    ConstantPool* constantPool;
-
-    // used to restore the state of the invoker,
-    // pc of the invoker
-    u4 previousPc;
-
-    ClassInfo* previousClass;
-    MethodInfo* previousMethod;
-
-    const char* className;
-    const char* methodName;
-
-    Variable popOperand()
-    {
-        if (operands.empty())
-        {
-            fprintf(stderr, "Error: No operands on stack found!\n");
-            Platform::exitProgram(-78);
-        }
-        Variable var = operands.back();
-        operands.pop_back();
-        return var;
-    }
-
-    Variable peekOperand() const
-    {
-        return operands.back();
-    }
-};
-
-class JavaStack {
-public:
-    std::vector<StackFrame> frames;
-};
-
-class VMThread {
-public:
-    u4 pc;
-    JavaStack stack;
-    // Current frame
-    StackFrame* currentFrame;
-    // Current method
-    MethodInfo* currentMethod;
-    // current class
-    ClassInfo* currentClass;
-    const char* name;
-};
+#include <vector>
 
 struct VM;
 
@@ -180,25 +126,21 @@ private:
     };
     ClassLoader bootstrapClassLoader;
     JavaHeap heap;
-    VMThread thread;
+    VMThread thread{"main", 200};
     Configuration configuration;
-    void initStaticFields(ClassInfo* class_info);
+    void initStaticFields(ClassInfo* class_info, VMThread* thread);
     void executeLoop(VMThread* thread);
-    void pushStackFrameWithoutParams(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread* thread);
     void runStaticInitializer(ClassInfo* classInfo, VMThread* thread);
 public:
-    void pushStackFrameStatic(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame, VMThread* thread);
-    void pushStackFrameVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame, VMThread* thread);
-    void updateVariableFromVariable(Variable* variable, const char* descriptor, Variable operand, Variable operand2);
-    VM();
+    explicit VM(Configuration configuration) noexcept;
+    void updateVariableFromVariable(Variable* variable, const char* descriptor, Variable operand, Variable operand2, VMThread* thread);
     static std::vector<Variable> createVariableForDescriptor(const char* descriptor);
     [[nodiscard]] static u1 getDescriptorVarCategory(const char* descriptor) noexcept;
-    void start(Configuration configuration);
+    void start();
     ClassInfo* getClass(const char* className, VMThread* thread);
     void runMain(const char* className);
     void shutdown();
-    void checkType(Variable var, VariableType type);
-    void internalError(const char* error);
+    void checkType(Variable var, VariableType type, VMThread* thread);
 };
 
 

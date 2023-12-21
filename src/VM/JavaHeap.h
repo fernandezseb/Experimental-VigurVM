@@ -19,7 +19,7 @@ class Array;
 
 class Reference {
 public:
-    Reference(ReferenceType type) { this->type = type; };
+    explicit Reference(ReferenceType type) { this->type = type; };
     ReferenceType type;
 
     Array* getArray() {
@@ -28,7 +28,9 @@ public:
         }
         else {
             fprintf(stderr, "Error: Reference is not of type 'Array'");
+            Platform::exitProgram(-23);
         }
+        return nullptr;
     };
 
     Object* getObject() {
@@ -37,7 +39,9 @@ public:
         }
         else {
             fprintf(stderr, "Error: Reference is not of type 'Object'");
+            Platform::exitProgram(-23);
         }
+        return nullptr;
     };
 };
 
@@ -57,12 +61,12 @@ public:
     uint16_t fieldsCount;
     ClassInfo* classInfo;
     u4 superClassObject;
-    FieldData* getField(const char* name, const char* descriptor, JavaHeap* heap);
+    FieldData* getField(const char* name, const char* descriptor, JavaHeap* heap) const;
 };
 
 class Array : public Reference {
 public:
-    Array() : Reference(ARRAY), arrayType(AT_UNDEFINED), length(0l), data(0) {
+    Array() : Reference(ARRAY), arrayType(AT_UNDEFINED), length(0l), data(nullptr) {
     };
     ArrayType arrayType;
     uint64_t length;
@@ -86,9 +90,9 @@ public:
 
     uint32_t createArray(ArrayType type, uint64_t size);
     uint32_t createObject(ClassInfo* classInfo, VM* VM);
-    Object* getObject(uint32_t id);
+    [[nodiscard]] Object* getObject(uint32_t id) const;
     Object* getChildObject(uint32_t id, ClassInfo* classInfo);
-    Array* getArray(u4 id);
+    [[nodiscard]] Array* getArray(u4 id) const;
     void addClassInfo(ClassInfo* classInfo);
     ClassInfo* getClassByName(const char* className);
 };

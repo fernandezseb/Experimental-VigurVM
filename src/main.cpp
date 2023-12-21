@@ -1,11 +1,7 @@
-
-#include <execution>
-
 #include "VM/Configuration.h"
 #include "VM/VM.h"
 
-
-Configuration parseArguments(int argc, char** argv)
+Configuration parseArguments(const int argc, const char*const*const argv)
 {
     Configuration config;
     bool mainNameFound = false;
@@ -35,14 +31,14 @@ Configuration parseArguments(int argc, char** argv)
     return config;
 }
 
-int main(int argc, char* argv[])
+int main(const int argc, const char*const*const argv)
 {
-    VM vm;
+    const Configuration config = parseArguments(argc, argv);
 
-    Configuration config = parseArguments(argc, argv);
-
-    vm.start(config);
+    VM vm(config);
+    vm.start();
     vm.runMain(config.mainClassName);
     vm.shutdown();
-    return 0;
+
+    return EXIT_SUCCESS;
 }

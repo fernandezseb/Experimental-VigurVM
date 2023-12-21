@@ -4,23 +4,16 @@
 #include <variant>
 
 #include "Configuration.h"
-#include "../Memory.h"
+#include "Memory.h"
 
-VM::VM()
+VM::VM(const Configuration configuration) noexcept
+    : configuration(configuration)
 {
 }
 
-void VM::start(Configuration configuration)
+void VM::start()
 {
     Platform::initialize();
-    this->configuration = configuration;
-
-    thread.name = "main";
-    thread.stack.frames.reserve(200);
-    thread.pc = 0;
-    thread.currentClass = nullptr;
-    thread.currentMethod = nullptr;
-    thread.currentFrame = nullptr;
 
     getClass("java/lang/OutOfMemoryError", &thread);
     getClass("java/lang/VirtualMachineError", &thread);
@@ -77,7 +70,7 @@ u1 VM::getDescriptorVarCategory(const char* descriptor) noexcept
     return 1;
 }
 
-void VM::initStaticFields(ClassInfo* class_info)
+void VM::initStaticFields(ClassInfo* class_info, VMThread* thread)
 {
     // TODO: Do it for superclasses as well?
     u2 staticFieldsCount = 0;
@@ -107,50 +100,50 @@ void VM::initStaticFields(ClassInfo* class_info)
             const i4 index = currentStaticField-variables.size();
             if (index > staticFieldsCount-1 || index < 0)
             {
-                internalError("Going outside of index!");
+                thread->internalError("Going outside of index!");
             }
             field->staticData = &class_info->staticFields[index];
         }
     }
 }
 
-void VM::updateVariableFromVariable(Variable* variable, const char* descriptor, Variable operand, Variable operand2)
+void VM::updateVariableFromVariable(Variable* variable, const char* descriptor, Variable operand, Variable operand2, VMThread* thread)
 {
     if (strcmp(descriptor, "I") == 0)
     {
-        checkType(*variable, VariableType_INT);
-        checkType(operand, VariableType_INT);
+        checkType(*variable, VariableType_INT, thread);
+        checkType(operand, VariableType_INT, thread);
 
         variable->data = operand.data;
     } else if (strcmp(descriptor, "Z") == 0)
     {
-        checkType(*variable, VariableType_BOOLEAN);
-        checkType(operand, VariableType_INT);
+        checkType(*variable, VariableType_BOOLEAN, thread);
+        checkType(operand, VariableType_INT, thread);
 
         variable->data = operand.data;
     } else if (descriptor[0] == '[' || descriptor[0] == 'L') {
 
-        checkType(*variable, VariableType_REFERENCE);
-        checkType(operand, VariableType_REFERENCE);
+        checkType(*variable, VariableType_REFERENCE, thread);
+        checkType(operand, VariableType_REFERENCE, thread);
 
         variable->data = operand.data;
     } else if (descriptor[0] == 'J' || descriptor[0] == 'J')
     {
-        checkType(*variable, VariableType_LONG);
-        checkType(operand, VariableType_LONG);
+        checkType(*variable, VariableType_LONG, thread);
+        checkType(operand, VariableType_LONG, thread);
         variable[0].data = operand2.data;
         variable[1].data = operand.data;
     } else if (descriptor[0] == 'D' || descriptor[0] == 'D')
     {
-        checkType(*variable, VariableType_DOUBLE);
-        checkType(operand, VariableType_DOUBLE);
+        checkType(*variable, VariableType_DOUBLE, thread);
+        checkType(operand, VariableType_DOUBLE, thread);
         variable[0].data = operand2.data;
         variable[1].data = operand.data;
     } else
     {
         char buffer[200];
         snprintf(buffer, 200, "Error: Setting of variable of type with descriptor: %s not implemented yet!\n", descriptor);
-        internalError(buffer);
+        thread->internalError(buffer);
     }
 }
 
@@ -205,60 +198,7 @@ void VM::executeLoop(VMThread* thread)
         }
         char buffer[200];
         snprintf(buffer, 200, "Unrecognized opcode detected: 0x%0x", opcode);
-        internalError(buffer);
-    }
-}
-
-void VM::pushStackFrameWithoutParams(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread* thread)
-{
-    StackFrame stackFrame;
-    stackFrame.localVariables.reserve(methodInfo->code->maxLocals);
-    for (u2  currentLocal = 0; currentLocal < methodInfo->code->maxLocals; ++currentLocal)
-    {
-        constexpr Variable var{VariableType_UNDEFINED};
-        stackFrame.localVariables.push_back(var);
-    }
-    stackFrame.operands.reserve(methodInfo->code->maxStack);
-    stackFrame.constantPool = classInfo->constantPool;
-    stackFrame.previousPc = thread->pc;
-    stackFrame.previousClass = thread->currentClass;
-    stackFrame.previousMethod = thread->currentMethod;
-    stackFrame.className = classInfo->getName();
-    stackFrame.methodName = methodInfo->name;
-
-
-    thread->pc = 0;
-    thread->currentClass = classInfo;
-    thread->currentMethod = methodInfo;
-
-    thread->stack.frames.push_back(stackFrame);
-    thread->currentFrame = &thread->stack.frames[thread->stack.frames.size()-1];
-}
-
-void VM::pushStackFrameVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame, VMThread* thread)
-{
-    pushStackFrameWithoutParams(classInfo, methodInfo, thread);
-    if (previousFrame != 0)
-    {
-        // The arguments and the pointer to the object
-        for (int i = methodInfo->argsCount; i >= 0; --i)
-        {
-            thread->currentFrame->localVariables[i] = previousFrame->popOperand();
-        }
-    }
-}
-
-void VM::pushStackFrameStatic(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame, VMThread* thread)
-{
-    pushStackFrameWithoutParams(classInfo, methodInfo, thread);
-
-    if (previousFrame != 0)
-    {
-        // The arguments
-        for (int i = methodInfo->argsCount; i > 0; --i)
-        {
-            thread->currentFrame->localVariables[i-1] = previousFrame->popOperand();
-        }
+        thread->internalError(buffer);
     }
 }
 
@@ -280,7 +220,7 @@ void VM::runStaticInitializer(ClassInfo* classInfo, VMThread* thread)
     thread->stack.frames = std::vector<StackFrame>();
     thread->stack.frames.reserve(200);
 
-    pushStackFrameWithoutParams(classInfo, entryPoint, thread);
+    thread->pushStackFrameWithoutParams(classInfo, entryPoint);
 
     printf("Executing static initializers...\n");
     executeLoop(thread);
@@ -299,7 +239,7 @@ ClassInfo* VM::getClass(const char* className, VMThread* thread)
         Memory *memory = new Memory(MIB(1), MIB(30));
         printf("Loading class %s...\n", className);
         ClassInfo *classInfo = bootstrapClassLoader.readClass(className, memory, configuration.classPath);
-        initStaticFields(classInfo);
+        initStaticFields(classInfo, thread);
         heap.addClassInfo(classInfo);
         runStaticInitializer(classInfo, thread);
         return classInfo;
@@ -330,7 +270,7 @@ void VM::runMain(const char* className)
     mainThread->currentClass = startupClass;
     mainThread->currentMethod = entryPoint;
 
-    pushStackFrameStatic(startupClass, entryPoint, 0, mainThread);
+    mainThread->pushStackFrameStatic(startupClass, entryPoint, 0);
 
     // TODO: Put string array in local variable with index 0
 
@@ -345,24 +285,10 @@ void VM::shutdown()
     Platform::cleanup();
 }
 
-void VM::checkType(Variable var, VariableType type)
+void VM::checkType(Variable var, VariableType type, VMThread* thread)
 {
     if (var.type != type)
     {
-        internalError("Error: TypeMismatch");
+        thread->internalError("Error: TypeMismatch");
     }
-}
-
-void VM::internalError(const char* error)
-{
-    fprintf(stdout, "Error: %s\n", error);
-    if (thread.stack.frames.size() > 0)
-    {
-        for (i4 currentFrame = thread.stack.frames.size()-1; currentFrame >= 0; --currentFrame)
-        {
-            StackFrame frame = thread.stack.frames[currentFrame];
-            printf("    at %s.%s\n", frame.className, frame.methodName);
-        }
-    }
-    Platform::exitProgram(-6);
 }
