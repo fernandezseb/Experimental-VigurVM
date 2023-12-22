@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
 	}
 
 	uint16_t size;
-	char** parts = DescriptorParser::getTypes("[Ljava/lang/String;I[SS[[I",26, &size, &memory);
+	char** parts = DescriptorParser::getTypes(const_cast<char*>("[Ljava/lang/String;I[SS[[I"),26, &size, &memory);
 	if (size != 5) {
 		return -2;
 	}
@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
 	assertString(parts[3], "S");
 	assertString(parts[4], "[[I");
 
-	parts = DescriptorParser::getTypes("I",1, &size, &memory);
+	parts = DescriptorParser::getTypes(const_cast<char*>("I"),1, &size, &memory);
 	if (size != 1) {
 		return -2;
 	}
