@@ -68,16 +68,6 @@ add_executable(${PROJECT_NAME}
         src/VM/Instructions/ComparisonInstructions.h
         src/VM/Instructions/ComparisonInstructions.cpp
 
-        src/Library/Vigur/lang/System.h
-        src/Library/NativeDefs.h
-        src/Library/Vigur/lang/System.cpp
-        src/Library/Builtin.h
-        src/Library/Builtin.cpp
-        src/Library/java/lang/Object.h
-        src/Library/java/lang/Object.cpp
-        src/Library/java/lang/System.h
-        src/Library/java/lang/System.cpp
-
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
@@ -94,6 +84,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_link_libraries(${PROJECT_NAME} Linux)
 endif()
 
+target_link_directories(${PROJECT_NAME} INTERFACE Library)
+target_link_libraries(${PROJECT_NAME} Library)
+
 enable_testing()
+add_subdirectory(src/Library)
 add_subdirectory(test)
 add_subdirectory(tools/ClassDump)
