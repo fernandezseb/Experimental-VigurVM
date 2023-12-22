@@ -33,4 +33,4 @@ extern "C" void registerNative(const char* name,
 extern "C" nativeImplementation findNativeMethod(const char* name,
     const char* descriptor);
 
-extern "C" extern Native native;
+extern "C" Native native;
