@@ -88,6 +88,8 @@ target_link_directories(${PROJECT_NAME} INTERFACE Library)
 target_link_libraries(${PROJECT_NAME} Library)
 
 enable_testing()
+
+add_subdirectory(extern/md5)
 add_subdirectory(src/Library)
 add_subdirectory(test)
 add_subdirectory(tools/ClassDump)

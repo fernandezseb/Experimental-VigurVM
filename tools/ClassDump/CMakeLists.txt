@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.17)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 
@@ -45,10 +45,8 @@ project(ClassDump
     src/OutputBuffer.h)
 
 
-    target_include_directories(${PROJECT_NAME} PUBLIC src/ extern/ ${PROJECT_BINARY_DIR} test/)
-    
-    add_subdirectory(extern/md5)
-    target_link_directories(${PROJECT_NAME} PRIVATE MD5)
+    target_include_directories(${PROJECT_NAME} PUBLIC src/ ${CMAKE_SOURCE_DIR}/extern/ ${PROJECT_BINARY_DIR} test/)
+    target_link_directories(${PROJECT_NAME} PUBLIC MD5)
     target_link_libraries(${PROJECT_NAME} MD5)
  
     if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
