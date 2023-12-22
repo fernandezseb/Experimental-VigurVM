@@ -2,6 +2,7 @@
 
 #include "Platform.h"
 #include "Data/Class.h"
+#include "VM/Native.h"
 
 template <class T>
 void DynamicArray<T>::expand()
@@ -61,3 +62,4 @@ DynamicArray<T>::~DynamicArray()
 
 template class DynamicArray<uint32_t>;
 template class DynamicArray<ClassInfo*>;
+template class DynamicArray<NativeMethod>;

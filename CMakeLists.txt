@@ -31,6 +31,8 @@ add_executable(${PROJECT_NAME}
         src/VM/VMThread.h
         src/VM/JavaStack.h
         src/VM/VMThread.cpp
+        src/VM/Native.h
+        src/VM/Native.cpp
 
         src/Data/Attribute.h
         src/Data/Attribute.cpp
@@ -66,6 +68,15 @@ add_executable(${PROJECT_NAME}
         src/VM/Instructions/ComparisonInstructions.h
         src/VM/Instructions/ComparisonInstructions.cpp
 
+        src/Library/Vigur/lang/System.h
+        src/Library/NativeDefs.h
+        src/Library/Vigur/lang/System.cpp
+        src/Library/Builtin.h
+        src/Library/Builtin.cpp
+        src/Library/java/lang/Object.h
+        src/Library/java/lang/Object.cpp
+        src/Library/java/lang/System.h
+        src/Library/java/lang/System.cpp
 
 )
 

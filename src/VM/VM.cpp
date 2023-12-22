@@ -1,10 +1,11 @@
 #include "VM.h"
 
-#include <stack>
-#include <variant>
-
 #include "Configuration.h"
 #include "Memory.h"
+#include "Library/Builtin.h"
+
+#include <stack>
+#include <variant>
 
 VM::VM(const Configuration configuration) noexcept
     : configuration(configuration)
@@ -15,11 +16,13 @@ void VM::start()
 {
     Platform::initialize();
 
+    registerBuiltinRegisterNatives();
     getClass("java/lang/OutOfMemoryError", &thread);
     getClass("java/lang/VirtualMachineError", &thread);
     getClass("java/lang/Object", &thread);
     getClass("java/lang/String", &thread);
     getClass("java/lang/System", &thread);
+    getClass("Vigur/lang/System", &thread);
 }
 
 std::vector<Variable> VM::createVariableForDescriptor(const char* descriptor)

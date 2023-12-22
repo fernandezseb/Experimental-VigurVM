@@ -2,6 +2,7 @@
 
 #include "VM/VM.h"
 #include "Data/Variable.h"
+#include "VM/Native.h"
 
 static u2 readShort(VMThread* thread)
 {
@@ -189,16 +190,21 @@ void invokestatic(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap,
     {
         const char* className = targetClass->getName();
         printf("Running native code of method: %s\n", methodInfo->name);
-        if (strcmp(targetClass->getName(), "Vigur/lang/System") == 0 &&
-            strcmp(methodInfo->name, "printLn") == 0)
+        const char* description = topFrame->constantPool->getString(nameAndTypeInfo->descriptorIndex);
+        const char* methodName = methodInfo->name;
+        char fullName[200] = {0};
+        strcat(fullName, className);
+        strcat(fullName, "/");
+        strcat(fullName, methodName);
+        nativeImplementation impl = findNativeMethod(fullName, description);
+        if (impl != nullptr)
         {
-            Variable strVar = thread->currentFrame->popOperand();
-            Object* obj = heap->getObject(strVar.data);
-            FieldData* charArrRef = obj->getField("value", "[C", heap);
-            Array* charArr = heap->getArray(charArrRef->data[0].data);
-            Platform::print((const char*)charArr->data, charArr->length);
-            Platform::print("\n", 1);
-            Platform::flush();
+            impl(heap, thread, VM);
+        } else
+        {
+            char errorString[400];
+            snprintf(errorString, 400, "Can't find native method %s%s", fullName, description);
+            thread->internalError(errorString);
         }
     } else
     {

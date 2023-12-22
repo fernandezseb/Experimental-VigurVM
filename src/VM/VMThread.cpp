@@ -36,6 +36,12 @@ void VMThread::pushStackFrameVirtual(ClassInfo* classInfo, MethodInfo* methodInf
         {
             this->currentFrame->localVariables[i] = previousFrame->popOperand();
         }
+
+        Variable ref = this->currentFrame->localVariables[0];
+        if (ref.type == VariableType_REFERENCE && ref.data == 0)
+        {
+            internalError("NullpointerException in virtual call\n");
+        }
     }
 }
 
