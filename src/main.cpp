@@ -40,5 +40,5 @@ int main(const int argc, const char*const*const argv)
     vm.runMain(config.mainClassName);
     vm.shutdown();
 
-    return EXIT_SUCCESS;
+    return 0;
 }
