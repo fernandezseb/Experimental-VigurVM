@@ -182,7 +182,8 @@ u4 JavaHeap::getString(const char* utf8String) const
             if (strcmp(obj->classInfo->getName(), "java/lang/String") == 0) {
                 Variable charArrRef =  obj->fields[0].data[0];
                 Array* arr = getArray(charArrRef.data);
-                if (strncmp((const char*)arr->data, utf8String, arr->length) == 0) {
+                if (strncmp((const char*)arr->data, utf8String,
+                    (arr->length > strlen(utf8String) ? arr->length : strlen(utf8String))) == 0) {
                     return currentObj;
                 }
             }

@@ -34,7 +34,7 @@ struct Instruction
 
 class VM {
 private:
-    Instruction instructions[78] =
+    Instruction instructions[80] =
     {
         // Constants
         {i_nop, 0, "nop", 0, nop},
@@ -72,6 +72,7 @@ private:
         {i_caload, 0, "caload", 0, caload},
         // Stores
         {i_istore, 1, "istore", 0, istore},
+        {i_astore, 1, "astore", 0, astore},
         {i_istore_0, 0, "astore_0", 0, istore_i},
         {i_istore_1, 0, "astore_1", 1, istore_i},
         {i_istore_2, 0, "astore_2", 2, istore_i},
@@ -102,6 +103,7 @@ private:
         {i_if_icmplt, 2, "if_icmplt", 0, if_icmplt},
         {i_if_icmpgt, 2, "if_icmpgt", 0, if_icmpgt},
         {i_if_icmple, 2, "if_icmple", 0, if_icmple},
+        {i_if_acmpne, 2, "if_acmpne", 0, if_acmpne},
         // References
         {i_getstatic, 0, "getstatic", 0, getstatic},
         {i_putstatic, 0, "putstatic", 0, putstatic},

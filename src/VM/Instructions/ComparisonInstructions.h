@@ -15,3 +15,4 @@ void if_icmpne(u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread,
 void if_icmplt(u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM);
 void if_icmpgt(u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM);
 void if_icmple(u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM);
+void if_acmpne(u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM);
