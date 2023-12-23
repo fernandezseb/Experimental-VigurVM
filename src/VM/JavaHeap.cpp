@@ -83,13 +83,16 @@ uint32_t JavaHeap::createObject(ClassInfo* classInfo, VM* VM)
         }
     }
 
-
-    const char* superClassName = classInfo->constantPool->getString(classInfo->constantPool->getClassInfo(classInfo->superClass)->nameIndex);
-    if (strcmp(superClassName, "java/lang/Object") != 0)
+    // Check if we are not in java/lang/Object, because that class doesn't have a superClas
+    if (classInfo->superClass != 0)
     {
-        ClassInfo* superClass = getClassByName(superClassName);
-        u4 superClassObject = createObject(superClass, VM);
-        object->superClassObject = superClassObject;
+        const char* superClassName = classInfo->constantPool->getString(classInfo->constantPool->getClassInfo(classInfo->superClass)->nameIndex);
+        if (strcmp(superClassName, "java/lang/Object") != 0)
+        {
+            ClassInfo* superClass = getClassByName(superClassName);
+            u4 superClassObject = createObject(superClass, VM);
+            object->superClassObject = superClassObject;
+        }
     }
 
     objects.push_back(object);

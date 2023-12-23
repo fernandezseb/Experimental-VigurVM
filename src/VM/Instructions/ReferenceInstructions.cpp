@@ -221,13 +221,17 @@ void newInstruction(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* hea
     CPClassInfo* cpClasInfo = topFrame->constantPool->getClassInfo(index);
     ClassInfo* targetClass = VM->getClass(topFrame->constantPool->getString(cpClasInfo->nameIndex), thread);
 
-    const char* superClassName = targetClass->constantPool->getString(
-    targetClass->constantPool->getClassInfo(targetClass->superClass)->nameIndex);
-    while (strcmp(superClassName, "java/lang/Object") != 0)
+    // Check if we are not in java/lang/Object, because that class doesn't have a superClas
+    if (targetClass->superClass != 0)
     {
-        ClassInfo* superClass = VM->getClass(superClassName, thread);
-        superClassName = superClass->constantPool->getString(
-            superClass->constantPool->getClassInfo(superClass->superClass)->nameIndex);
+        const char* superClassName = targetClass->constantPool->getString(
+        targetClass->constantPool->getClassInfo(targetClass->superClass)->nameIndex);
+        while (strcmp(superClassName, "java/lang/Object") != 0)
+        {
+            ClassInfo* superClass = VM->getClass(superClassName, thread);
+            superClassName = superClass->constantPool->getString(
+                superClass->constantPool->getClassInfo(superClass->superClass)->nameIndex);
+        }
     }
 
     const uint32_t reference = heap->createObject(targetClass, VM);
