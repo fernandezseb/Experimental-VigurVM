@@ -11,7 +11,6 @@ typedef nativeImplementation (*nativeDef)();
 
 struct NativeMethod
 {
-public:
     const char* name{};
     const char* descriptor{};
     nativeImplementation impl;
@@ -26,11 +25,11 @@ public:
     DynamicArray<NativeMethod> nativeMethods{200};
 };
 
-extern "C" void registerNative(const char* name,
+CCALL void registerNative(const char* name,
                         const char* descriptor,
                         void (*nativeImplementation)(JavaHeap* heap, VMThread* thread, VM* VM));
 
-extern "C" nativeImplementation findNativeMethod(const char* name,
+CCALL nativeImplementation findNativeMethod(const char* name,
     const char* descriptor);
 
-extern "C" Native native;
+CCALL Native native;

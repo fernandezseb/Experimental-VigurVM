@@ -54,6 +54,9 @@ std::vector<Variable> VM::createVariableForDescriptor(const char* descriptor)
     {
         constexpr Variable variable{VariableType_REFERENCE};
         variables.push_back(variable);
+    } else if (descriptor[0] == 'F') {
+        constexpr Variable variable{VariableType_FLOAT};
+        variables.push_back(variable);
     }
     else
     {
@@ -217,7 +220,7 @@ void VM::runStaticInitializer(ClassInfo* classInfo, VMThread* thread)
     JavaStack oldStack = thread->stack;
     u4 oldPc = thread->pc;
     ClassInfo* oldCurrentClass = thread->currentClass;
-    MethodInfo* oldCurrentMethod = thread->currentMethod;
+    const MethodInfo* oldCurrentMethod = thread->currentMethod;
     StackFrame* oldFrame = thread->currentFrame;
     thread->stack.frames = std::vector<StackFrame>();
     thread->stack.frames.reserve(200);

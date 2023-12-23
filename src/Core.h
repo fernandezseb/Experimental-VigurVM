@@ -11,6 +11,8 @@
 #include <cinttypes>
 #include <cstddef>
 
+#define CCALL extern "C"
+
 // Type strings
 #define T_VOID    "void"
 #define T_BYTE    "byte"

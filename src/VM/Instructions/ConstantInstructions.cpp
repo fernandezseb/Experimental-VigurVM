@@ -75,7 +75,12 @@ void loadConstant(const VMThread* thread, const u4 index, JavaHeap* heap, VM* VM
         const CPIntegerInfo* integerInfo = static_cast<const CPIntegerInfo*>(cpItem);
         const Variable var{VariableType_INT, integerInfo->bytes};
         thread->currentFrame->operands.push_back(var);
-    } else if (cpItem->getType() == CT_STRING)
+    } else if (cpItem->getType() == CT_FLOAT)
+    {
+        const CPFloatInfo* floatInfo = static_cast<const CPFloatInfo*>(cpItem);
+        const Variable var{VariableType_FLOAT, floatInfo->bytes};
+        thread->currentFrame->operands.push_back(var);
+    }else if (cpItem->getType() == CT_STRING)
     {
         const CPStringInfo* stringInfo = static_cast<const CPStringInfo*>(cpItem);
         const char* utf8String = thread->currentClass->constantPool->getString(stringInfo->stringIndex);

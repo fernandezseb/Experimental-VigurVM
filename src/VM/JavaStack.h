@@ -22,7 +22,7 @@ struct StackFrame {
     u4 previousPc{};
 
     ClassInfo* previousClass{};
-    MethodInfo* previousMethod{};
+    const MethodInfo* previousMethod{};
 
     const char* className{};
     const char* methodName{};

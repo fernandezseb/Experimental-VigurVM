@@ -1,6 +1,6 @@
 #include "VMThread.h"
 
-void VMThread::pushStackFrameWithoutParams(ClassInfo* classInfo, MethodInfo* methodInfo)
+void VMThread::pushStackFrameWithoutParams(ClassInfo* classInfo, const MethodInfo* methodInfo)
 {
     StackFrame stackFrame;
     stackFrame.localVariables.reserve(methodInfo->code->maxLocals);
@@ -26,7 +26,7 @@ void VMThread::pushStackFrameWithoutParams(ClassInfo* classInfo, MethodInfo* met
     this->currentFrame = &this->stack.frames[this->stack.frames.size()-1];
 }
 
-void VMThread::pushStackFrameVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame)
+void VMThread::pushStackFrameVirtual(ClassInfo* classInfo, const MethodInfo* methodInfo, StackFrame* previousFrame)
 {
     pushStackFrameWithoutParams(classInfo, methodInfo);
     if (previousFrame != nullptr)
@@ -37,7 +37,7 @@ void VMThread::pushStackFrameVirtual(ClassInfo* classInfo, MethodInfo* methodInf
             this->currentFrame->localVariables[i] = previousFrame->popOperand();
         }
 
-        Variable ref = this->currentFrame->localVariables[0];
+        const Variable ref = this->currentFrame->localVariables[0];
         if (ref.type == VariableType_REFERENCE && ref.data == 0)
         {
             internalError("NullpointerException in virtual call");

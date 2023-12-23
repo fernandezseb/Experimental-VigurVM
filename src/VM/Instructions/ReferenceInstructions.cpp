@@ -136,17 +136,26 @@ void putfield(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMT
 void invokevirtual(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     StackFrame* topFrame = thread->currentFrame;
-    u2 index = readShort(thread);
-    CPMethodRef* methodRef = topFrame->constantPool->getMethodRef(index);
-    CPClassInfo* cpClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
-    CPNameAndTypeInfo* nameAndTypeInfo = topFrame->constantPool->getNameAndTypeInfo(methodRef->nameAndTypeIndex);
+    const u2 index = readShort(thread);
+    const CPMethodRef* methodRef = topFrame->constantPool->getMethodRef(index);
+    const CPClassInfo* cpClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
+    const CPNameAndTypeInfo* nameAndTypeInfo = topFrame->constantPool->getNameAndTypeInfo(methodRef->nameAndTypeIndex);
     const char* methodName = topFrame->constantPool->getString(nameAndTypeInfo->nameIndex);
     const char* methodDescriptor = topFrame->constantPool->getString(nameAndTypeInfo->descriptorIndex);
     const char* className = topFrame->constantPool->getString(cpClassInfo->nameIndex);
     ClassInfo* targetClassInfo = VM->getClass(className, thread);
-    MethodInfo* methodInfo = targetClassInfo->findMethodWithNameAndDescriptor(methodName, methodDescriptor);
-    thread->pushStackFrameVirtual(targetClassInfo, methodInfo, topFrame);
-    printf("> Created new stack frame for virtual call on: %s.%s()\n", className, methodName);
+    const MethodInfo* methodInfo = targetClassInfo->findMethodWithNameAndDescriptor(methodName, methodDescriptor);
+
+    if (methodInfo->isNative())
+    {
+        // TODO: Implement virtual native calls
+        // TODO: In the future we maybe should create a new stackframe for native callS?
+        thread->internalError("Virtual native methods are not supported yet!");
+    } else
+    {
+        thread->pushStackFrameVirtual(targetClassInfo, methodInfo, topFrame);
+        printf("> Created new stack frame for virtual call on: %s.%s()\n", className, methodName);
+    }
 }
 
 void invokespecial(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
