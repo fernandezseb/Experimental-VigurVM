@@ -192,16 +192,15 @@ void VM::executeLoop(VMThread* thread)
             }
         }
 
-        if (found)
+        if (found)[[likely]]
         {
             continue;
-        } else
-        {
+        } else [[unlikely]] {
             printf("\n");
+            char buffer[200];
+            snprintf(buffer, 200, "Unrecognized opcode detected: 0x%0x", opcode);
+            thread->internalError(buffer);
         }
-        char buffer[200];
-        snprintf(buffer, 200, "Unrecognized opcode detected: 0x%0x", opcode);
-        thread->internalError(buffer);
     }
 }
 

@@ -88,11 +88,21 @@ private:
 public:
     JavaHeap();
 
+    /*
+     * Object operations
+     */
     uint32_t createArray(ArrayType type, uint64_t size);
     uint32_t createObject(ClassInfo* classInfo, VM* VM);
+    uint32_t createString(const char* utf8String, VM* VM);
+
     [[nodiscard]] Object* getObject(uint32_t id) const;
-    Object* getChildObject(uint32_t id, ClassInfo* classInfo);
+    [[nodiscard]] Object* getChildObject(uint32_t id, ClassInfo* classInfo);
     [[nodiscard]] Array* getArray(u4 id) const;
+    [[nodiscard]] u4 getString(const char* utf8String) const;
+
+    /*
+     * Class Operations
+     */
     void addClassInfo(ClassInfo* classInfo);
     ClassInfo* getClassByName(const char* className);
 };

@@ -79,17 +79,7 @@ void loadConstant(const VMThread* thread, const u4 index, JavaHeap* heap, VM* VM
     {
         CPStringInfo* stringInfo = (CPStringInfo*) cpItem;
         const char* utf8String = thread->currentClass->constantPool->getString(stringInfo->stringIndex);
-
-        const u4 strObjectId = heap->createObject(heap->getClassByName("java/lang/String"), VM);
-        const Object* strObject = heap->getObject(strObjectId);
-
-        const u4 arrId = heap->createArray(AT_CHAR, strlen(utf8String));
-        const Array* charArray = heap->getArray(arrId);
-        memcpy((char*)charArray->data, utf8String, strlen(utf8String));
-
-        const Variable var{VariableType_REFERENCE, arrId};
-        strObject->fields[0].data[0] = var;
-
+        uint32_t strObjectId =  heap->createString(utf8String, VM);
         const Variable strVar{VariableType_REFERENCE, strObjectId};
         thread->currentFrame->operands.push_back(strVar);
         // TODO: If type is 7, check if a Class reference has already been created,

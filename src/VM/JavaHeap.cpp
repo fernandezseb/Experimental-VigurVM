@@ -96,6 +96,25 @@ uint32_t JavaHeap::createObject(ClassInfo* classInfo, VM* VM)
     return objects.size()-1;
 }
 
+uint32_t JavaHeap::createString(const char* utf8String, VM* VM) {
+    const u4 existingString = getString(utf8String);
+    if (existingString != 0) {
+        return existingString;
+    }
+
+    const u4 strObjectId = createObject(getClassByName("java/lang/String"), VM);
+    const Object* strObject = getObject(strObjectId);
+
+    const u4 arrId = createArray(AT_CHAR, strlen(utf8String));
+    const Array* charArray = getArray(arrId);
+    memcpy((char*)charArray->data, utf8String, strlen(utf8String));
+
+    const Variable var{VariableType_REFERENCE, arrId};
+    strObject->fields[0].data[0] = var;
+
+    return strObjectId;
+}
+
 Object* JavaHeap::getObject(const uint32_t id) const
 {
     if (id == 0)
@@ -151,6 +170,25 @@ Array* JavaHeap::getArray(const uint32_t id) const
         Platform::exitProgram(-22);
     }
     return nullptr;
+}
+
+u4 JavaHeap::getString(const char* utf8String) const
+{
+    for (uint32_t currentObj = 1; currentObj < objects.size(); ++currentObj)
+    {
+        const Reference* ref = objects[currentObj];
+        if (ref->type == ReferenceType::OBJECT) {
+            const Object* obj = static_cast<const Object*>(ref);
+            if (strcmp(obj->classInfo->getName(), "java/lang/String") == 0) {
+                Variable charArrRef =  obj->fields[0].data[0];
+                Array* arr = getArray(charArrRef.data);
+                if (strncmp((const char*)arr->data, utf8String, arr->length) == 0) {
+                    return currentObj;
+                }
+            }
+        }
+    }
+    return 0;
 }
 
 void JavaHeap::addClassInfo(ClassInfo* classInfo)
