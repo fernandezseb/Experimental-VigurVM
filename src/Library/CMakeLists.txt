@@ -7,5 +7,11 @@ add_library(Library
         java/lang/Object.h
         java/lang/Object.cpp
         java/lang/System.h
-        java/lang/System.cpp)
+        java/lang/System.cpp
+        java/io/FileOutputStream.h
+        java/io/FileOutputStream.cpp
+        java/io/FileDescriptor.h
+        java/io/FileDescriptor.cpp
+        sun/misc/Unsafe.h
+        sun/misc/Unsafe.cpp)
 target_include_directories(Library PRIVATE ${PROJECT_SOURCE_DIR}/src/)
