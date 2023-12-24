@@ -6,6 +6,8 @@ add_library(Library
         Vigur/lang/System.cpp
         java/lang/Object.h
         java/lang/Object.cpp
+        java/lang/Class.h
+        java/lang/Class.cpp
         java/lang/System.h
         java/lang/System.cpp
         java/io/FileOutputStream.h

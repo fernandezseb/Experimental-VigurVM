@@ -40,6 +40,8 @@ uint32_t JavaHeap::createArray(ArrayType type, uint64_t size)
 
 uint32_t JavaHeap::createObject(ClassInfo* classInfo, VM* VM)
 {
+    // TODO: Fix undefined behavior with uninitialized memory in object
+    // We are NOT calling the constructor of the object here
     Object* object = (Object*) Platform::allocateMemory(sizeof(Object), 0);
     u2 fieldsCount = 0;
     for (u2 currentField = 0; currentField < classInfo->fieldsCount; ++currentField)
@@ -99,6 +101,72 @@ uint32_t JavaHeap::createObject(ClassInfo* classInfo, VM* VM)
     return objects.size()-1;
 }
 
+// TODO: De-duplicate code from createObject
+uint32_t JavaHeap::createClassObject(ClassInfo* classInfo, VM* VM, ClassInfo* targetClassInfo)
+{
+    // TODO: Fix undefined behavior with uninitialized memory in object
+    // We are NOT calling the constructor of the object here
+    ClassObject* object = (ClassObject*) Platform::allocateMemory(sizeof(ClassObject), 0);
+    u2 fieldsCount = 0;
+    for (u2 currentField = 0; currentField < classInfo->fieldsCount; ++currentField)
+    {
+        FieldInfo* fieldInfo = classInfo->fields[currentField];
+        if (!fieldInfo->isStatic())
+        {
+            ++fieldsCount;
+        }
+    }
+
+    object->classInfo = classInfo;
+    object->type = CLASSOBJECT;
+    object->fields = 0;
+    if (fieldsCount > 0)
+    {
+        object->fields = (FieldData*) Platform::allocateMemory(sizeof(FieldData) * fieldsCount, 0);
+    }
+    object->fieldsCount = fieldsCount;
+    object->superClassObject = 0;
+    object->targetClassInfo = targetClassInfo;
+
+    fieldsCount = 0;
+    for (u2 currentField = 0; currentField < classInfo->fieldsCount; ++currentField)
+    {
+        FieldInfo* fieldInfo = classInfo->fields[currentField];
+        if (!fieldInfo->isStatic())
+        {
+            FieldData data = {};
+            data.descriptorIndex = fieldInfo->descriptorIndex;
+            data.nameIndex = fieldInfo->nameIndex;
+            const char* descriptorText = classInfo->constantPool->getString(fieldInfo->descriptorIndex);
+            std::vector<Variable> vars = VM->createVariableForDescriptor(descriptorText);
+            Variable* varsAllocated = (Variable*) Platform::allocateMemory(sizeof(Variable) * vars.size(), 0);
+            for (u1 currentVar = 0; currentVar < vars.size(); ++currentVar)
+            {
+                varsAllocated[currentVar] = vars[currentVar];
+            }
+            data.dataSize = vars.size();
+            data.data = varsAllocated;
+            object->fields[fieldsCount++] = data;
+        }
+    }
+
+    // Check if we are not in java/lang/Object, because that class doesn't have a superClas
+    if (classInfo->superClass != 0)
+    {
+        const char* superClassName = classInfo->constantPool->getString(classInfo->constantPool->getClassInfo(classInfo->superClass)->nameIndex);
+        if (strcmp(superClassName, "java/lang/Object") != 0)
+        {
+            ClassInfo* superClass = getClassByName(superClassName);
+            u4 superClassObject = createObject(superClass, VM);
+            object->superClassObject = superClassObject;
+        }
+    }
+
+    objects.push_back(object);
+    return objects.size()-1;
+}
+
+
 uint32_t JavaHeap::createString(const char* utf8String, VM* VM) {
     const u4 existingString = getString(utf8String);
     if (existingString != 0) {
@@ -129,10 +197,30 @@ Object* JavaHeap::getObject(const uint32_t id) const
     Reference* ref = objects[id];
     if (ref->type == OBJECT)
     {
-        return (Object*) objects[id];
+        return static_cast<Object*>(objects[id]);
     } else
     {
         fprintf(stderr, "Error: Array instead of Object\n");
+        Platform::exitProgram(-22);
+    }
+    return nullptr;
+}
+
+ClassObject* JavaHeap::getClassObject(uint32_t id) const
+{
+    if (id == 0)
+    {
+        // Nullpointer
+        fprintf(stderr, "Error: Null pointer exception!\n");
+        Platform::exitProgram(-1);
+    }
+    Reference* ref = objects[id];
+    if (ref->type == CLASSOBJECT)
+    {
+        return static_cast<ClassObject*>(objects[id]);
+    } else
+    {
+        fprintf(stderr, "Error: Array or Object instead of ClassObject\n");
         Platform::exitProgram(-22);
     }
     return nullptr;

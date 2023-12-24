@@ -2,6 +2,7 @@
 
 #include "java/io/FileDescriptor.h"
 #include "java/io/FileOutputStream.h"
+#include "java/lang/Class.h"
 #include "java/lang/Object.h"
 #include "java/lang/System.h"
 #include "sun/misc/Unsafe.h"
@@ -11,6 +12,7 @@ void registerBuiltinRegisterNatives()
 {
     // java/lang package
     registerNative("java/lang/Object/registerNatives", "()V", lib_java_lang_Object_registerNatives);
+    registerNative("java/lang/Class/registerNatives", "()V", lib_java_lang_Class_registerNatives);
     registerNative("java/lang/System/registerNatives", "()V", lib_java_lang_System_registerNatives);
     // java/io package
     registerNative("java/io/FileOutputStream/initIDs", "()V", lib_java_io_FileOutputStream_initIDs);

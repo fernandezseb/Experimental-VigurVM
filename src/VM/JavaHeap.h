@@ -11,7 +11,7 @@ class VM;
 class JavaHeap;
 
 enum ReferenceType : char {
-    OBJECT, ARRAY
+    OBJECT, ARRAY, CLASSOBJECT
 };
 
 class Object;
@@ -19,7 +19,6 @@ class Array;
 
 class Reference {
 public:
-    explicit Reference(ReferenceType type) { this->type = type; };
     ReferenceType type;
 
     Array* getArray() {
@@ -55,13 +54,17 @@ public:
 
 class Object : public Reference {
 public:
-    Object() : Reference(OBJECT) {
-    };
-    FieldData* fields;
-    uint16_t fieldsCount;
-    ClassInfo* classInfo;
-    u4 superClassObject;
+    FieldData* fields{nullptr};
+    uint16_t fieldsCount{0};
+    ClassInfo* classInfo{nullptr};
+    u4 superClassObject{0};
     FieldData* getField(const char* name, const char* descriptor, JavaHeap* heap) const;
+};
+
+class ClassObject : public Object
+{
+public:
+    ClassInfo* targetClassInfo{nullptr};
 };
 
 class Array : public Reference {
@@ -93,9 +96,11 @@ public:
      */
     uint32_t createArray(ArrayType type, uint64_t size);
     uint32_t createObject(ClassInfo* classInfo, VM* VM);
+    uint32_t createClassObject(ClassInfo* classInfo, VM* VM, ClassInfo* targetClassInfo);
     uint32_t createString(const char* utf8String, VM* VM);
 
     [[nodiscard]] Object* getObject(uint32_t id) const;
+    [[nodiscard]] ClassObject* getClassObject(uint32_t id) const;
     [[nodiscard]] Object* getChildObject(uint32_t id, ClassInfo* classInfo);
     [[nodiscard]] Array* getArray(u4 id) const;
     [[nodiscard]] u4 getString(const char* utf8String) const;

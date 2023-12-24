@@ -69,27 +69,38 @@ void sipush(u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM
 
 void loadConstant(const VMThread* thread, const u4 index, JavaHeap* heap, VM* VM)
 {
-    const ConstantPoolItem* cpItem = thread->currentFrame->constantPool->constants[index-1];
+    const ConstantPoolItem* cpItem = thread->currentFrame->constantPool->constants[index - 1];
     if (cpItem->getType() == CT_INTEGER)
     {
         const CPIntegerInfo* integerInfo = static_cast<const CPIntegerInfo*>(cpItem);
         const Variable var{VariableType_INT, integerInfo->bytes};
         thread->currentFrame->operands.push_back(var);
-    } else if (cpItem->getType() == CT_FLOAT)
+    }
+    else if (cpItem->getType() == CT_FLOAT)
     {
         const CPFloatInfo* floatInfo = static_cast<const CPFloatInfo*>(cpItem);
         const Variable var{VariableType_FLOAT, floatInfo->bytes};
         thread->currentFrame->operands.push_back(var);
-    }else if (cpItem->getType() == CT_STRING)
+    }
+    else if (cpItem->getType() == CT_STRING)
     {
         const CPStringInfo* stringInfo = static_cast<const CPStringInfo*>(cpItem);
         const char* utf8String = thread->currentClass->constantPool->getString(stringInfo->stringIndex);
-        const uint32_t strObjectId =  heap->createString(utf8String, VM);
+        const uint32_t strObjectId = heap->createString(utf8String, VM);
         const Variable strVar{VariableType_REFERENCE, strObjectId};
         thread->currentFrame->operands.push_back(strVar);
-        // TODO: If type is 7, check if a Class reference has already been created,
-        // TODO: if not, create this object and initialize the fields correctly
-    } else
+    }
+    else if (cpItem->getType() == CT_CLASS)
+    {
+        const CPClassInfo* classInfo = static_cast<const CPClassInfo*>(cpItem);
+        const char* className = thread->currentClass->constantPool->getString(classInfo->nameIndex);
+        ClassInfo* targetClassInfo = VM->getClass(className, const_cast<VMThread*>(thread));
+        const u4 classObjectRef =  heap->createClassObject(heap->getClassByName("java/lang/Class"), VM, targetClassInfo);
+        const ClassObject * classObject = heap->getClassObject(classObjectRef);
+        const Variable classObjectVar{VariableType_REFERENCE, classObjectRef};
+        thread->currentFrame->operands.push_back(classObjectVar);
+    }
+    else
     {
         char buffer[200];
         snprintf(buffer, 200, "LDC not implemented yet for type: %d", cpItem->getType());

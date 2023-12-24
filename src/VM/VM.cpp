@@ -20,6 +20,7 @@ void VM::start()
     getClass("java/lang/OutOfMemoryError", &thread);
     getClass("java/lang/VirtualMachineError", &thread);
     getClass("java/lang/Object", &thread);
+    getClass("java/lang/Class", &thread);
     getClass("java/lang/String", &thread);
     getClass("java/lang/System", &thread);
     getClass("Vigur/lang/System", &thread);
