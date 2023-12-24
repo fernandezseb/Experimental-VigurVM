@@ -1,5 +1,7 @@
 # VigurVM
 
+![Logo of the project, showing a simple drawing inspired by a famous windmill in Vigur, Iceland](Vigur_logo.svg)
+
 A simple java virtual machine made for learning purposes.
 
 
