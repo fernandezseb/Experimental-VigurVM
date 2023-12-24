@@ -69,8 +69,6 @@ public:
 
 class Array : public Reference {
 public:
-    Array() : Reference(ARRAY), arrayType(AT_UNDEFINED), length(0l), data(nullptr) {
-    };
     ArrayType arrayType;
     uint64_t length;
     u1* data;
