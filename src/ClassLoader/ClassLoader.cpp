@@ -199,7 +199,7 @@ ConstantPoolItem* ClassLoader::readConstantPoolItem(uint8_t tag, ByteArray& byte
     default:
     {
         fprintf(stderr, "Error: Unidentified constant pool item detected with tag: %" PRIu8 "\n", tag);
-        Platform::exitProgram(-5);
+        Platform::exitProgram(5);
     }
     }
 
@@ -262,7 +262,7 @@ ClassInfo* ClassLoader::readClass(const char* className, Memory* memory, const c
         if (file == NULL)
         {
             fprintf(stderr, "Class file not found for className: %s\n", className);
-            Platform::exitProgram(-6);
+            Platform::exitProgram(6);
         }
     }
 

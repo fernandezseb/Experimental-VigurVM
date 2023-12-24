@@ -10,7 +10,7 @@ void iload(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThre
 {
     u1 index = args[0];
     Variable var = thread->currentFrame->localVariables[index];
-    VM->checkType(var, VariableType_INT, thread);
+    VM::checkType(var, VariableType_INT, thread);
 
     thread->currentFrame->operands.push_back(var);
 }
@@ -18,7 +18,7 @@ void iload(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThre
 void aload_i(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     Variable var = thread->currentFrame->localVariables[arg];
-    VM->checkType(var, VariableType_REFERENCE, thread);
+    VM::checkType(var, VariableType_REFERENCE, thread);
 
     thread->currentFrame->operands.push_back(var);
 }
@@ -26,7 +26,7 @@ void aload_i(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMTh
 void iload_i(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     Variable var = thread->currentFrame->localVariables[arg];
-    VM->checkType(var, VariableType_INT, thread);
+    VM::checkType(var, VariableType_INT, thread);
 
     thread->currentFrame->operands.push_back(var);
 }

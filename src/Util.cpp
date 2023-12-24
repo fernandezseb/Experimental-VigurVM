@@ -7,7 +7,7 @@ void joinStrings(char** strings, size_t arraySize, const char* delim, size_t buf
 		return;
 	}
 
-	strcpy(buffer, strings[0]);
+	strncpy(buffer, strings[0], bufferSize);
 
 	if (arraySize > 1) {
 		size_t index = 1;
@@ -31,7 +31,6 @@ void modifiedUtf8ToStandardUtf8(char *input, JString *jstring)
 						   ((input[i + 2] & 0x3f) << 10) +
 						   ((input[i + 4] & 0x0f) << 6) +
 						   (input[i + 5] & 0x3f);
-			char fourBytes[5];
 			jstring->chars[currentOut++] = (char)(((codepoint >> 18) & 0x07) | 0xF0);
 			jstring->chars[currentOut++] = (char)(((codepoint >> 12) & 0x3F) | 0x80);
 			jstring->chars[currentOut++] = (char)(((codepoint >> 6) & 0x3F) | 0x80);

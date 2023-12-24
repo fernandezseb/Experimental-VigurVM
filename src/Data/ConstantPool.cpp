@@ -22,6 +22,7 @@ char* ConstantPool::getString(uint16_t index) const
 		char* chars = (char*) utf8item->bytes;
 		return chars;
 	}
+	return nullptr;
 }
 
 CPClassInfo* ConstantPool::getClassInfo(uint16_t index) const
@@ -29,14 +30,16 @@ CPClassInfo* ConstantPool::getClassInfo(uint16_t index) const
 	checkIndex(index);
 
 	ConstantPoolItem* item = this->constants[index - 1];
-	if (item->getType() != CT_CLASS) {
+	if (item->getType() != CT_CLASS) [[unlikely]] {
 		fprintf(stderr, "Error: Trying to read class info at non class info item in constant pool at: #%" PRIu16 "\n", index);
 		Platform::exitProgram(1);
 	}
-	else {
+	else [[likely]] {
 		CPClassInfo* cpClassInfo = (CPClassInfo*)item;
 		return cpClassInfo;
 	}
+
+	return nullptr;
 }
 
 CPMethodRef* ConstantPool::getMethodRef(u2 index) const
@@ -52,6 +55,7 @@ CPMethodRef* ConstantPool::getMethodRef(u2 index) const
 		CPMethodRef* cpMethodRef = (CPMethodRef*)item;
 		return cpMethodRef;
 	}
+	return nullptr;
 }
 
 CPNameAndTypeInfo* ConstantPool::getNameAndTypeInfo(u2 index) const
@@ -67,6 +71,7 @@ CPNameAndTypeInfo* ConstantPool::getNameAndTypeInfo(u2 index) const
 		CPNameAndTypeInfo* cpNameAndType = (CPNameAndTypeInfo*)item;
 		return cpNameAndType;
 	}
+	return nullptr;
 }
 
 CPFieldRef* ConstantPool::getFieldRef(uint16_t index) const
@@ -82,4 +87,5 @@ CPFieldRef* ConstantPool::getFieldRef(uint16_t index) const
 		CPFieldRef* cpFieldRef = (CPFieldRef*)item;
 		return cpFieldRef;
 	}
+	return nullptr;
 }

@@ -62,7 +62,7 @@ std::vector<Variable> VM::createVariableForDescriptor(const char* descriptor)
     else
     {
         fprintf(stderr, "Error: Couldn't construct data for descriptor type: %s\n", descriptor);
-        Platform::exitProgram(-7);
+        Platform::exitProgram(7);
     }
     return variables;
 }
@@ -104,7 +104,7 @@ void VM::initStaticFields(ClassInfo* class_info, VMThread* thread)
             for (Variable variable : variables) {
                 class_info->staticFields[currentStaticField++] = variable;
             }
-            const i4 index = currentStaticField-variables.size();
+            const i4 index = static_cast<i4>(currentStaticField)-variables.size();
             if (index > staticFieldsCount-1 || index < 0)
             {
                 thread->internalError("Going outside of index!");
@@ -159,6 +159,7 @@ static u1 readByte(VMThread* thread)
     return thread->currentMethod->code->code[thread->pc++];
 }
 
+[[maybe_unused]]
 static u2 readShort(VMThread* thread)
 {
     uint8_t indexByte1 = thread->currentMethod->code->code[thread->pc++];
@@ -244,7 +245,7 @@ ClassInfo* VM::getClass(const char* className, VMThread* thread)
     if (classInfo == NULL) {
         Memory *memory = new Memory(MIB(1), MIB(30));
         printf("Loading class %s...\n", className);
-        ClassInfo *classInfo = bootstrapClassLoader.readClass(className, memory, configuration.classPath);
+        classInfo = bootstrapClassLoader.readClass(className, memory, configuration.classPath);
         initStaticFields(classInfo, thread);
         heap.addClassInfo(classInfo);
         runStaticInitializer(classInfo, thread);
@@ -259,7 +260,7 @@ void VM::runMain(const char* className)
     if (className == 0)
     {
         fprintf(stderr, "Error: Class name of starting class not defined..\n");
-        Platform::exitProgram(-6);
+        Platform::exitProgram(6);
     }
 
     Memory memory(1000, KIB(5));
@@ -269,7 +270,7 @@ void VM::runMain(const char* className)
     if (entryPoint == 0)
     {
         fprintf(stderr, "Error: Entry point not found. Exiting...\n");
-        Platform::exitProgram(-6);
+        Platform::exitProgram(6);
     }
 
     mainThread->pc = 0;
@@ -282,7 +283,7 @@ void VM::runMain(const char* className)
 
     printf("> Executing main method...\n");
     executeLoop(mainThread);
-    Object* object = heap.getObject(3);
+    // Object* object = heap.getObject(3);
     printf("> Done executing\n");
 }
 
@@ -291,7 +292,7 @@ void VM::shutdown()
     Platform::cleanup();
 }
 
-void VM::checkType(Variable var, VariableType type, VMThread* thread)
+void VM::checkType(const Variable var, const VariableType type, const VMThread* thread)
 {
     if (var.type != type)
     {

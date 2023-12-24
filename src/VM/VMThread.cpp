@@ -50,13 +50,13 @@ void VMThread::internalError(const char* error) const
     fprintf(stdout, "Unhandled VM error in thread \"%s\": %s\n", name, error);
     if (!stack.frames.empty())
     {
-        for (i4 currentFrame = stack.frames.size() - 1; currentFrame >= 0; --currentFrame)
+        for (i8 currentFrame = stack.frames.size() - 1; currentFrame >= 0; --currentFrame)
         {
             const StackFrame frame = stack.frames[currentFrame];
             printf("    at %s.%s\n", frame.className, frame.methodName);
         }
     }
-    Platform::exitProgram(-6);
+    Platform::exitProgram(6);
 }
 
 void VMThread::pushStackFrameStatic(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame)

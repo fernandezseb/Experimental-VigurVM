@@ -32,7 +32,7 @@ struct StackFrame {
         if (operands.empty())
         {
             fprintf(stderr, "Error: No operands on stack found!\n");
-            Platform::exitProgram(-78);
+            Platform::exitProgram(78);
         }
         Variable var = operands.back();
         operands.pop_back();

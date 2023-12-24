@@ -163,7 +163,7 @@ uint32_t JavaHeap::createClassObject(ClassInfo* classInfo, VM* VM, ClassInfo* ta
     }
 
     objects.push_back(object);
-    return objects.size()-1;
+    return static_cast<u4>(objects.size()-1);
 }
 
 
@@ -192,7 +192,7 @@ Object* JavaHeap::getObject(const uint32_t id) const
     {
         // Nullpointer
         fprintf(stderr, "Error: Null pointer exception!\n");
-        Platform::exitProgram(-1);
+        Platform::exitProgram(1);
     }
     Reference* ref = objects[id];
     if (ref->type == OBJECT)
@@ -201,7 +201,7 @@ Object* JavaHeap::getObject(const uint32_t id) const
     } else
     {
         fprintf(stderr, "Error: Array instead of Object\n");
-        Platform::exitProgram(-22);
+        Platform::exitProgram(22);
     }
     return nullptr;
 }
@@ -212,7 +212,7 @@ ClassObject* JavaHeap::getClassObject(uint32_t id) const
     {
         // Nullpointer
         fprintf(stderr, "Error: Null pointer exception!\n");
-        Platform::exitProgram(-1);
+        Platform::exitProgram(1);
     }
     Reference* ref = objects[id];
     if (ref->type == CLASSOBJECT)
@@ -221,7 +221,7 @@ ClassObject* JavaHeap::getClassObject(uint32_t id) const
     } else
     {
         fprintf(stderr, "Error: Array or Object instead of ClassObject\n");
-        Platform::exitProgram(-22);
+        Platform::exitProgram(22);
     }
     return nullptr;
 }
@@ -237,7 +237,7 @@ Object* JavaHeap::getChildObject(uint32_t id, ClassInfo* classInfo)
         } else
         {
             fprintf(stderr, "Error: Object not found at reference with class: %s\n", classInfo->getName());
-            Platform::exitProgram(-22);
+            Platform::exitProgram(22);
         }
     }
     return o;
@@ -249,7 +249,7 @@ Array* JavaHeap::getArray(const uint32_t id) const
     {
         // Nullpointer
         fprintf(stderr, "Error: Null pointer exception!");
-        Platform::exitProgram(-1);
+        Platform::exitProgram(1);
     }
     Reference* ref = objects[id];
     if (ref->type == ARRAY)
@@ -258,7 +258,7 @@ Array* JavaHeap::getArray(const uint32_t id) const
     } else
     {
         fprintf(stderr, "Error: Array instead of Object");
-        Platform::exitProgram(-22);
+        Platform::exitProgram(22);
     }
     return nullptr;
 }
@@ -320,6 +320,6 @@ FieldData* Object::getField(const char* name, const char* descriptor, JavaHeap* 
         return heap->getObject(superClassObject)->getField(name, descriptor, heap);
     }
     fprintf(stderr, "Error: Field not resolved!");
-    Platform::exitProgram(-23);
+    Platform::exitProgram(23);
     return nullptr;
 }

@@ -75,7 +75,7 @@ StackMapTableAttribute* AttributeParser::readStackMapTable(ByteArray& byteArray,
 			frame->frameType = AppendFrameType;
 			uint16_t offsetDelta = byteArray.readUnsignedShort();
 			frame->offsetDelta = offsetDelta;
-			uint16_t numberOfLocals = frameType - 251;
+			u1 numberOfLocals = frameType - 251;
 			frame->numberOfLocals = numberOfLocals;
 			frame->locals = (VerificationTypeInfo*)memory->alloc(sizeof(VerificationTypeInfo) * numberOfLocals);
 			for (uint16_t currentLocal = 0; currentLocal < numberOfLocals; ++currentLocal) {
@@ -141,7 +141,7 @@ ExceptionTableEntry* AttributeParser::readExceptionTable(ByteArray& byteArray, u
 
 	if (exceptionTableLength > 0)
 	{
-		ExceptionTableEntry* table = (ExceptionTableEntry*)
+		table = (ExceptionTableEntry*)
 			memory->alloc(sizeof(ExceptionTableEntry) * exceptionTableLength);
 		*size = exceptionTableLength;
 

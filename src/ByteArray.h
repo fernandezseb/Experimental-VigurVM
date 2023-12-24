@@ -8,7 +8,7 @@ private:
 	uint64_t size = 0;
 	bool allocated = false;
 public:
-	uint8_t* bytes = 0;
+	uint8_t* bytes = nullptr;
 
 	ByteArray(uint8_t* bytes, uint64_t size);
 	

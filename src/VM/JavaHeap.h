@@ -27,7 +27,7 @@ public:
         }
         else {
             fprintf(stderr, "Error: Reference is not of type 'Array'");
-            Platform::exitProgram(-23);
+            Platform::exitProgram(23);
         }
         return nullptr;
     };
@@ -38,7 +38,7 @@ public:
         }
         else {
             fprintf(stderr, "Error: Reference is not of type 'Object'");
-            Platform::exitProgram(-23);
+            Platform::exitProgram(23);
         }
         return nullptr;
     };
@@ -69,8 +69,6 @@ public:
 
 class Array : public Reference {
 public:
-    Array() : Reference(ARRAY), arrayType(AT_UNDEFINED), length(0l), data(nullptr) {
-    };
     ArrayType arrayType;
     uint64_t length;
     u1* data;
