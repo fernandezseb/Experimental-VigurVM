@@ -20,7 +20,7 @@ private:
 	FieldInfo** readFields(ByteArray& byteArray, ConstantPool* constantPool, uint16_t fieldsCount);
 	MethodInfo** readMethods(ByteArray& byteArray, ConstantPool* constantPool, uint16_t methodCount);
 	ClassInfo* readClass(ByteArray& byteArray);
-	Memory* memory;
+	Memory* memory{nullptr};
 public:
 	ClassInfo* readClass(const char* className, Memory* memory);
 };

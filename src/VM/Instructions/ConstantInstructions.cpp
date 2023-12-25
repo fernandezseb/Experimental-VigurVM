@@ -15,7 +15,7 @@ void aconst_null(u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* threa
     thread->currentFrame->operands.push_back(reference);
 }
 
-void iconst_i(u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void iconst_i(u1* args, u2 argsCount, const i1 arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     const Variable variable{VariableType_INT,
         std::bit_cast<u4>(static_cast<int32_t>(arg))};

@@ -6,8 +6,6 @@
 #include "VMThread.h"
 
 typedef void (*nativeImplementation)(JavaHeap* heap, VMThread* thread, VM* VM);
-typedef nativeImplementation (*nativeDef)();
-
 
 struct NativeMethod
 {

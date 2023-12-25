@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
 
             ClassLoader classLoader;
             ClassPrinter classPrinter;
-            ClassInfo* classInfo = classLoader.readClass(className, &memory);
+            const ClassInfo* classInfo = classLoader.readClass(className, &memory);
             classPrinter.printClass(*classInfo, &memory);
 #ifndef NDEBUG
             memory.printSize();
