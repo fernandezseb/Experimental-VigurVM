@@ -5,60 +5,54 @@
 
 void istore(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
-    Variable refVar = thread->currentFrame->popOperand();
-    u1 index = args[0];
-    Variable* var =  &thread->currentFrame->localVariables[index];
-    var->data = refVar.data;
-    var->type = refVar.type;
+    const Variable refVar = thread->currentFrame->popOperand();
+    const u1 index = args[0];
+    thread->currentFrame->localVariables[index] = refVar;
 }
 
 void astore(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
-    Variable refVar = thread->currentFrame->popOperand();
-    u1 index = args[0];
-    Variable* var =  &thread->currentFrame->localVariables[index];
-    var->data = refVar.data;
-    var->type = refVar.type;
+    const Variable refVar = thread->currentFrame->popOperand();
+    const u1 index = args[0];
+    thread->currentFrame->localVariables[index] = refVar;
 }
 
 void istore_i(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
-    // TODO: Check types
-    Variable refVar = thread->currentFrame->popOperand();
-    Variable* var =  &thread->currentFrame->localVariables[arg];
-    var->data = refVar.data;
-    var->type = refVar.type;
+    const Variable refVar = thread->currentFrame->popOperand();
+    VM::checkType(refVar, VariableType_INT, thread);
+    thread->currentFrame->localVariables[arg] = refVar;
 }
 
 void astore_i(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
-    Variable refVar = thread->currentFrame->popOperand();
-    Variable* var =  &thread->currentFrame->localVariables[arg];
-    var->data = refVar.data;
-    var->type = refVar.type;
+    const Variable refVar = thread->currentFrame->popOperand();
+    thread->currentFrame->localVariables[arg] = refVar;
 }
 
 void iastore(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     Variable value = thread->currentFrame->popOperand();
-    Variable index = thread->currentFrame->popOperand();
-    Variable arrayref = thread->currentFrame->popOperand();
+    const Variable index = thread->currentFrame->popOperand();
+    const Variable arrayref = thread->currentFrame->popOperand();
 
-    Array* array = heap->getArray(arrayref.data);
-    i4* intArray = (i4*) array->data;
-    intArray[index.data] = (i4) value.data;
+    const Array* array = heap->getArray(arrayref.data);
+    i4* intArray = reinterpret_cast<i4*>(array->data);
+    intArray[index.data] = *reinterpret_cast<i4*>(&value.data);
 }
 
 void aastore(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     StackFrame* currentFrame = thread->currentFrame;
-    Variable value = currentFrame->popOperand();
+    const Variable value = currentFrame->popOperand();
+    const Variable index = currentFrame->popOperand();
+    const Variable arrayRef = currentFrame->popOperand();
+
     VM::checkType(value, VariableType_REFERENCE, thread);
-    Variable index = currentFrame->popOperand();
     VM::checkType(index, VariableType_INT, thread);
-    Variable arrayRef = currentFrame->popOperand();
     VM::checkType(arrayRef, VariableType_REFERENCE, thread);
-    Array* arrayArr = heap->getArray(arrayRef.data);
+
+    const Array* arrayArr = heap->getArray(arrayRef.data);
 
     if (arrayArr->arrayType != AT_REFERENCE)
     {
@@ -71,10 +65,11 @@ void aastore(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMTh
 
 void castore(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
-    Variable value = thread->currentFrame->popOperand();
-    Variable index = thread->currentFrame->popOperand();
-    Variable arrayref = thread->currentFrame->popOperand();
+    StackFrame* currentFrame = thread->currentFrame;
+    const Variable value = currentFrame->popOperand();
+    const Variable index = currentFrame->popOperand();
+    const Variable arrayref = currentFrame->popOperand();
 
-    Array* array = heap->getArray(arrayref.data);
+    const Array* array = heap->getArray(arrayref.data);
     array->data[index.data] = value.data;
 }
