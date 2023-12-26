@@ -3,34 +3,34 @@
 #include "VM/VM.h"
 #include "Data/Variable.h"
 
-void istore(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void istore(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     const Variable refVar = thread->currentFrame->popOperand();
     const u1 index = args[0];
     thread->currentFrame->localVariables[index] = refVar;
 }
 
-void astore(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void astore(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     const Variable refVar = thread->currentFrame->popOperand();
     const u1 index = args[0];
     thread->currentFrame->localVariables[index] = refVar;
 }
 
-void istore_i(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void istore_i(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     const Variable refVar = thread->currentFrame->popOperand();
     VM::checkType(refVar, VariableType_INT, thread);
     thread->currentFrame->localVariables[arg] = refVar;
 }
 
-void astore_i(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void astore_i(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     const Variable refVar = thread->currentFrame->popOperand();
     thread->currentFrame->localVariables[arg] = refVar;
 }
 
-void iastore(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void iastore(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     Variable value = thread->currentFrame->popOperand();
     const Variable index = thread->currentFrame->popOperand();
@@ -41,7 +41,7 @@ void iastore(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMTh
     intArray[index.data] = *reinterpret_cast<i4*>(&value.data);
 }
 
-void aastore(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void aastore(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     StackFrame* currentFrame = thread->currentFrame;
     const Variable value = currentFrame->popOperand();
@@ -63,7 +63,7 @@ void aastore(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMTh
     arrData[index.data] = value.data;
 }
 
-void castore(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void castore(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     StackFrame* currentFrame = thread->currentFrame;
     const Variable value = currentFrame->popOperand();

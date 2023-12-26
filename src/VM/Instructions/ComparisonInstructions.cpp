@@ -3,7 +3,7 @@
 #include "VM/VM.h"
 #include "Data/Variable.h"
 
-void ifeq(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void ifeq(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     u1 byte1 = args[0];
     u1 byte2 = args[1];
@@ -18,7 +18,7 @@ void ifeq(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThrea
     }
 }
 
-void ifne(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void ifne(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     u1 byte1 = args[0];
     u1 byte2 = args[1];
@@ -34,7 +34,7 @@ void ifne(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThrea
     }
 }
 
-void ifge(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void ifge(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     u1 byte1 = args[0];
     u1 byte2 = args[1];
@@ -50,7 +50,7 @@ void ifge(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThrea
     }
 }
 
-void ifgt(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void ifgt(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     u1 byte1 = args[0];
     u1 byte2 = args[1];
@@ -66,7 +66,7 @@ void ifgt(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThrea
     }
 }
 
-void ifle(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void ifle(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     u1 byte1 = args[0];
     u1 byte2 = args[1];
@@ -82,7 +82,7 @@ void ifle(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThrea
     }
 }
 
-void if_icmpne(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void if_icmpne(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     u1 byte1 = args[0];
     u1 byte2 = args[1];
@@ -98,7 +98,7 @@ void if_icmpne(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VM
     }
 }
 
-void if_icmplt(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void if_icmplt(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     u1 byte1 = args[0];
     u1 byte2 = args[1];
@@ -114,7 +114,7 @@ void if_icmplt(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VM
     }
 }
 
-void if_icmpgt(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void if_icmpgt(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     u1 byte1 = args[0];
     u1 byte2 = args[1];
@@ -130,7 +130,7 @@ void if_icmpgt(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VM
     }
 }
 
-void if_icmple(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void if_icmple(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     u1 byte1 = args[0];
     u1 byte2 = args[1];
@@ -146,7 +146,7 @@ void if_icmple(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VM
     }
 }
 
-void if_acmpne(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void if_acmpne(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     u1 byte1 = args[0];
     u1 byte2 = args[1];

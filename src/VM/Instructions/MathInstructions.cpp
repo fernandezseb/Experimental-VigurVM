@@ -5,7 +5,7 @@
 #include "VM/VM.h"
 #include "Data/Variable.h"
 
-void iadd(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void iadd(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     // TODO: Check types and convert to int correctly
     const Variable var1 = thread->currentFrame->popOperand();
@@ -16,7 +16,7 @@ void iadd(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThrea
     thread->internalError("test exception");
 }
 
-void isub(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void isub(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     // TODO: Check types and convert to int correctly
     const Variable var2 = thread->currentFrame->popOperand();
@@ -26,7 +26,7 @@ void isub(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThrea
     thread->currentFrame->operands.push_back(added);
 }
 
-void imul(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void imul(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     const Variable var2 = thread->currentFrame->popOperand();
     const Variable var1 = thread->currentFrame->popOperand();
@@ -35,7 +35,7 @@ void imul(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThrea
     thread->currentFrame->operands.push_back(added);
 }
 
-void ishl(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void ishl(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     Variable value2 = thread->currentFrame->popOperand();
     Variable value1 = thread->currentFrame->popOperand();
@@ -48,7 +48,7 @@ void ishl(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThrea
     thread->currentFrame->operands.push_back(result);
 }
 
-void iushr(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void iushr(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     Variable value2 = thread->currentFrame->popOperand();
     Variable value1 = thread->currentFrame->popOperand();
@@ -66,7 +66,7 @@ void iushr(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThre
     thread->currentFrame->operands.push_back(result);
 }
 
-void iinc(uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void iinc(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
 {
     u1 index = args[0];
     i1* argsArr = ((i1*)args);
