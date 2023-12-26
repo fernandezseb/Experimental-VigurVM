@@ -25,8 +25,8 @@ enum ArrayType : char {
     AT_LONG = 11, // 2 are needed for this
     AT_DOUBLE = 7,
     AT_FLOAT = 6,
-    AT_REFERENCE,
-    AT_UNDEFINED,
+    AT_REFERENCE = 1,
+    AT_UNDEFINED = -1,
     AT_END
 };
 
