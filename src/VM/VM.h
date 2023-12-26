@@ -34,7 +34,7 @@ struct Instruction
 
 class VM {
 private:
-    Instruction instructions[80] =
+    Instruction instructions[81] =
     {
         // Constants
         {i_nop, 0, "nop", 0, nop},
@@ -82,6 +82,7 @@ private:
         {i_astore_2, 0, "astore_2", 2, astore_i},
         {i_astore_3, 0, "astore_3", 3, astore_i},
         {i_iastore, 0, "iastore", 0, iastore},
+        {i_aastore, 0, "aastore", 0, aastore},
         {i_castore, 0, "castore", 0, castore},
         // Stack
         {i_pop, 0, "pop", 0, pop},
