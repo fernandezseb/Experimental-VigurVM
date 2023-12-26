@@ -20,5 +20,5 @@ void registerBuiltinRegisterNatives()
     // sun/misc
     registerNative("sun/misc/Unsafe/registerNatives", "()V", lib_sun_misc_Unsafe_registerNatives);
     // Vigur/lang package
-    registerNative("Vigur/lang/System/registerNatives", "()V", lib_Vigur_lang_System_registerNatives);
+    // registerNative("Vigur/lang/System/registerNatives", "()V", lib_Vigur_lang_System_registerNatives);
 }

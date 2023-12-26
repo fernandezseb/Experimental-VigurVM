@@ -2,8 +2,6 @@ add_library(Library
         NativeDefs.h
         Builtin.h
         Builtin.cpp
-        Vigur/lang/System.h
-        Vigur/lang/System.cpp
         java/lang/Object.h
         java/lang/Object.cpp
         java/lang/Class.h

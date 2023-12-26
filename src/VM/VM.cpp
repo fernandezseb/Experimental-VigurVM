@@ -23,7 +23,7 @@ void VM::start()
     getClass("java/lang/Class", &thread);
     getClass("java/lang/String", &thread);
     getClass("java/lang/System", &thread);
-    getClass("Vigur/lang/System", &thread);
+    // getClass("Vigur/lang/System", &thread);
 }
 
 std::vector<Variable> VM::createVariableForDescriptor(const char* descriptor)
