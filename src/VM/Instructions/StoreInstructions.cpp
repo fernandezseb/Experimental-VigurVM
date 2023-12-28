@@ -1,5 +1,6 @@
 #include "StoreInstructions.h"
 
+#include "Util.h"
 #include "VM/VM.h"
 #include "Data/Variable.h"
 
@@ -71,5 +72,5 @@ void castore(INSTRUCTION_ARGS)
     const Variable arrayref = currentFrame->popOperand();
 
     const Array* array = heap->getArray(arrayref.data);
-    array->data[index.data] = value.data;
+    array->data[index.data] = castToU1<u4>(value.data);
 }

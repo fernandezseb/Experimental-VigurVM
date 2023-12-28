@@ -4,6 +4,8 @@
 #include "Data/Variable.h"
 #include "VM/Native.h"
 
+#include <bit>
+
 static u2 readShort(VMThread* thread)
 {
     uint8_t indexByte1 = thread->currentMethod->code->code[thread->pc++];
@@ -267,11 +269,11 @@ void newarray(INSTRUCTION_ARGS)
 void anewarray(INSTRUCTION_ARGS)
 {
     StackFrame* topFrame = thread->currentFrame;
-    uint16_t index = readShort(thread);
-    CPClassInfo* cpclassInfo = topFrame->constantPool->getClassInfo(index);
+    // uint16_t index = readShort(thread);
+    // CPClassInfo* cpclassInfo = topFrame->constantPool->getClassInfo(index);
     //ClassInfo* classInfo = VM->getClass(topFrame->constantPool->getString(cpclassInfo->nameIndex), thread);
 
-    int32_t size = topFrame->popOperand().data;
+    int32_t size = std::bit_cast<i4>(topFrame->popOperand().data);
 
     if (size < 0)
     {

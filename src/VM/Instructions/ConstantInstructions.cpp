@@ -5,6 +5,8 @@
 
 #include <bit>
 
+#include "Util.h"
+
 void nop(INSTRUCTION_ARGS)
 {
 }
@@ -41,8 +43,8 @@ void fconst_i(INSTRUCTION_ARGS)
 void dconst_i(INSTRUCTION_ARGS)
 {
     const double d = arg;
-    const u4 lowBytes =  *((u8*)(&d));
-    const u4 highBytes = (*((u8*)(&(d))) >> 32);
+    const u4 lowBytes =  castToU4(*std::bit_cast<u8*>(&d));
+    const u4 highBytes = (*(std::bit_cast<u8*>)(&(d)) >> 32);
 
     // /uint64_t bytes = ((uint64_t)highBytes << 32) + (uint64_t)lowBytes;
     // The value is double back = *reinterpret_cast<double*> (&bytes);

@@ -6,7 +6,7 @@ char* DescriptorParser::getArgsPart(char* descriptor, uint16_t* length)
 	char* openBracket = descriptor + 1;
 	char* closeBracket = strchr(descriptor, ')');
 
-	*length = closeBracket - openBracket;
+	*length = castToU2<std::size_t>(closeBracket - openBracket);
 
 	return openBracket;
 }
@@ -14,7 +14,7 @@ char* DescriptorParser::getArgsPart(char* descriptor, uint16_t* length)
 char* DescriptorParser::getReturnPart(char* descriptor, uint16_t* length)
 {
 	char* closeBracket = strchr(descriptor, ')');
-	*length = (descriptor + (strlen(descriptor)-1)) - closeBracket;
+	*length = castToU2<std::size_t>((descriptor + (strlen(descriptor)-1)) - closeBracket);
 	return  closeBracket+1;
 }
 
@@ -69,7 +69,7 @@ char** DescriptorParser::getTypes(char* descriptorPart, uint16_t partLength, uin
 			parts[*size] = classStr;
 
 			arrayCount = 0;
-			i += classLength;
+			i += castToU2<std::size_t>(classLength);
 			(*size)++;
 		}
 		else if (c == '[') {

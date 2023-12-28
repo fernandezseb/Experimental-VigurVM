@@ -1,5 +1,6 @@
 #include "JavaHeap.h"
 
+#include "Util.h"
 #include "VM.h"
 
 JavaHeap::JavaHeap()
@@ -35,7 +36,7 @@ uint32_t JavaHeap::createArray(ArrayType type, uint64_t size)
     }
 
     objects.push_back(array);
-    return objects.size()-1;
+    return castToU4<std::size_t>(objects.size()-1);
 }
 
 uint32_t JavaHeap::createObject(ClassInfo* classInfo, VM* VM)

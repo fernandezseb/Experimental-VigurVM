@@ -129,7 +129,7 @@ char* Platform::getFullPath(PlatformFile* file, char* charOut)
 
 uint8_t* Platform::readEntireFile(PlatformFile* file, size_t* sizeOut)
 {
-	uint64_t size = GetFileSize(file->hFile, 0);
+	const DWORD size = GetFileSize(file->hFile, nullptr);
 
 	*sizeOut = size;
 
