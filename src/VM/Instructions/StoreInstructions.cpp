@@ -3,34 +3,34 @@
 #include "VM/VM.h"
 #include "Data/Variable.h"
 
-void istore(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void istore(INSTRUCTION_ARGS)
 {
     const Variable refVar = thread->currentFrame->popOperand();
     const u1 index = args[0];
     thread->currentFrame->localVariables[index] = refVar;
 }
 
-void astore(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void astore(INSTRUCTION_ARGS)
 {
     const Variable refVar = thread->currentFrame->popOperand();
     const u1 index = args[0];
     thread->currentFrame->localVariables[index] = refVar;
 }
 
-void istore_i(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void istore_i(INSTRUCTION_ARGS)
 {
     const Variable refVar = thread->currentFrame->popOperand();
     VM::checkType(refVar, VariableType_INT, thread);
     thread->currentFrame->localVariables[arg] = refVar;
 }
 
-void astore_i(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void astore_i(INSTRUCTION_ARGS)
 {
     const Variable refVar = thread->currentFrame->popOperand();
     thread->currentFrame->localVariables[arg] = refVar;
 }
 
-void iastore(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void iastore(INSTRUCTION_ARGS)
 {
     Variable value = thread->currentFrame->popOperand();
     const Variable index = thread->currentFrame->popOperand();
@@ -41,7 +41,7 @@ void iastore(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap
     intArray[index.data] = *reinterpret_cast<i4*>(&value.data);
 }
 
-void aastore(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void aastore(INSTRUCTION_ARGS)
 {
     StackFrame* currentFrame = thread->currentFrame;
     const Variable value = currentFrame->popOperand();
@@ -63,7 +63,7 @@ void aastore(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap
     arrData[index.data] = value.data;
 }
 
-void castore(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void castore(INSTRUCTION_ARGS)
 {
     StackFrame* currentFrame = thread->currentFrame;
     const Variable value = currentFrame->popOperand();

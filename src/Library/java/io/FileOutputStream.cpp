@@ -1,6 +1,6 @@
 #include "FileOutputStream.h"
 
-void lib_java_io_FileOutputStream_initIDs([[maybe_unused]] JavaHeap* heap, [[maybe_unused]] VMThread* thread, [[maybe_unused]] VM* VM)
+void lib_java_io_FileOutputStream_initIDs(NATIVE_ARGS)
 {
     printf("[Running initIDs from FileOutputStream]\n");
 }

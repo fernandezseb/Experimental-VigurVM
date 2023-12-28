@@ -49,3 +49,11 @@ struct JString
     uint64_t length;
     char* chars;
 };
+
+#define INSTRUCTION_ARGS \
+    [[maybe_unused]] const u1* args, \
+    [[maybe_unused]] u2 argsCount, \
+    [[maybe_unused]] i1 arg, \
+    [[maybe_unused]] JavaHeap* heap, \
+    [[maybe_unused]] VMThread* thread, \
+    [[maybe_unused]] VM* VM

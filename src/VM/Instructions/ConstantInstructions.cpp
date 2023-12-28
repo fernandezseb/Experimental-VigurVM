@@ -5,24 +5,24 @@
 
 #include <bit>
 
-void nop(const u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void nop(INSTRUCTION_ARGS)
 {
 }
 
-void aconst_null(const u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void aconst_null(INSTRUCTION_ARGS)
 {
     constexpr Variable reference{VariableType_REFERENCE};
     thread->currentFrame->operands.push_back(reference);
 }
 
-void iconst_i(const u1* args, u2 argsCount, const i1 arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void iconst_i(INSTRUCTION_ARGS)
 {
     const Variable variable{VariableType_INT,
         std::bit_cast<u4>(static_cast<int32_t>(arg))};
     thread->currentFrame->operands.push_back(variable);
 }
 
-void lconst_i(const u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void lconst_i(INSTRUCTION_ARGS)
 {
     constexpr Variable variableHigh{VariableType_LONG};
     const Variable variableLow{VariableType_LONG,
@@ -31,14 +31,14 @@ void lconst_i(const u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* th
     thread->currentFrame->operands.push_back(variableLow);
 }
 
-void fconst_i(const u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void fconst_i(INSTRUCTION_ARGS)
 {
     const float f = arg;
     const Variable variable{VariableType_FLOAT, std::bit_cast<u4>(f)};
     thread->currentFrame->operands.push_back(variable);
 }
 
-void dconst_i(const u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void dconst_i(INSTRUCTION_ARGS)
 {
     const double d = arg;
     const u4 lowBytes =  *((u8*)(&d));
@@ -52,14 +52,14 @@ void dconst_i(const u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* th
     thread->currentFrame->operands.push_back(variableLow);
 }
 
-void bipush(const u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void bipush(INSTRUCTION_ARGS)
 {
     const uint8_t byte = args[0];
     const Variable variable{VariableType_INT, byte};
     thread->currentFrame->operands.push_back(variable);
 }
 
-void sipush(const u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void sipush(INSTRUCTION_ARGS)
 {
     const i2 shortValue = (args[0] << 8) | args[1];
     const i4 intValue = shortValue;
@@ -130,19 +130,19 @@ void loadConstant2(const VMThread* thread, const u4 index)
     }
 }
 
-void ldc(const u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void ldc(INSTRUCTION_ARGS)
 {
     const u1 index = args[0];
     loadConstant(thread, index, heap, VM);
 }
 
-void ldc_w(const u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void ldc_w(INSTRUCTION_ARGS)
 {
     const u2 index = (args[0] << 8) | args[1];
     loadConstant(thread, index, heap, VM);
 }
 
-void ldc2_w(const u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void ldc2_w(INSTRUCTION_ARGS)
 {
     const u2 index = (args[0] << 8) | args[1];
     loadConstant2(thread, index);

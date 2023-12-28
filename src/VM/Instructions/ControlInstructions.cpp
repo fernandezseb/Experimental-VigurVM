@@ -3,7 +3,7 @@
 #include "VM/VM.h"
 #include "Data/Variable.h"
 
-void gotoInstruction(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void gotoInstruction(INSTRUCTION_ARGS)
 {
     u1 byte1 = args[0];
     u1 byte2 = args[1];
@@ -13,7 +13,7 @@ void gotoInstruction(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHe
     thread->pc = thread->pc-3+branchByte;
 }
 
-void ireturnInstruction(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void ireturnInstruction(INSTRUCTION_ARGS)
 {
     StackFrame* stackFrame = thread->currentFrame;
     thread->pc = stackFrame->previousPc;
@@ -33,7 +33,7 @@ void ireturnInstruction(const uint8_t* args, uint16_t argsCount, int8_t arg, Jav
     }
 }
 
-void areturnInstruction(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void areturnInstruction(INSTRUCTION_ARGS)
 {
     StackFrame* stackFrame = thread->currentFrame;
     thread->pc = stackFrame->previousPc;
@@ -53,7 +53,7 @@ void areturnInstruction(const uint8_t* args, uint16_t argsCount, int8_t arg, Jav
     }
 }
 
-void returnInstruction(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void returnInstruction(INSTRUCTION_ARGS)
 {
     StackFrame* stackFrame = thread->currentFrame;
     thread->pc = stackFrame->previousPc;

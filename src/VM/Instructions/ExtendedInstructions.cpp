@@ -11,7 +11,7 @@ static u2 readShort(VMThread* thread)
     return shortCombined;
 }
 
-void ifnonnull(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void ifnonnull(INSTRUCTION_ARGS)
 {
     u2 branchByte = readShort(thread);
     // uint8_t byte = thread->currentMethod->code->code[thread->pc-3+branchByte];

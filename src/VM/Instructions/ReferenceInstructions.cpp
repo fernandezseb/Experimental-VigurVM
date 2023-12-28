@@ -12,7 +12,7 @@ static u2 readShort(VMThread* thread)
     return shortCombined;
 }
 
-void getstatic(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void getstatic(INSTRUCTION_ARGS)
 {
     uint16_t index = readShort(thread);
     CPFieldRef* fieldRef =  thread->currentFrame->constantPool->getFieldRef(index);
@@ -36,7 +36,7 @@ void getstatic(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* he
     }
 }
 
-void putstatic(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void putstatic(INSTRUCTION_ARGS)
 {
     uint16_t index = readShort(thread);
     CPFieldRef* fieldRef =  thread->currentFrame->constantPool->getFieldRef(index);
@@ -57,7 +57,7 @@ void putstatic(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* he
     VM->updateVariableFromVariable(targetField->staticData, descriptor, var, var2, thread);
 }
 
-void getfield(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void getfield(INSTRUCTION_ARGS)
 {
     uint16_t index = readShort(thread);
     CPFieldRef* fieldRef = thread->currentFrame->constantPool->getFieldRef(index);
@@ -99,7 +99,7 @@ void getfield(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* hea
     }
 }
 
-void putfield(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void putfield(INSTRUCTION_ARGS)
 {
     uint16_t index = readShort(thread);
     CPFieldRef* fieldRef = thread->currentFrame->constantPool->getFieldRef(index);
@@ -133,7 +133,7 @@ void putfield(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* hea
     }
 }
 
-void invokevirtual(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void invokevirtual(INSTRUCTION_ARGS)
 {
     StackFrame* topFrame = thread->currentFrame;
     const u2 index = readShort(thread);
@@ -158,7 +158,7 @@ void invokevirtual(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap
     }
 }
 
-void invokespecial(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void invokespecial(INSTRUCTION_ARGS)
 {
     StackFrame* topFrame = thread->currentFrame;
     uint16_t index = readShort(thread);
@@ -179,7 +179,7 @@ void invokespecial(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap
 
 }
 
-void invokestatic(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void invokestatic(INSTRUCTION_ARGS)
 {
     StackFrame* topFrame = thread->currentFrame;
     uint16_t index = readShort(thread);
@@ -223,7 +223,7 @@ void invokestatic(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap*
     }
 }
 
-void newInstruction(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void newInstruction(INSTRUCTION_ARGS)
 {
     StackFrame* topFrame = thread->currentFrame;
     uint16_t index = readShort(thread);
@@ -249,7 +249,7 @@ void newInstruction(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHea
     topFrame->operands.push_back(variable);
 }
 
-void newarray(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void newarray(INSTRUCTION_ARGS)
 {
     u1 typeArg = args[0];
 
@@ -264,7 +264,7 @@ void newarray(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* hea
     thread->currentFrame->operands.push_back(variable);
 }
 
-void anewarray(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void anewarray(INSTRUCTION_ARGS)
 {
     StackFrame* topFrame = thread->currentFrame;
     uint16_t index = readShort(thread);
@@ -284,7 +284,7 @@ void anewarray(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* he
     topFrame->operands.push_back(variable);
 }
 
-void arraylength(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void arraylength(INSTRUCTION_ARGS)
 {
     const Variable arrayRef = thread->currentFrame->popOperand();
     VM->checkType(arrayRef, VariableType_REFERENCE, thread);
@@ -294,7 +294,7 @@ void arraylength(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* 
     thread->currentFrame->operands.push_back(lengthVar);
 }
 
-void monitorenter(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void monitorenter(INSTRUCTION_ARGS)
 {
     // TODO: Implement when real threading is implemented
     Variable ref = thread->currentFrame->popOperand();
@@ -309,7 +309,7 @@ void monitorenter(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap*
     }
 }
 
-void monitorexit(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void monitorexit(INSTRUCTION_ARGS)
 {
     // TODO: Implement when real threading is implemented
     Variable ref = thread->currentFrame->popOperand();

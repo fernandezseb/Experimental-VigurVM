@@ -1,6 +1,6 @@
 #include "System.h"
 
-JCALL void lib_vigur_lang_System_printLnString(JavaHeap* heap, VMThread* thread, VM* VM)
+JCALL void lib_vigur_lang_System_printLnString(NATIVE_ARGS)
 {
     Variable strVar = thread->currentFrame->popOperand();
     Object* obj = heap->getObject(strVar.data);
@@ -11,7 +11,7 @@ JCALL void lib_vigur_lang_System_printLnString(JavaHeap* heap, VMThread* thread,
     Platform::flush();
 }
 
-JCALL void lib_Vigur_lang_System_registerNatives(JavaHeap* heap, VMThread* thread, VM* VM)
+JCALL void lib_Vigur_lang_System_registerNatives(NATIVE_ARGS)
 {
     registerNative("Vigur/lang/System/printLn", "(Ljava/lang/String;)V", lib_vigur_lang_System_printLnString);
 }

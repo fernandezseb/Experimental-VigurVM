@@ -6,7 +6,7 @@ class VM;
 class VMThread;
 class JavaHeap;
 
-void ifeq(const u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM);
+void ifeq(INSTRUCTION_ARGS);
 void ifne(const u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM);
 void ifge(const u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM);
 void ifgt(const u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM);

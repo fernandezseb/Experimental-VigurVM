@@ -6,7 +6,7 @@
 #include "Data/Variable.h"
 
 
-void iload(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void iload(INSTRUCTION_ARGS)
 {
     u1 index = args[0];
     Variable var = thread->currentFrame->localVariables[index];
@@ -15,7 +15,7 @@ void iload(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, 
     thread->currentFrame->operands.push_back(var);
 }
 
-void aload_i(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void aload_i(INSTRUCTION_ARGS)
 {
     Variable var = thread->currentFrame->localVariables[arg];
     VM::checkType(var, VariableType_REFERENCE, thread);
@@ -23,7 +23,7 @@ void aload_i(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap
     thread->currentFrame->operands.push_back(var);
 }
 
-void iload_i(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void iload_i(INSTRUCTION_ARGS)
 {
     Variable var = thread->currentFrame->localVariables[arg];
     VM::checkType(var, VariableType_INT, thread);
@@ -31,7 +31,7 @@ void iload_i(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap
     thread->currentFrame->operands.push_back(var);
 }
 
-void iaload(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void iaload(INSTRUCTION_ARGS)
 {
     const Variable index = thread->currentFrame->popOperand();
     const Variable arrayRef = thread->currentFrame->popOperand();
@@ -45,7 +45,7 @@ void iaload(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap,
     thread->currentFrame->operands.push_back(dataVar);
 }
 
-void caload(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void caload(INSTRUCTION_ARGS)
 {
     const Variable index = thread->currentFrame->popOperand();
     const Variable arrayRef = thread->currentFrame->popOperand();
