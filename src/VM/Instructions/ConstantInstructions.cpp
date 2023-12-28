@@ -96,7 +96,7 @@ void loadConstant(const VMThread* thread, const u4 index, JavaHeap* heap, VM* VM
         const char* className = thread->currentClass->constantPool->getString(classInfo->nameIndex);
         ClassInfo* targetClassInfo = VM->getClass(className, const_cast<VMThread*>(thread));
         const u4 classObjectRef =  heap->createClassObject(heap->getClassByName("java/lang/Class"), VM, targetClassInfo);
-        const ClassObject * classObject = heap->getClassObject(classObjectRef);
+        // const ClassObject * classObject = heap->getClassObject(classObjectRef);
         const Variable classObjectVar{VariableType_REFERENCE, classObjectRef};
         thread->currentFrame->operands.push_back(classObjectVar);
     }

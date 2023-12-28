@@ -75,13 +75,13 @@ void getfield(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* hea
     if (referencePointer.type != VariableType_REFERENCE)
     {
         fprintf(stderr, "Error: Expected object reference on stack\n");
-        Platform::exitProgram(-6);
+        Platform::exitProgram(6);
     }
 
     if (referencePointer.data == 0)
     {
         fprintf(stderr, "Error: Nullpointer Exception\n");
-        Platform::exitProgram(-6);
+        Platform::exitProgram(6);
     }
     else
     {
@@ -269,7 +269,7 @@ void anewarray(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* he
     StackFrame* topFrame = thread->currentFrame;
     uint16_t index = readShort(thread);
     CPClassInfo* cpclassInfo = topFrame->constantPool->getClassInfo(index);
-    ClassInfo* classInfo = VM->getClass(topFrame->constantPool->getString(cpclassInfo->nameIndex), thread);
+    //ClassInfo* classInfo = VM->getClass(topFrame->constantPool->getString(cpclassInfo->nameIndex), thread);
 
     int32_t size = topFrame->popOperand().data;
 
@@ -316,7 +316,7 @@ void monitorexit(const uint8_t* args, uint16_t argsCount, int8_t arg, JavaHeap* 
     if (ref.type != VariableType_REFERENCE)
     {
         fprintf(stderr, "Error: Expected object reference on stack\n");
-        Platform::exitProgram(-6);
+        Platform::exitProgram(6);
     }
 
     if (ref.data == 0) {

@@ -24,7 +24,7 @@ void Platform::initialize()
 
 		if (hStdout == INVALID_HANDLE_VALUE)
 		{
-			Platform:exitProgram(-6);
+			exitProgram(6);
 		}
 	}
 

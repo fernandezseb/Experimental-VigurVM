@@ -26,15 +26,15 @@
 #define T_DOUBLE  "double"
 
 // Fundamental JVM sizes
-#define u1 uint8_t
-#define u2 uint16_t
-#define u4 uint32_t
-#define u8 uint64_t
+typedef uint8_t  u1;
+typedef uint16_t u2;
+typedef uint32_t u4;
+typedef uint64_t u8;
 
-#define i1 int8_t
-#define i2 int16_t
-#define i4 int32_t
-#define i8 int64_t
+typedef int8_t  i1;
+typedef int16_t i2;
+typedef int32_t i4;
+typedef int64_t i8;
 
 // Memory sizes
 #define KIB(x)   ((size_t) (x) << 10)

@@ -4,22 +4,22 @@
 
 class ByteArray {
 private:
-	uint64_t bytePtr = 0;
-	uint64_t size = 0;
+	std::size_t bytePtr = 0;
+	std::size_t size = 0;
 	bool allocated = false;
 public:
-	uint8_t* bytes = nullptr;
+	u1* bytes = nullptr;
 
-	ByteArray(uint8_t* bytes, uint64_t size);
+	ByteArray(u1* bytes, std::size_t size);
 	
-	uint8_t readUnsignedByte();
-    uint16_t readUnsignedShort();
-	uint32_t readUnsignedInt();
-	int32_t readSignedInt();
+	u1 readUnsignedByte();
+    u2 readUnsignedShort();
+	u4 readUnsignedInt();
+	i4 readSignedInt();
 
-	void readBytes(uint8_t* target, uint64_t size);
-	void setPtr(uint64_t ptr);
-	uint64_t getPtr();
-	bool atEnd();
-	uint64_t getSize();
+	void readBytes(u1* target, std::size_t size);
+	void setPtr(std::size_t ptr);
+	[[nodiscard]] std::size_t getPtr() const;
+	[[nodiscard]] bool atEnd() const;
+	[[nodiscard]] std::size_t getSize() const;
 };
