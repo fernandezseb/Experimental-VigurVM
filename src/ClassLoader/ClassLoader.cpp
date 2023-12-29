@@ -351,7 +351,7 @@ MethodInfo** ClassLoader::readMethods(ByteArray& byteArray, ConstantPool* consta
         parseDescriptor(constantPool->getString(descriptorIndex), info);
 
         const char* name = constantPool->getString(nameIndex);
-        info->name = constantPool->getString(nameIndex);
+        info->name = name;
 
         methods[currentMethod] = info;
     }

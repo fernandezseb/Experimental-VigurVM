@@ -80,7 +80,7 @@ uint32_t JavaHeap::createObject(ClassInfo* classInfo, VM* VM)
             {
                 varsAllocated[currentVar] = vars[currentVar];
             }
-            data.dataSize = vars.size();
+            data.dataSize = castToU1<std::size_t>(vars.size());
             data.data = varsAllocated;
             object->fields[fieldsCount++] = data;
         }
@@ -99,7 +99,7 @@ uint32_t JavaHeap::createObject(ClassInfo* classInfo, VM* VM)
     }
 
     objects.push_back(object);
-    return objects.size()-1;
+    return castToU4<std::size_t>(objects.size()-1);
 }
 
 // TODO: De-duplicate code from createObject
@@ -145,7 +145,7 @@ uint32_t JavaHeap::createClassObject(ClassInfo* classInfo, VM* VM, ClassInfo* ta
             {
                 varsAllocated[currentVar] = vars[currentVar];
             }
-            data.dataSize = vars.size();
+            data.dataSize = castToU1<std::size_t>(vars.size());
             data.data = varsAllocated;
             object->fields[fieldsCount++] = data;
         }

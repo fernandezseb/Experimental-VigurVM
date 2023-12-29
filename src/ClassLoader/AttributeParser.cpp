@@ -159,7 +159,7 @@ ElementValue parseElementValue(ByteArray& byteArray, ConstantPool* constantPool,
 static Annotation parseAnnotation(ByteArray& byteArray, ConstantPool* constantPool, Memory* memory)
 {
 	Annotation annotation;
-	uint16_t typeIndex = byteArray.readUnsignedShort();
+	// uint16_t typeIndex = byteArray.readUnsignedShort();
 	uint16_t elementValuePairsCount = byteArray.readUnsignedShort();
 	annotation.elementValuePairs = (ElementValuePair*)memory->alloc(sizeof(ElementValuePair) * elementValuePairsCount);
 	for (uint16_t currentElementValuePair = 0;
@@ -564,7 +564,7 @@ AttributeCollection* AttributeParser::readAttributes(ByteArray& byteArray, Const
 			attribute->annotations = (Annotation*)memory->alloc(sizeof(Annotation) * attribute->annotationsCount);
 
 			for (uint16_t currentAnnotation = 0; currentAnnotation < attribute->annotationsCount; ++currentAnnotation) {
-				uint16_t typeIndex = byteArray.readUnsignedShort();
+				// uint16_t typeIndex = byteArray.readUnsignedShort();
 				uint16_t elementValuePairsCount = byteArray.readUnsignedShort();
 				attribute->annotations[currentAnnotation].elementValuePairs = (ElementValuePair*)memory->alloc(sizeof(ElementValuePair) * elementValuePairsCount);
 				for (uint16_t currentElementValuePair = 0; currentElementValuePair < elementValuePairsCount; ++currentElementValuePair) {
@@ -586,7 +586,7 @@ AttributeCollection* AttributeParser::readAttributes(ByteArray& byteArray, Const
 			attribute->annotations = (Annotation*)memory->alloc(sizeof(Annotation) * attribute->annotationsCount);
 
 			for (uint16_t currentAnnotation = 0; currentAnnotation < attribute->annotationsCount; ++currentAnnotation) {
-				uint16_t typeIndex = byteArray.readUnsignedShort();
+				// uint16_t typeIndex = byteArray.readUnsignedShort();
 				uint16_t elementValuePairsCount = byteArray.readUnsignedShort();
 				attribute->annotations[currentAnnotation].elementValuePairs = (ElementValuePair*)memory->alloc(sizeof(ElementValuePair) * elementValuePairsCount);
 				for (uint16_t currentElementValuePair = 0; currentElementValuePair < elementValuePairsCount; ++currentElementValuePair) {
