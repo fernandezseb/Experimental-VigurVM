@@ -18,7 +18,7 @@ u2 ByteArray::readUnsignedShort()
 	return value;
 }
 
-uint32_t ByteArray::readUnsignedInt()
+u4 ByteArray::readUnsignedInt()
 {
 	const uint8_t buffer[4] = {bytes[bytePtr++], bytes[bytePtr++], bytes[bytePtr++], bytes[bytePtr++]};
 	const uint32_t value = static_cast<uint32_t>(buffer[3])
@@ -28,7 +28,7 @@ uint32_t ByteArray::readUnsignedInt()
 	return value;
 }
 
-int32_t ByteArray::readSignedInt()
+i4 ByteArray::readSignedInt()
 {
 	const uint8_t buffer[4] = {bytes[bytePtr++], bytes[bytePtr++], bytes[bytePtr++], bytes[bytePtr++]};
 	const int32_t value = static_cast<int32_t>(buffer[3])
