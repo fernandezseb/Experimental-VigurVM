@@ -269,9 +269,9 @@ void newarray(INSTRUCTION_ARGS)
 void anewarray(INSTRUCTION_ARGS)
 {
     StackFrame* topFrame = thread->currentFrame;
-    // uint16_t index = readShort(thread);
-    // CPClassInfo* cpclassInfo = topFrame->constantPool->getClassInfo(index);
-    //ClassInfo* classInfo = VM->getClass(topFrame->constantPool->getString(cpclassInfo->nameIndex), thread);
+    uint16_t index = readShort(thread);
+    CPClassInfo* cpclassInfo = topFrame->constantPool->getClassInfo(index);
+    ClassInfo* classInfo = VM->getClass(topFrame->constantPool->getString(cpclassInfo->nameIndex), thread);
 
     int32_t size = std::bit_cast<i4>(topFrame->popOperand().data);
 
