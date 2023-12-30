@@ -1,5 +1,7 @@
 #include "ConstantPool.h"
 
+#include <cstdlib>
+
 void ConstantPool::checkIndex(uint16_t index) const
 {
 	if (index > this->size) {
@@ -87,5 +89,20 @@ CPFieldRef* ConstantPool::getFieldRef(uint16_t index) const
 		CPFieldRef* cpFieldRef = (CPFieldRef*)item;
 		return cpFieldRef;
 	}
+	return nullptr;
+}
+
+CPInterfaceRef * ConstantPool::getInterfaceMethodRef(const u2 index) const {
+	checkIndex(index);
+
+	ConstantPoolItem* item = this->constants[index - 1];
+	if (item->getType() != CT_INTERFACEMETHOD) {
+		fprintf(stderr, "Error: Trying to read interface method ref at non field interface method item in constant pool at: #%" PRIu16 "\n", index);
+		exit(1);
+	}
+	else {
+		return static_cast<CPInterfaceRef*>(item);
+	}
+
 	return nullptr;
 }

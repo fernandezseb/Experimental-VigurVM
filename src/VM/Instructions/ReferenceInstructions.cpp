@@ -14,6 +14,11 @@ static u2 readShort(VMThread* thread)
     return shortCombined;
 }
 
+
+[[nodiscard]] static constexpr u2 combineBytes(const u1 byte1, const u1 byte2) {
+    return (byte1 << 8) | byte2;
+}
+
 void getstatic(INSTRUCTION_ARGS)
 {
     uint16_t index = readShort(thread);
@@ -223,6 +228,20 @@ void invokestatic(INSTRUCTION_ARGS)
         printf("> Created new stack frame for constructor call on: %s\n",
             topFrame->constantPool->getString(targetClassInfo->nameIndex));
     }
+}
+
+void invokeinterface(INSTRUCTION_ARGS) {
+    const StackFrame* topFrame = thread->currentFrame;
+    const u2 index = combineBytes(args[0], args[1]);
+    const u1 count = args[2];
+    CPInterfaceRef* interfaceMethodRef =  thread->currentClass->constantPool->getInterfaceMethodRef(index);
+    CPClassInfo* targetClassInfo = topFrame->constantPool->getClassInfo(interfaceMethodRef->classIndex);
+    CPNameAndTypeInfo* nameAndTypeInfo = topFrame->constantPool->getNameAndTypeInfo(interfaceMethodRef->nameAndTypeIndex);
+    ClassInfo* targetClass = VM->getClass(topFrame->constantPool->getString(targetClassInfo->nameIndex), thread);
+    // TODO: Take in account descriptor of method as well, for overriding and such
+    MethodInfo* methodInfo = targetClass->findMethodWithName(topFrame->constantPool->getString(nameAndTypeInfo->nameIndex));
+
+    printf("Hello");
 }
 
 void newInstruction(INSTRUCTION_ARGS)

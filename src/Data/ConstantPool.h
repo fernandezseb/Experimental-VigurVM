@@ -122,9 +122,10 @@ public:
 	ConstantPoolItem** constants;
 	uint16_t size;
 public:
-	char* getString(uint16_t index) const;
-	CPClassInfo* getClassInfo(uint16_t index) const;
-	CPMethodRef* getMethodRef(u2 index) const;
-	CPNameAndTypeInfo* getNameAndTypeInfo(u2 index) const;
-	CPFieldRef* getFieldRef(u2 index) const;
+	[[nodiscard]] char* getString(uint16_t index) const;
+	[[nodiscard]] CPClassInfo* getClassInfo(uint16_t index) const;
+	[[nodiscard]] CPMethodRef* getMethodRef(u2 index) const;
+	[[nodiscard]] CPNameAndTypeInfo* getNameAndTypeInfo(u2 index) const;
+	[[nodiscard]] CPFieldRef* getFieldRef(u2 index) const;
+	[[nodiscard]] CPInterfaceRef* getInterfaceMethodRef(u2 index) const;
 };

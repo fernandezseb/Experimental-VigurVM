@@ -34,7 +34,7 @@ struct Instruction
 
 class VM {
 private:
-    Instruction instructions[81] =
+    Instruction instructions[82] =
     {
         // Constants
         {i_nop, 0, "nop", 0, nop},
@@ -113,6 +113,7 @@ private:
         {i_invokevirtual, 0, "invokevirtual", 0, invokevirtual},
         {i_invokespecial, 0, "invokespecial", 0, invokespecial},
         {i_invokestatic, 0, "invokestatic", 0, invokestatic},
+        {i_invokeinterface, 4, "invokeinterface", 0, invokeinterface},
         {i_new, 0, "new", 0, newInstruction},
         {i_newarray, 1, "newarray", 0, newarray},
         {i_anewarray, 0, "anewarray", 0, anewarray},

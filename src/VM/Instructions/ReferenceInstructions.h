@@ -13,6 +13,7 @@ void putfield(INSTRUCTION_ARGS);
 void invokevirtual(INSTRUCTION_ARGS);
 void invokespecial(INSTRUCTION_ARGS);
 void invokestatic(INSTRUCTION_ARGS);
+void invokeinterface(INSTRUCTION_ARGS);
 void newInstruction(INSTRUCTION_ARGS);
 void newarray(INSTRUCTION_ARGS);
 void anewarray(INSTRUCTION_ARGS);
