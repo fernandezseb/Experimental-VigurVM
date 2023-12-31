@@ -4,7 +4,7 @@
 #include "ByteArray.h"
 #include "AttributeParser.h"
 #include "DynamicArray.h"
-#include "../Memory.h"
+#include "Memory.h"
 #include "Data/Class.h"
 #include "Data/ConstantPool.h"
 
@@ -12,6 +12,8 @@
 #define MAGIC_NUMBER       0xCAFEBABE
 
 class ClassLoader {
+public:
+	ClassInfo* readClass(const char* className, Memory* memory, const char* classPath);
 private:
 	void checkMagicNumber(ByteArray& byteArray);
 	ConstantPool* readConstantPool(ByteArray& byteArray);
@@ -22,6 +24,4 @@ private:
 	MethodInfo** readMethods(ByteArray& byteArray, ConstantPool* constantPool, uint16_t methodCount);
 	ClassInfo* readClass(ByteArray& byteArray);
 	Memory* memory;
-public:
-	ClassInfo* readClass(const char* className, Memory* memory, const char* classPath);
 };

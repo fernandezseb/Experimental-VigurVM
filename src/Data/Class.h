@@ -3,7 +3,7 @@
 #include "Core.h"
 
 #include "Attribute.h"
-#include "../Memory.h"
+#include "Memory.h"
 #include "Data/Variable.h"
 
 class FieldInfo {

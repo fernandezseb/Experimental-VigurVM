@@ -8,7 +8,7 @@
 #include <variant>
 
 VM::VM(const Configuration configuration) noexcept
-    : configuration(configuration)
+    : bootstrapClassLoader(), configuration(configuration)
 {
 }
 
@@ -17,13 +17,12 @@ void VM::start()
     Platform::initialize();
 
     registerBuiltinRegisterNatives();
-    getClass("java/lang/OutOfMemoryError", &thread);
-    getClass("java/lang/VirtualMachineError", &thread);
-    getClass("java/lang/Object", &thread);
-    getClass("java/lang/Class", &thread);
-    getClass("java/lang/String", &thread);
-    getClass("java/lang/System", &thread);
-    // getClass("Vigur/lang/System", &thread);
+    getClass("java/lang/OutOfMemoryError", &m_mainThread);
+    getClass("java/lang/VirtualMachineError", &m_mainThread);
+    getClass("java/lang/Object", &m_mainThread);
+    getClass("java/lang/Class", &m_mainThread);
+    getClass("java/lang/String", &m_mainThread);
+    getClass("java/lang/System", &m_mainThread);
 }
 
 std::vector<Variable> VM::createVariableForDescriptor(const char* descriptor)
@@ -77,7 +76,7 @@ u1 VM::getDescriptorVarCategory(const char* descriptor) noexcept
     return 1;
 }
 
-void VM::initStaticFields(ClassInfo* class_info, VMThread* thread)
+void VM::initStaticFields(ClassInfo* class_info, [[maybe_unused]] VMThread* thread)
 {
     // TODO: Do it for superclasses as well?
     u2 staticFieldsCount = 0;
@@ -104,11 +103,11 @@ void VM::initStaticFields(ClassInfo* class_info, VMThread* thread)
             for (Variable variable : variables) {
                 class_info->staticFields[currentStaticField++] = variable;
             }
-            const i4 index = static_cast<i4>(currentStaticField)-variables.size();
-            if (index > staticFieldsCount-1 || index < 0)
-            {
-                thread->internalError("Going outside of index!");
-            }
+            const std::size_t index = currentStaticField-variables.size();
+            // if (index > staticFieldsCount-1 || index < 0)
+            // {
+            //     thread->internalError("Going outside of index!");
+            // TODO: Replace above commented code by using typechecked data structure
             field->staticData = &class_info->staticFields[index];
         }
     }
@@ -213,7 +212,7 @@ void VM::runStaticInitializer(ClassInfo* classInfo, VMThread* thread)
 {
     MethodInfo* entryPoint = classInfo->findMethodWithNameAndDescriptor("<clinit>", "()V");
 
-    if (entryPoint == 0)
+    if (entryPoint == nullptr)
     {
         // No static initializers for this class
         return;
@@ -240,7 +239,7 @@ void VM::runStaticInitializer(ClassInfo* classInfo, VMThread* thread)
 ClassInfo* VM::getClass(const char* className, VMThread* thread)
 {
     ClassInfo* classInfo = heap.getClassByName(className);
-    if (classInfo == NULL) {
+    if (classInfo == nullptr) {
         Memory *memory = new Memory(MIB(1), MIB(30));
         printf("Loading class %s...\n", className);
         classInfo = bootstrapClassLoader.readClass(className, memory, configuration.classPath);
@@ -254,8 +253,8 @@ ClassInfo* VM::getClass(const char* className, VMThread* thread)
 
 void VM::runMain(const char* className)
 {
-    VMThread* mainThread = &thread;
-    if (className == 0)
+    VMThread* mainThread = &m_mainThread;
+    if (className == nullptr)
     {
         fprintf(stderr, "Error: Class name of starting class not defined..\n");
         Platform::exitProgram(6);
@@ -265,7 +264,7 @@ void VM::runMain(const char* className)
     ClassInfo* startupClass = getClass(className, mainThread);
     MethodInfo* entryPoint = startupClass->findMethodWithNameAndDescriptor("main", "([Ljava/lang/String;)V");
 
-    if (entryPoint == 0)
+    if (entryPoint == nullptr)
     {
         fprintf(stderr, "Error: Entry point not found. Exiting...\n");
         Platform::exitProgram(6);

@@ -1,17 +1,19 @@
 #include "VM/Configuration.h"
 #include "VM/VM.h"
 
-Configuration parseArguments(const int argc, const char*const*const argv)
+#include <span>
+
+Configuration parseArguments(const std::span<const char*> args)
 {
     Configuration config;
     bool mainNameFound = false;
-    for (int currentArg = 1; currentArg < argc; ++currentArg)
+    for (int currentArg = 1; currentArg < args.size(); ++currentArg)
     {
-        if (strcmp(argv[currentArg], "-classpath") == 0 )
+        if (strcmp(args[currentArg], "-classpath") == 0 )
         {
-            if (currentArg+1 < argc)
+            if (currentArg+1 < args.size())
             {
-                config.classPath = argv[currentArg+1];
+                config.classPath = args[currentArg+1];
                 currentArg++;
             }
         }
@@ -19,11 +21,11 @@ Configuration parseArguments(const int argc, const char*const*const argv)
         {
             if (!mainNameFound)
             {
-                config.mainClassName = argv[currentArg];
+                config.mainClassName = args[currentArg];
                 mainNameFound = true;
             } else
             {
-                config.args.push_back(argv[currentArg]);
+                config.args.push_back(args[currentArg]);
             }
         }
     }
@@ -31,9 +33,11 @@ Configuration parseArguments(const int argc, const char*const*const argv)
     return config;
 }
 
-int main(const int argc, const char*const*const argv)
+int main(const int argc, const char* argv[])
 {
-    const Configuration config = parseArguments(argc, argv);
+    const size_t size = argc;
+    const std::span args{argv, size};
+    const Configuration config = parseArguments(args);
 
     VM vm(config);
     vm.start();

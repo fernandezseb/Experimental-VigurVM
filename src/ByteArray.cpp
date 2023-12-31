@@ -1,7 +1,7 @@
 #include "ByteArray.h"
 
 ByteArray::ByteArray(u1* bytes, const std::size_t size) :
-	size(size), bytes(bytes)
+	bytes(bytes, size)
 {
 }
 
@@ -54,9 +54,9 @@ std::size_t ByteArray::getPtr() const {
 }
 
 bool ByteArray::atEnd() const {
-	return (bytePtr == size);
+	return (bytePtr == bytes.size());
 }
 
 std::size_t ByteArray::getSize() const {
-	return size;
+	return bytes.size();
 }

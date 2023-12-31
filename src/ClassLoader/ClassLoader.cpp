@@ -4,7 +4,7 @@
 #include "DescriptorParser.h"
 #include "Util.h"
 #include "Platform.h"
-#include "../Memory.h"
+#include "Memory.h"
 
 void ClassLoader::checkMagicNumber(ByteArray& byteArray) {
     uint32_t magic = byteArray.readUnsignedInt();

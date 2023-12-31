@@ -61,7 +61,7 @@ void VMThread::pushStackFrameVirtual(ClassInfo* classInfo, const MethodInfo* met
         {
 
             CPClassInfo* ci = targetClass->constantPool->getClassInfo(targetClass->superClass);
-            const char* superClass = targetClass->constantPool->getString(ci->nameIndex);
+            [[maybe_unused]] const char* superClass = targetClass->constantPool->getString(ci->nameIndex);
             internalError("Failed to get the correct method on the object.\n"
                             " Searching on superclass and generic search is not implemented yet.");
             printf("");
@@ -84,7 +84,7 @@ void VMThread::pushStackFrameVirtual(ClassInfo* classInfo, const MethodInfo* met
 }
 
 void VMThread::pushStackFrameSpecial(ClassInfo* classInfo, const MethodInfo* methodInfo, StackFrame* previousFrame,
-    JavaHeap* heap)
+    [[maybe_unused]] JavaHeap* heap)
 {
     std::deque<Variable> arguments;
     if (previousFrame != nullptr)

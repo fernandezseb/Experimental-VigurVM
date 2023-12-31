@@ -3,7 +3,7 @@
 #include "Core.h"
 #include "ByteArray.h"
 #include "Data/ConstantPool.h"
-#include "../Memory.h"
+#include "Memory.h"
 #include "Data/Attribute.h"
 
 class AttributeParser {

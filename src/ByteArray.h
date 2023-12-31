@@ -2,13 +2,14 @@
 
 #include "Core.h"
 
+#include <span>
+
 class ByteArray {
 private:
 	std::size_t bytePtr = 0;
-	std::size_t size = 0;
 	bool allocated = false;
 public:
-	u1* bytes = nullptr;
+	std::span<u1> bytes;
 
 	ByteArray(u1* bytes, std::size_t size);
 	

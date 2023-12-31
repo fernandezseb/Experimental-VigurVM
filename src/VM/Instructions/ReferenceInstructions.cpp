@@ -5,6 +5,7 @@
 #include "VM/Native.h"
 
 #include <bit>
+#include <string>
 
 static u2 readShort(VMThread* thread)
 {
@@ -208,18 +209,17 @@ void invokestatic(INSTRUCTION_ARGS)
         printf("Running native code of method: %s\n", methodInfo->name);
         const char* description = topFrame->constantPool->getString(nameAndTypeInfo->descriptorIndex);
         const char* methodName = methodInfo->name;
-        char fullName[200] = {0};
-        strcat(fullName, className);
-        strcat(fullName, "/");
-        strcat(fullName, methodName);
-        nativeImplementation impl = findNativeMethod(fullName, description);
+        std::string fullName = className;
+        fullName += "/";
+        fullName += methodName;
+        nativeImplementation impl = findNativeMethod(fullName.c_str(), description);
         if (impl != nullptr)
         {
             impl(heap, thread, VM);
         } else
         {
             char errorString[400];
-            snprintf(errorString, 400, "Can't find native method %s%s", fullName, description);
+            snprintf(errorString, 400, "Can't find native method %s%s", fullName.c_str(), description);
             thread->internalError(errorString);
         }
     } else
@@ -233,7 +233,7 @@ void invokestatic(INSTRUCTION_ARGS)
 void invokeinterface(INSTRUCTION_ARGS) {
     StackFrame* topFrame = thread->currentFrame;
     const u2 index = combineBytes(args[0], args[1]);
-    const u1 count = args[2];
+    [[maybe_unused]] const u1 count = args[2];
     CPInterfaceRef* interfaceMethodRef =  thread->currentClass->constantPool->getInterfaceMethodRef(index);
     CPClassInfo* targetClassInfo = topFrame->constantPool->getClassInfo(interfaceMethodRef->classIndex);
     CPNameAndTypeInfo* nameAndTypeInfo = topFrame->constantPool->getNameAndTypeInfo(interfaceMethodRef->nameAndTypeIndex);
@@ -299,7 +299,7 @@ void anewarray(INSTRUCTION_ARGS)
     StackFrame* topFrame = thread->currentFrame;
     uint16_t index = readShort(thread);
     CPClassInfo* cpclassInfo = topFrame->constantPool->getClassInfo(index);
-    ClassInfo* classInfo = VM->getClass(topFrame->constantPool->getString(cpclassInfo->nameIndex), thread);
+    [[maybe_unused]] ClassInfo* classInfo = VM->getClass(topFrame->constantPool->getString(cpclassInfo->nameIndex), thread);
 
     int32_t size = std::bit_cast<i4>(topFrame->popOperand().data);
 

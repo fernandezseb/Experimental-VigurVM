@@ -33,6 +33,16 @@ struct Instruction
 
 
 class VM {
+public:
+    explicit VM(Configuration configuration) noexcept;
+    void updateVariableFromVariable(Variable* variable, const char* descriptor, Variable operand, Variable operand2, VMThread* thread);
+    static std::vector<Variable> createVariableForDescriptor(const char* descriptor);
+    [[nodiscard]] static u1 getDescriptorVarCategory(const char* descriptor) noexcept;
+    void start();
+    ClassInfo* getClass(const char* className, VMThread* thread);
+    void runMain(const char* className);
+    void shutdown();
+    static void checkType(Variable var, VariableType type, VMThread *thread);
 private:
     Instruction instructions[82] =
     {
@@ -130,21 +140,11 @@ private:
     };
     ClassLoader bootstrapClassLoader;
     JavaHeap heap;
-    VMThread thread{"main", 200};
+    VMThread m_mainThread{"main", 200};
     Configuration configuration;
     void initStaticFields(ClassInfo* class_info, VMThread* thread);
     void executeLoop(VMThread* thread);
     void runStaticInitializer(ClassInfo* classInfo, VMThread* thread);
-public:
-    explicit VM(Configuration configuration) noexcept;
-    void updateVariableFromVariable(Variable* variable, const char* descriptor, Variable operand, Variable operand2, VMThread* thread);
-    static std::vector<Variable> createVariableForDescriptor(const char* descriptor);
-    [[nodiscard]] static u1 getDescriptorVarCategory(const char* descriptor) noexcept;
-    void start();
-    ClassInfo* getClass(const char* className, VMThread* thread);
-    void runMain(const char* className);
-    void shutdown();
-    static void checkType(Variable var, VariableType type, VMThread *thread);
 };
 
 
