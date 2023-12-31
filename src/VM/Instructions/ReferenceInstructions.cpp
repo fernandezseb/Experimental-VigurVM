@@ -160,7 +160,7 @@ void invokevirtual(INSTRUCTION_ARGS)
         thread->internalError("Virtual native methods are not supported yet!");
     } else
     {
-        thread->pushStackFrameVirtual(targetClassInfo, methodInfo, topFrame);
+        thread->pushStackFrameVirtual(targetClassInfo, methodInfo, topFrame, heap);
         printf("> Created new stack frame for virtual call on: %s.%s()\n", className, methodName);
     }
 }
@@ -181,8 +181,8 @@ void invokespecial(INSTRUCTION_ARGS)
     // TODO: Check correct parsing of descriptors with subclasses
 
     // TODO: Check argument types
-    thread->pushStackFrameVirtual(targetClassInfo, methodInfo, topFrame);
-    printf("> Created new stack frame for method call %s on: %s\n", methodName, className);
+    thread->pushStackFrameSpecial(targetClassInfo, methodInfo, topFrame, heap);
+    printf("> Created new stack frame for method call %s on: %s\n", thread->currentFrame->methodName, thread->currentFrame->className);
 
 }
 
@@ -225,13 +225,13 @@ void invokestatic(INSTRUCTION_ARGS)
     } else
     {
         thread->pushStackFrameStatic(targetClass, methodInfo, topFrame);
-        printf("> Created new stack frame for constructor call on: %s\n",
-            topFrame->constantPool->getString(targetClassInfo->nameIndex));
+        printf("> Created new stack frame for static call: %s.%s\n",
+            topFrame->constantPool->getString(targetClassInfo->nameIndex), methodInfo->name);
     }
 }
 
 void invokeinterface(INSTRUCTION_ARGS) {
-    const StackFrame* topFrame = thread->currentFrame;
+    StackFrame* topFrame = thread->currentFrame;
     const u2 index = combineBytes(args[0], args[1]);
     const u1 count = args[2];
     CPInterfaceRef* interfaceMethodRef =  thread->currentClass->constantPool->getInterfaceMethodRef(index);
@@ -241,7 +241,16 @@ void invokeinterface(INSTRUCTION_ARGS) {
     // TODO: Take in account descriptor of method as well, for overriding and such
     MethodInfo* methodInfo = targetClass->findMethodWithName(topFrame->constantPool->getString(nameAndTypeInfo->nameIndex));
 
-    printf("Hello");
+    if (methodInfo->isNative())
+    {
+        // TODO: Implement virtual native calls
+        // TODO: In the future we maybe should create a new stackframe for native callS?
+        thread->internalError("Virtual native methods are not supported yet!");
+    } else
+    {
+        thread->pushStackFrameVirtual(targetClass, methodInfo, topFrame, heap);
+        printf("> Created new stack frame for virtual call on: %s.%s()\n", thread->currentFrame->className, thread->currentFrame->methodName);
+    }
 }
 
 void newInstruction(INSTRUCTION_ARGS)

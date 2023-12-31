@@ -1,5 +1,9 @@
 #include "VMThread.h"
 
+#include "JavaHeap.h"
+
+#include <stack>
+
 void VMThread::pushStackFrameWithoutParams(ClassInfo* classInfo, const MethodInfo* methodInfo)
 {
     StackFrame stackFrame;
@@ -26,21 +30,84 @@ void VMThread::pushStackFrameWithoutParams(ClassInfo* classInfo, const MethodInf
     this->currentFrame = &this->stack.frames[this->stack.frames.size()-1];
 }
 
-void VMThread::pushStackFrameVirtual(ClassInfo* classInfo, const MethodInfo* methodInfo, StackFrame* previousFrame)
+void VMThread::pushStackFrameVirtual(ClassInfo* classInfo, const MethodInfo* methodInfo, StackFrame* previousFrame, JavaHeap* heap)
 {
-    pushStackFrameWithoutParams(classInfo, methodInfo);
+    std::deque<Variable> arguments;
+    const MethodInfo* targetMethod;
+    ClassInfo* targetClass;
     if (previousFrame != nullptr)
     {
         // The arguments and the pointer to the object
         for (int i = methodInfo->argsCount; i >= 0; --i)
         {
-            this->currentFrame->localVariables[i] = previousFrame->popOperand();
+            arguments.push_front(previousFrame->popOperand());
         }
 
-        const Variable ref = this->currentFrame->localVariables[0];
+        const Variable ref = arguments[0];
         if (ref.type == VariableType_REFERENCE && ref.data == 0)
         {
             internalError("NullpointerException in virtual call");
+        }
+
+        // Look for method based on the object
+        Object* object = heap->getObject(ref.data);
+        targetClass = object->classInfo;
+        MethodInfo* foundMethod = targetClass->findMethodWithNameAndDescriptor(methodInfo->name,
+            classInfo->constantPool->getString(methodInfo->descriptorIndex));
+        if (foundMethod != nullptr)
+        {
+            targetMethod = foundMethod;
+        } else
+        {
+
+            CPClassInfo* ci = targetClass->constantPool->getClassInfo(targetClass->superClass);
+            const char* superClass = targetClass->constantPool->getString(ci->nameIndex);
+            internalError("Failed to get the correct method on the object.\n"
+                            " Searching on superclass and generic search is not implemented yet.");
+            printf("");
+        }
+    } else
+    {
+        targetMethod = methodInfo;
+        targetClass = classInfo;
+    }
+
+
+    pushStackFrameWithoutParams(targetClass, targetMethod);
+    if (!arguments.empty())
+    {
+        for (int i = 0; i <= methodInfo->argsCount; ++i)
+        {
+            currentFrame->localVariables[i] = arguments[i];
+        }
+    }
+}
+
+void VMThread::pushStackFrameSpecial(ClassInfo* classInfo, const MethodInfo* methodInfo, StackFrame* previousFrame,
+    JavaHeap* heap)
+{
+    std::deque<Variable> arguments;
+    if (previousFrame != nullptr)
+    {
+        // The arguments and the pointer to the object
+        for (int i = methodInfo->argsCount; i >= 0; --i)
+        {
+            arguments.push_front(previousFrame->popOperand());
+        }
+
+        const Variable ref = arguments[0];
+        if (ref.type == VariableType_REFERENCE && ref.data == 0)
+        {
+            internalError("NullpointerException in special call");
+        }
+    }
+
+    pushStackFrameWithoutParams(classInfo, methodInfo);
+    if (!arguments.empty())
+    {
+        for (int i = 0; i <= methodInfo->argsCount; ++i)
+        {
+            currentFrame->localVariables[i] = arguments[i];
         }
     }
 }
