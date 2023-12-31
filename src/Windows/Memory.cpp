@@ -1,4 +1,4 @@
-#include "../Memory.h"
+#include "Memory.h"
 #include "windows.h"
 
 static void* reserveMemory(size_t size, size_t baseAddress) {
@@ -60,10 +60,9 @@ void* Memory::alloc(size_t size)
 
 void Memory::printSize()
 {
-	jprintf("Memory stats:\n");
-	jprintf("  Memory used: %zu bytes\n", ptr);
-	jprintf("  Memory commited: %zu bytes\n", size);
-	jprintf("  Free memory: %zu bytes\n", (size-ptr));
-	jprintf("  Max memory (reserved): %zu bytes\n", maxSize);
-	jflush();
+	printf("Memory stats:\n");
+	printf("  Memory used: %zu bytes\n", ptr);
+	printf("  Memory commited: %zu bytes\n", size);
+	printf("  Free memory: %zu bytes\n", (size-ptr));
+	printf("  Max memory (reserved): %zu bytes\n", maxSize);
 }

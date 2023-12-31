@@ -96,34 +96,6 @@ void Platform::print(const char* string, uint64_t length)
 	fwrite(string, 1 ,length, stdout);
 }
 
-void Platform::printModifiedUtf8String(char* string)
-{
-	JString jstring = {0};
-	size_t length = strlen(string);
-	jstring.chars = (char*) allocateMemory(length, 0); // In the worst case, the string has the same length
-	jstring.length = length;
-	modifiedUtf8ToStandardUtf8(string, &jstring);
-	print(jstring.chars, jstring.length);
-	freeMemory(jstring.chars);
-}
-
-int Platform::printModifiedUtf8StringFormatted(const char* string, ...)
-{
-	va_list argsList;
-	va_start(argsList, string);
-	textBuffer[0] = 0;
-	int size = vsnprintf(textBuffer, getPageSize(), string, argsList);
-	print(textBuffer, size);
-	va_end(argsList);
-
-	return size;
-}
-
-void Platform::flush()
-{
-	outBuffer->flush();
-}
-
 void Platform::closeFile(PlatformFile* file)
 {
 	close(file->fd);
