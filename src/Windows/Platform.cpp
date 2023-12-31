@@ -156,7 +156,7 @@ void Platform::closeFile(PlatformFile* file)
 	freeMemory(file);
 }
 
-void Platform::exitProgram(uint32_t exitCode)
+void Platform::exitProgram(const int32_t exitCode)
 {
 	cleanup();
 	ExitProcess(exitCode);

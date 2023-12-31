@@ -2,15 +2,10 @@
 
 #include <cinttypes>
 #include <cstddef>
-#include <cstdarg>
-
-#include "OutputBuffer.h"
 
 struct PlatformFile;
 
 class Platform {
-private:
-	inline static char* textBuffer = nullptr;
 public:
 	static void print(const char* string, uint64_t length);
 	static void initialize();
@@ -21,8 +16,9 @@ public:
 	static uint8_t* readEntireFile(PlatformFile* file, size_t* sizeOut);
 	static void getLastModifiedString(PlatformFile* file, char* stringOut);
 	static void closeFile(PlatformFile* file);
-	static void exitProgram(uint32_t exitCode);
+	static void exitProgram(int32_t exitCode);
 	static size_t getPageSize();
 	static void cleanup();
-	friend class OutputBuffer;
+private:
+	inline static char* textBuffer = nullptr;
 };
