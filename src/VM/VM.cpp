@@ -170,7 +170,7 @@ static u2 readShort(VMThread* thread)
 
 void VM::executeLoop(VMThread* thread)
 {
-    while(!thread->stack.frames.empty())
+    while(!thread->stackstack.top().frames.empty())
     {
         uint8_t opcode = readByte(thread);
         printf("Running instruction with opcode: 0x%0x ", opcode);
@@ -219,13 +219,11 @@ void VM::runStaticInitializer(ClassInfo* classInfo, VMThread* thread)
         return;
     }
 
-    JavaStack oldStack = thread->stack;
     u4 oldPc = thread->pc;
     ClassInfo* oldCurrentClass = thread->currentClass;
     const MethodInfo* oldCurrentMethod = thread->currentMethod;
     StackFrame* oldFrame = thread->currentFrame;
-    thread->stack.frames = std::vector<StackFrame>();
-    thread->stack.frames.reserve(200);
+    thread->stackstack.emplace(200);
 
     thread->pushStackFrameWithoutParams(classInfo, entryPoint);
 
@@ -235,7 +233,7 @@ void VM::runStaticInitializer(ClassInfo* classInfo, VMThread* thread)
     thread->pc = oldPc;
     thread->currentClass = oldCurrentClass;
     thread->currentMethod = oldCurrentMethod;
-    thread->stack.frames = oldStack.frames;
+    thread->stackstack.pop();
     thread->currentFrame = oldFrame;
 }
 
@@ -292,7 +290,7 @@ void VM::shutdown()
     Platform::cleanup();
 }
 
-void VM::checkType(const Variable var, const VariableType type, const VMThread* thread)
+void VM::checkType(const Variable var, const VariableType type, VMThread* thread)
 {
     if (var.type != type)
     {

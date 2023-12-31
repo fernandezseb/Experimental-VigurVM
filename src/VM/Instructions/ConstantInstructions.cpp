@@ -69,7 +69,7 @@ void sipush(INSTRUCTION_ARGS)
     thread->currentFrame->operands.push_back(variable);
 }
 
-void loadConstant(const VMThread* thread, const u4 index, JavaHeap* heap, VM* VM)
+void loadConstant(VMThread* thread, const u4 index, JavaHeap* heap, VM* VM)
 {
     const ConstantPoolItem* cpItem = thread->currentFrame->constantPool->constants[index - 1];
     if (cpItem->getType() == CT_INTEGER)

@@ -22,10 +22,10 @@ void ireturnInstruction(INSTRUCTION_ARGS)
 
     Variable returnVal = thread->currentFrame->popOperand();
 
-    thread->stack.frames.pop_back();
-    if (thread->stack.frames.size() > 0)
+    thread->stackstack.top().frames.pop_back();
+    if (thread->stackstack.top().frames.size() > 0)
     {
-        thread->currentFrame = &thread->stack.frames[thread->stack.frames.size()-1];
+        thread->currentFrame = &thread->stackstack.top().frames[thread->stackstack.top().frames.size()-1];
         thread->currentFrame->operands.push_back(returnVal);
     } else
     {
@@ -42,10 +42,10 @@ void areturnInstruction(INSTRUCTION_ARGS)
 
     Variable returnVal = thread->currentFrame->popOperand();
 
-    thread->stack.frames.pop_back();
-    if (thread->stack.frames.size() > 0)
+    thread->stackstack.top().frames.pop_back();
+    if (thread->stackstack.top().frames.size() > 0)
     {
-        thread->currentFrame = &thread->stack.frames[thread->stack.frames.size()-1];
+        thread->currentFrame = &thread->stackstack.top().frames[thread->stackstack.top().frames.size()-1];
         thread->currentFrame->operands.push_back(returnVal);
     } else
     {
@@ -59,10 +59,10 @@ void returnInstruction(INSTRUCTION_ARGS)
     thread->pc = stackFrame->previousPc;
     thread->currentClass = stackFrame->previousClass;
     thread->currentMethod = stackFrame->previousMethod;
-    thread->stack.frames.pop_back();
-    if (thread->stack.frames.size() > 0)
+    thread->stackstack.top().frames.pop_back();
+    if (thread->stackstack.top().frames.size() > 0)
     {
-        thread->currentFrame = &thread->stack.frames[thread->stack.frames.size()-1];
+        thread->currentFrame = &thread->stackstack.top().frames[thread->stackstack.top().frames.size()-1];
     } else
     {
         thread->currentFrame = 0;

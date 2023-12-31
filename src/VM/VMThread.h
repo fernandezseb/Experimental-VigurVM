@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stack>
+
 #include "Core.h"
 #include "JavaHeap.h"
 #include "JavaStack.h"
@@ -9,7 +11,7 @@ class VMThread
 {
 public:
     u4 pc{0};
-    JavaStack stack;
+    std::stack<JavaStack> stackstack;
     // Current frame
     StackFrame* currentFrame{nullptr};
     // Current method
@@ -19,12 +21,13 @@ public:
     const char* name{nullptr};
 
     explicit VMThread(const char* name, const size_t frameSize) noexcept
-        : name(name), stack(frameSize)
+        : name(name)
     {
+        stackstack.emplace(frameSize);
     }
     void pushStackFrameWithoutParams(ClassInfo* classInfo, const MethodInfo* methodInfo);
     void pushStackFrameStatic(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame);
     void pushStackFrameVirtual(ClassInfo* classInfo, const MethodInfo* methodInfo, StackFrame* previousFrame, JavaHeap* heap);
     void pushStackFrameSpecial(ClassInfo* classInfo, const MethodInfo* methodInfo, StackFrame* previousFrame, JavaHeap* heap);
-    void internalError(const char* error) const;
+    void internalError(const char* error);
 };

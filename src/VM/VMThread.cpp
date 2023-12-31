@@ -26,8 +26,8 @@ void VMThread::pushStackFrameWithoutParams(ClassInfo* classInfo, const MethodInf
     this->currentClass = classInfo;
     this->currentMethod = methodInfo;
 
-    this->stack.frames.push_back(stackFrame);
-    this->currentFrame = &this->stack.frames[this->stack.frames.size()-1];
+    this->stackstack.top().frames.push_back(stackFrame);
+    this->currentFrame = &this->stackstack.top().frames[this->stackstack.top().frames.size()-1];
 }
 
 void VMThread::pushStackFrameVirtual(ClassInfo* classInfo, const MethodInfo* methodInfo, StackFrame* previousFrame, JavaHeap* heap)
@@ -112,16 +112,19 @@ void VMThread::pushStackFrameSpecial(ClassInfo* classInfo, const MethodInfo* met
     }
 }
 
-void VMThread::internalError(const char* error) const
+void VMThread::internalError(const char* error)
 {
     fprintf(stdout, "Unhandled VM error in thread \"%s\": %s\n", name, error);
-    if (!stack.frames.empty())
-    {
-        for (i8 currentFrame = stack.frames.size() - 1; currentFrame >= 0; --currentFrame)
+    while (!stackstack.empty()) {
+        if (!stackstack.top().frames.empty())
         {
-            const StackFrame frame = stack.frames[currentFrame];
-            printf("    at %s.%s\n", frame.className, frame.methodName);
+            for (i8 currentFrame = stackstack.top().frames.size() - 1; currentFrame >= 0; --currentFrame)
+            {
+                const StackFrame frame = stackstack.top().frames[currentFrame];
+                printf("    at %s.%s\n", frame.className, frame.methodName);
+            }
         }
+        stackstack.pop();
     }
     Platform::exitProgram(6);
 }
