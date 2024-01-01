@@ -11,9 +11,9 @@ public:
 	void* alloc(size_t size);
 	void printSize();
 private:
-	uint8_t* memoryPtr;
-	size_t ptr = 0;
-	size_t size;
-	size_t maxSize;
-	size_t pageSize;
+	uint8_t* m_memoryPtr;
+	size_t m_ptr = 0;
+	size_t m_size;
+	size_t m_maxSize;
+	size_t m_pageSize;
 };

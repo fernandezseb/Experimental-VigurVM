@@ -11,58 +11,58 @@ static void* reserveMemory(size_t size, size_t baseAddress) {
 }
 
 Memory::Memory(size_t size, size_t maxSize) 
-	: size(size), maxSize(maxSize)
+	: m_size(size), m_maxSize(maxSize)
 {
-	pageSize = Platform::getPageSize();
+	m_pageSize = Platform::getPageSize();
 
 	// We want to at least allocate one page if possible
-	if (this->size < pageSize) {
-		this->size = pageSize;
+	if (m_size < m_pageSize) {
+		m_size = m_pageSize;
 
 		// Make sure that we don't allocate more than the max allowed
-		if (this->size > maxSize) {
-			this->size = maxSize;
+		if (m_size > maxSize) {
+			m_size = maxSize;
 		}
 	}
 
 	uint8_t* reservedMemory = (uint8_t*)reserveMemory(maxSize, 0);
-	memoryPtr = (uint8_t*)Platform::allocateMemory(this->size, (size_t)reservedMemory);
+	m_memoryPtr = (uint8_t*)Platform::allocateMemory(m_size, (size_t)reservedMemory);
 }
 
 Memory::~Memory()
 {
-	Platform::freeMemory(memoryPtr);
+	Platform::freeMemory(m_memoryPtr);
 }
 
 void* Memory::alloc(size_t size)
 {
 
-	if (ptr + size > this->size) {
-		size_t toAlloc = pageSize;
-		if (this->size + pageSize > maxSize) {
-			toAlloc = maxSize - this->size;
+	if (m_ptr + size > m_size) {
+		size_t toAlloc = m_pageSize;
+		if (m_size + m_pageSize > m_maxSize) {
+			toAlloc = m_maxSize - m_size;
 		}
 
-		Platform::allocateMemory(toAlloc, ((size_t)memoryPtr)+this->size);
-		this->size += toAlloc;
+		Platform::allocateMemory(toAlloc, ((size_t)m_memoryPtr)+m_size);
+		m_size += toAlloc;
 	}
 
-	if (ptr + size > this->size) {
+	if (m_ptr + size > m_size) {
 		fprintf(stderr, "\nOut of memory\n");
 		printSize();
 		Platform::exitProgram(3);
 	}
 
-	size_t oldPtr = ptr;
-	ptr += size;
-	return memoryPtr + oldPtr;
+	size_t oldPtr = m_ptr;
+	m_ptr += size;
+	return m_memoryPtr + oldPtr;
 }
 
 void Memory::printSize()
 {
 	printf("Memory stats:\n");
-	printf("  Memory used: %zu bytes\n", ptr);
-	printf("  Memory commited: %zu bytes\n", size);
-	printf("  Free memory: %zu bytes\n", (size-ptr));
-	printf("  Max memory (reserved): %zu bytes\n", maxSize);
+	printf("  Memory used: %zu bytes\n", m_ptr);
+	printf("  Memory commited: %zu bytes\n", m_size);
+	printf("  Free memory: %zu bytes\n", (m_size-m_ptr));
+	printf("  Max memory (reserved): %zu bytes\n", m_maxSize);
 }

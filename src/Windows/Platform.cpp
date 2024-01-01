@@ -93,7 +93,7 @@ char* Platform::getFullPath(PlatformFile* file, char* charOut)
 		}
 	}
 
-	strcpy(charOut, absolutePath);
+	strncpy(charOut, absolutePath, 500);
 
 	return charOut;
 }

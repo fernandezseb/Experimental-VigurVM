@@ -100,9 +100,6 @@ CPInterfaceRef * ConstantPool::getInterfaceMethodRef(const u2 index) const {
 		fprintf(stderr, "Error: Trying to read interface method ref at non field interface method item in constant pool at: #%" PRIu16 "\n", index);
 		exit(1);
 	}
-	else {
-		return static_cast<CPInterfaceRef*>(item);
-	}
 
-	return nullptr;
+	return static_cast<CPInterfaceRef*>(item);
 }
