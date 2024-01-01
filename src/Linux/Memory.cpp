@@ -1,33 +1,33 @@
 #include "Memory.h"
 
 Memory::Memory(size_t size, size_t maxSize) 
-	: size(size), maxSize(maxSize)
+	: m_size(size), m_maxSize(maxSize)
 {
-	this->size = maxSize;
-	memoryPtr = (uint8_t*)Platform::allocateMemory(this->maxSize, 0);
+	m_size = maxSize;
+	memoryPtr = (uint8_t*)Platform::allocateMemory(m_maxSize, 0);
 }
 
 Memory::~Memory()
 {
-	Platform::freeMemory(memoryPtr);
+	Platform::freeMemory(m_memoryPtr);
 }
 
 void* Memory::alloc(size_t size)
 {
-	if (ptr + size > this->size) {
+	if (m_ptr + size > m_size) {
 		fprintf(stderr, "\nOut of memory\n");
 		printSize();
 		Platform::exitProgram(3);
 	}
 
-	size_t oldPtr = ptr;
-	ptr += size;
+	size_t oldPtr = m_ptr;
+	m_ptr += size;
 	return memoryPtr + oldPtr;
 }
 
 void Memory::printSize()
 {
 	printf("Memory stats:\n");
-	printf("  Memory used: %zu bytes\n", ptr);
-	printf("  Free memory: %zu bytes\n", (size-ptr));
+	printf("  Memory used: %zu bytes\n", m_ptr);
+	printf("  Free memory: %zu bytes\n", (m_size-m_ptr));
 }
