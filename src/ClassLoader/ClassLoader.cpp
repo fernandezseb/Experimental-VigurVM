@@ -247,15 +247,13 @@ ClassInfo* ClassLoader::readClass(const char* className, Memory* memory, const c
 {
     this->memory = memory;
     char name[300] = {0};
-    strcat(name, className);
-    strcat(name, ".class");
+    snprintf(name, 300, "%s.class", className);
     PlatformFile *file = Platform::getFile(name);
 
     if (file == NULL)
     {
         char cpName[300] = {0};
-        strcat(cpName, classPath);
-        strcat(cpName,  name);
+        snprintf(cpName, 300, "%s%s",classPath, name);
         file = Platform::getFile(cpName);
 
 

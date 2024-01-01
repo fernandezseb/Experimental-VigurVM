@@ -64,7 +64,7 @@ void VMThread::pushStackFrameVirtual(ClassInfo* classInfo, const MethodInfo* met
             [[maybe_unused]] const char* superClass = targetClass->constantPool->getString(ci->nameIndex);
             internalError("Failed to get the correct method on the object.\n"
                             " Searching on superclass and generic search is not implemented yet.");
-            printf("");
+            targetMethod = nullptr;
         }
     } else
     {
