@@ -22,7 +22,7 @@ void* Memory::alloc(size_t size)
 
 	size_t oldPtr = m_ptr;
 	m_ptr += size;
-	return memoryPtr + oldPtr;
+	return m_memoryPtr + oldPtr;
 }
 
 void Memory::printSize()
