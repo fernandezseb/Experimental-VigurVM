@@ -155,21 +155,21 @@ void VM::updateVariableFromVariable(Variable* variable, const char* descriptor, 
 
 static u1 readByte(VMThread* thread)
 {
-    return thread->currentMethod->code->code[thread->pc++];
+    return thread->m_currentMethod->code->code[thread->m_pc++];
 }
 
 [[maybe_unused]]
 static u2 readShort(VMThread* thread)
 {
-    uint8_t indexByte1 = thread->currentMethod->code->code[thread->pc++];
-    uint8_t indexByte2 = thread->currentMethod->code->code[thread->pc++];
+    uint8_t indexByte1 = thread->m_currentMethod->code->code[thread->m_pc++];
+    uint8_t indexByte2 = thread->m_currentMethod->code->code[thread->m_pc++];
     uint16_t shortCombined = (indexByte1 << 8) | indexByte2;
     return shortCombined;
 }
 
 void VM::executeLoop(VMThread* thread)
 {
-    while(!thread->stackstack.top().frames.empty())
+    while(!thread->m_stackstack.top().frames.empty())
     {
         uint8_t opcode = readByte(thread);
         printf("Running instruction with opcode: 0x%0x ", opcode);
@@ -218,22 +218,22 @@ void VM::runStaticInitializer(ClassInfo* classInfo, VMThread* thread)
         return;
     }
 
-    u4 oldPc = thread->pc;
-    ClassInfo* oldCurrentClass = thread->currentClass;
-    const MethodInfo* oldCurrentMethod = thread->currentMethod;
-    StackFrame* oldFrame = thread->currentFrame;
-    thread->stackstack.emplace(200);
+    u4 oldPc = thread->m_pc;
+    ClassInfo* oldCurrentClass = thread->m_currentClass;
+    const MethodInfo* oldCurrentMethod = thread->m_currentMethod;
+    StackFrame* oldFrame = thread->m_currentFrame;
+    thread->m_stackstack.emplace(200);
 
     thread->pushStackFrameWithoutParams(classInfo, entryPoint);
 
     printf("Executing static initializers...\n");
     executeLoop(thread);
 
-    thread->pc = oldPc;
-    thread->currentClass = oldCurrentClass;
-    thread->currentMethod = oldCurrentMethod;
-    thread->stackstack.pop();
-    thread->currentFrame = oldFrame;
+    thread->m_pc = oldPc;
+    thread->m_currentClass = oldCurrentClass;
+    thread->m_currentMethod = oldCurrentMethod;
+    thread->m_stackstack.pop();
+    thread->m_currentFrame = oldFrame;
 }
 
 ClassInfo* VM::getClass(const char* className, VMThread* thread)
@@ -270,9 +270,9 @@ void VM::runMain(const char* className)
         Platform::exitProgram(6);
     }
 
-    mainThread->pc = 0;
-    mainThread->currentClass = startupClass;
-    mainThread->currentMethod = entryPoint;
+    mainThread->m_pc = 0;
+    mainThread->m_currentClass = startupClass;
+    mainThread->m_currentMethod = entryPoint;
 
     mainThread->pushStackFrameStatic(startupClass, entryPoint, 0);
 

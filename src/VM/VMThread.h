@@ -10,20 +10,20 @@
 class VMThread
 {
 public:
-    u4 pc{0};
-    std::stack<JavaStack> stackstack;
+    u4 m_pc{0};
+    std::stack<JavaStack> m_stackstack;
     // Current frame
-    StackFrame* currentFrame{nullptr};
+    StackFrame* m_currentFrame{nullptr};
     // Current method
-    const MethodInfo* currentMethod{nullptr};
+    const MethodInfo* m_currentMethod{nullptr};
     // current class
-    ClassInfo* currentClass{nullptr};
-    const char* name{nullptr};
+    ClassInfo* m_currentClass{nullptr};
+    const char* m_name{nullptr};
 
     explicit VMThread(const char* name, const size_t frameSize) noexcept
-        : name(name)
+        : m_name(name)
     {
-        stackstack.emplace(frameSize);
+        m_stackstack.emplace(frameSize);
     }
     void pushStackFrameWithoutParams(ClassInfo* classInfo, const MethodInfo* methodInfo);
     void pushStackFrameStatic(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame);

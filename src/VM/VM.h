@@ -28,7 +28,7 @@ struct Instruction
     u1 args;
     const char* name;
     i1 arg;
-    void(*instructionFunction)(const u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM);
+    void(*instructionFunction)(INSTRUCTION_ARGS);
 };
 
 

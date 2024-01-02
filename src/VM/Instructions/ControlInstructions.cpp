@@ -10,61 +10,61 @@ void gotoInstruction(INSTRUCTION_ARGS)
 
     i2 branchByte = (byte1 << 8) | byte2;
 
-    thread->pc = thread->pc-3+branchByte;
+    thread->m_pc = thread->m_pc-3+branchByte;
 }
 
 void ireturnInstruction(INSTRUCTION_ARGS)
 {
-    StackFrame* stackFrame = thread->currentFrame;
-    thread->pc = stackFrame->previousPc;
-    thread->currentClass = stackFrame->previousClass;
-    thread->currentMethod = stackFrame->previousMethod;
+    StackFrame* stackFrame = thread->m_currentFrame;
+    thread->m_pc = stackFrame->previousPc;
+    thread->m_currentClass = stackFrame->previousClass;
+    thread->m_currentMethod = stackFrame->previousMethod;
 
-    Variable returnVal = thread->currentFrame->popOperand();
+    Variable returnVal = thread->m_currentFrame->popOperand();
 
-    thread->stackstack.top().frames.pop_back();
-    if (thread->stackstack.top().frames.size() > 0)
+    thread->m_stackstack.top().frames.pop_back();
+    if (thread->m_stackstack.top().frames.size() > 0)
     {
-        thread->currentFrame = &thread->stackstack.top().frames[thread->stackstack.top().frames.size()-1];
-        thread->currentFrame->operands.push_back(returnVal);
+        thread->m_currentFrame = &thread->m_stackstack.top().frames[thread->m_stackstack.top().frames.size()-1];
+        thread->m_currentFrame->operands.push_back(returnVal);
     } else
     {
-        thread->currentFrame = 0;
+        thread->m_currentFrame = 0;
     }
 }
 
 void areturnInstruction(INSTRUCTION_ARGS)
 {
-    StackFrame* stackFrame = thread->currentFrame;
-    thread->pc = stackFrame->previousPc;
-    thread->currentClass = stackFrame->previousClass;
-    thread->currentMethod = stackFrame->previousMethod;
+    StackFrame* stackFrame = thread->m_currentFrame;
+    thread->m_pc = stackFrame->previousPc;
+    thread->m_currentClass = stackFrame->previousClass;
+    thread->m_currentMethod = stackFrame->previousMethod;
 
-    Variable returnVal = thread->currentFrame->popOperand();
+    Variable returnVal = thread->m_currentFrame->popOperand();
 
-    thread->stackstack.top().frames.pop_back();
-    if (thread->stackstack.top().frames.size() > 0)
+    thread->m_stackstack.top().frames.pop_back();
+    if (thread->m_stackstack.top().frames.size() > 0)
     {
-        thread->currentFrame = &thread->stackstack.top().frames[thread->stackstack.top().frames.size()-1];
-        thread->currentFrame->operands.push_back(returnVal);
+        thread->m_currentFrame = &thread->m_stackstack.top().frames[thread->m_stackstack.top().frames.size()-1];
+        thread->m_currentFrame->operands.push_back(returnVal);
     } else
     {
-        thread->currentFrame = 0;
+        thread->m_currentFrame = 0;
     }
 }
 
 void returnInstruction(INSTRUCTION_ARGS)
 {
-    StackFrame* stackFrame = thread->currentFrame;
-    thread->pc = stackFrame->previousPc;
-    thread->currentClass = stackFrame->previousClass;
-    thread->currentMethod = stackFrame->previousMethod;
-    thread->stackstack.top().frames.pop_back();
-    if (thread->stackstack.top().frames.size() > 0)
+    StackFrame* stackFrame = thread->m_currentFrame;
+    thread->m_pc = stackFrame->previousPc;
+    thread->m_currentClass = stackFrame->previousClass;
+    thread->m_currentMethod = stackFrame->previousMethod;
+    thread->m_stackstack.top().frames.pop_back();
+    if (thread->m_stackstack.top().frames.size() > 0)
     {
-        thread->currentFrame = &thread->stackstack.top().frames[thread->stackstack.top().frames.size()-1];
+        thread->m_currentFrame = &thread->m_stackstack.top().frames[thread->m_stackstack.top().frames.size()-1];
     } else
     {
-        thread->currentFrame = 0;
+        thread->m_currentFrame = 0;
     }
 }

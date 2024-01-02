@@ -5,12 +5,12 @@
 
 void pop(INSTRUCTION_ARGS)
 {
-    thread->currentFrame->popOperand();
+    thread->m_currentFrame->popOperand();
 }
 
 void dup(INSTRUCTION_ARGS)
 {
-    const Variable top = thread->currentFrame->popOperand();
-    thread->currentFrame->operands.push_back(top);
-    thread->currentFrame->operands.push_back(top);
+    const Variable top = thread->m_currentFrame->popOperand();
+    thread->m_currentFrame->operands.push_back(top);
+    thread->m_currentFrame->operands.push_back(top);
 }

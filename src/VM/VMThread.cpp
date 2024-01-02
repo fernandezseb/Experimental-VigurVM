@@ -15,19 +15,19 @@ void VMThread::pushStackFrameWithoutParams(ClassInfo* classInfo, const MethodInf
     }
     stackFrame.operands.reserve(methodInfo->code->maxStack);
     stackFrame.constantPool = classInfo->constantPool;
-    stackFrame.previousPc = this->pc;
-    stackFrame.previousClass = this->currentClass;
-    stackFrame.previousMethod = this->currentMethod;
+    stackFrame.previousPc = m_pc;
+    stackFrame.previousClass = m_currentClass;
+    stackFrame.previousMethod = m_currentMethod;
     stackFrame.className = classInfo->getName();
     stackFrame.methodName = methodInfo->name;
 
 
-    this->pc = 0;
-    this->currentClass = classInfo;
-    this->currentMethod = methodInfo;
+    m_pc = 0;
+    m_currentClass = classInfo;
+    m_currentMethod = methodInfo;
 
-    this->stackstack.top().frames.push_back(stackFrame);
-    this->currentFrame = &this->stackstack.top().frames[this->stackstack.top().frames.size()-1];
+    this->m_stackstack.top().frames.push_back(stackFrame);
+    m_currentFrame = &this->m_stackstack.top().frames[this->m_stackstack.top().frames.size()-1];
 }
 
 void VMThread::pushStackFrameVirtual(ClassInfo* classInfo, const MethodInfo* methodInfo, StackFrame* previousFrame, JavaHeap* heap)
@@ -78,7 +78,7 @@ void VMThread::pushStackFrameVirtual(ClassInfo* classInfo, const MethodInfo* met
     {
         for (int i = 0; i <= methodInfo->argsCount; ++i)
         {
-            currentFrame->localVariables[i] = arguments[i];
+            m_currentFrame->localVariables[i] = arguments[i];
         }
     }
 }
@@ -107,24 +107,24 @@ void VMThread::pushStackFrameSpecial(ClassInfo* classInfo, const MethodInfo* met
     {
         for (int i = 0; i <= methodInfo->argsCount; ++i)
         {
-            currentFrame->localVariables[i] = arguments[i];
+            m_currentFrame->localVariables[i] = arguments[i];
         }
     }
 }
 
 void VMThread::internalError(const char* error)
 {
-    fprintf(stdout, "Unhandled VM error in thread \"%s\": %s\n", name, error);
-    while (!stackstack.empty()) {
-        if (!stackstack.top().frames.empty())
+    fprintf(stdout, "Unhandled VM error in thread \"%s\": %s\n", m_name, error);
+    while (!m_stackstack.empty()) {
+        if (!m_stackstack.top().frames.empty())
         {
-            for (i8 currentFrame = stackstack.top().frames.size() - 1; currentFrame >= 0; --currentFrame)
+            for (i8 currentFrame = m_stackstack.top().frames.size() - 1; currentFrame >= 0; --currentFrame)
             {
-                const StackFrame frame = stackstack.top().frames[currentFrame];
+                const StackFrame frame = m_stackstack.top().frames[currentFrame];
                 printf("    at %s.%s\n", frame.className, frame.methodName);
             }
         }
-        stackstack.pop();
+        m_stackstack.pop();
     }
     Platform::exitProgram(6);
 }
@@ -138,7 +138,7 @@ void VMThread::pushStackFrameStatic(ClassInfo* classInfo, MethodInfo* methodInfo
         // The arguments
         for (int i = methodInfo->argsCount; i > 0; --i)
         {
-            this->currentFrame->localVariables[i-1] = previousFrame->popOperand();
+            m_currentFrame->localVariables[i-1] = previousFrame->popOperand();
         }
     }
 }

@@ -9,8 +9,8 @@
 
 static u2 readShort(VMThread* thread)
 {
-    uint8_t indexByte1 = thread->currentMethod->code->code[thread->pc++];
-    uint8_t indexByte2 = thread->currentMethod->code->code[thread->pc++];
+    uint8_t indexByte1 = thread->m_currentMethod->code->code[thread->m_pc++];
+    uint8_t indexByte2 = thread->m_currentMethod->code->code[thread->m_pc++];
     uint16_t shortCombined = (indexByte1 << 8) | indexByte2;
     return shortCombined;
 }
@@ -23,14 +23,14 @@ static u2 readShort(VMThread* thread)
 void getstatic(INSTRUCTION_ARGS)
 {
     uint16_t index = readShort(thread);
-    CPFieldRef* fieldRef =  thread->currentFrame->constantPool->getFieldRef(index);
-    CPClassInfo* classInfo =  thread->currentFrame->constantPool->getClassInfo(fieldRef->classIndex);
-    CPNameAndTypeInfo* nameAndType = thread->currentFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
-    const char* className = thread->currentFrame->constantPool->getString(classInfo->nameIndex);
+    CPFieldRef* fieldRef =  thread->m_currentFrame->constantPool->getFieldRef(index);
+    CPClassInfo* classInfo =  thread->m_currentFrame->constantPool->getClassInfo(fieldRef->classIndex);
+    CPNameAndTypeInfo* nameAndType = thread->m_currentFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
+    const char* className = thread->m_currentFrame->constantPool->getString(classInfo->nameIndex);
     ClassInfo* targetClass = VM->getClass(className, thread);
-    FieldInfo* targetField = targetClass->findField(thread->currentFrame->constantPool->getString(nameAndType->nameIndex),
-        thread->currentFrame->constantPool->getString(nameAndType->descriptorIndex));
-    const char* descriptor = thread->currentFrame->constantPool->getString(nameAndType->descriptorIndex);
+    FieldInfo* targetField = targetClass->findField(thread->m_currentFrame->constantPool->getString(nameAndType->nameIndex),
+        thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex));
+    const char* descriptor = thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex);
     const u1 varCount = VM::getDescriptorVarCategory(descriptor);
     // TODO: Check type
     Variable *vars = targetField->staticData;
@@ -40,27 +40,27 @@ void getstatic(INSTRUCTION_ARGS)
         {
             thread->internalError("Error: Unitialized field not supported in getstatic yet");
         }
-        thread->currentFrame->operands.push_back(vars[currentVar]);
+        thread->m_currentFrame->operands.push_back(vars[currentVar]);
     }
 }
 
 void putstatic(INSTRUCTION_ARGS)
 {
     uint16_t index = readShort(thread);
-    CPFieldRef* fieldRef =  thread->currentFrame->constantPool->getFieldRef(index);
-    CPClassInfo* classInfo =  thread->currentFrame->constantPool->getClassInfo(fieldRef->classIndex);
-    CPNameAndTypeInfo* nameAndType = thread->currentFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
-    const char* className = thread->currentFrame->constantPool->getString(classInfo->nameIndex);
+    CPFieldRef* fieldRef =  thread->m_currentFrame->constantPool->getFieldRef(index);
+    CPClassInfo* classInfo =  thread->m_currentFrame->constantPool->getClassInfo(fieldRef->classIndex);
+    CPNameAndTypeInfo* nameAndType = thread->m_currentFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
+    const char* className = thread->m_currentFrame->constantPool->getString(classInfo->nameIndex);
     ClassInfo* targetClass = VM->getClass(className, thread);
-    FieldInfo* targetField = targetClass->findField(thread->currentFrame->constantPool->getString(nameAndType->nameIndex),
-        thread->currentFrame->constantPool->getString(nameAndType->descriptorIndex));
-    const char* descriptor = thread->currentFrame->constantPool->getString(nameAndType->descriptorIndex);
+    FieldInfo* targetField = targetClass->findField(thread->m_currentFrame->constantPool->getString(nameAndType->nameIndex),
+        thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex));
+    const char* descriptor = thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex);
     const u1 varCount = VM::getDescriptorVarCategory(descriptor);
-    Variable var = thread->currentFrame->popOperand();
+    Variable var = thread->m_currentFrame->popOperand();
     Variable var2{VariableType_UNDEFINED};
     if (varCount == 2)
     {
-        var2 = thread->currentFrame->popOperand();
+        var2 = thread->m_currentFrame->popOperand();
     }
     VM->updateVariableFromVariable(targetField->staticData, descriptor, var, var2, thread);
 }
@@ -68,17 +68,17 @@ void putstatic(INSTRUCTION_ARGS)
 void getfield(INSTRUCTION_ARGS)
 {
     uint16_t index = readShort(thread);
-    CPFieldRef* fieldRef = thread->currentFrame->constantPool->getFieldRef(index);
-    CPClassInfo* cpClassInfo = thread->currentFrame->constantPool->getClassInfo(fieldRef->classIndex);
-    CPNameAndTypeInfo* nameAndType = thread->currentFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
+    CPFieldRef* fieldRef = thread->m_currentFrame->constantPool->getFieldRef(index);
+    CPClassInfo* cpClassInfo = thread->m_currentFrame->constantPool->getClassInfo(fieldRef->classIndex);
+    CPNameAndTypeInfo* nameAndType = thread->m_currentFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
 
-    const char* className = thread->currentFrame->constantPool->getString(cpClassInfo->nameIndex);
+    const char* className = thread->m_currentFrame->constantPool->getString(cpClassInfo->nameIndex);
     ClassInfo* targetClass = VM->getClass(className, thread);
-    const char* fieldName = thread->currentFrame->constantPool->getString(nameAndType->nameIndex);
-    const char* fieldDescr = thread->currentFrame->constantPool->getString(nameAndType->descriptorIndex);
+    const char* fieldName = thread->m_currentFrame->constantPool->getString(nameAndType->nameIndex);
+    const char* fieldDescr = thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex);
 
 
-    Variable referencePointer = thread->currentFrame->popOperand();
+    Variable referencePointer = thread->m_currentFrame->popOperand();
 
     if (referencePointer.type != VariableType_REFERENCE)
     {
@@ -102,7 +102,7 @@ void getfield(INSTRUCTION_ARGS)
         Variable* vars = field->data;
         for (u1 currentVar = 0; currentVar < field->dataSize; ++currentVar)
         {
-            thread->currentFrame->operands.push_back(vars[currentVar]);
+            thread->m_currentFrame->operands.push_back(vars[currentVar]);
         }
     }
 }
@@ -110,22 +110,22 @@ void getfield(INSTRUCTION_ARGS)
 void putfield(INSTRUCTION_ARGS)
 {
     uint16_t index = readShort(thread);
-    CPFieldRef* fieldRef = thread->currentFrame->constantPool->getFieldRef(index);
-    CPClassInfo* cpClassInfo = thread->currentFrame->constantPool->getClassInfo(fieldRef->classIndex);
-    CPNameAndTypeInfo* nameAndType = thread->currentFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
+    CPFieldRef* fieldRef = thread->m_currentFrame->constantPool->getFieldRef(index);
+    CPClassInfo* cpClassInfo = thread->m_currentFrame->constantPool->getClassInfo(fieldRef->classIndex);
+    CPNameAndTypeInfo* nameAndType = thread->m_currentFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
 
-    const char* className = thread->currentFrame->constantPool->getString(cpClassInfo->nameIndex);
+    const char* className = thread->m_currentFrame->constantPool->getString(cpClassInfo->nameIndex);
     ClassInfo* targetClass = VM->getClass(className, thread);
-    const char* fieldName = thread->currentFrame->constantPool->getString(nameAndType->nameIndex);
-    const char* fieldDescr = thread->currentFrame->constantPool->getString(nameAndType->descriptorIndex);
+    const char* fieldName = thread->m_currentFrame->constantPool->getString(nameAndType->nameIndex);
+    const char* fieldDescr = thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex);
 
-    Variable targetValue = thread->currentFrame->popOperand();
+    Variable targetValue = thread->m_currentFrame->popOperand();
     Variable targetValue2{VariableType_UNDEFINED};
     if (targetValue.getCategory() == 2)
     {
-        targetValue2 = thread->currentFrame->popOperand();
+        targetValue2 = thread->m_currentFrame->popOperand();
     }
-    Variable referencePointer = thread->currentFrame->popOperand();
+    Variable referencePointer = thread->m_currentFrame->popOperand();
 
     Object* targetObject = heap->getChildObject(referencePointer.data, targetClass);
 
@@ -143,7 +143,7 @@ void putfield(INSTRUCTION_ARGS)
 
 void invokevirtual(INSTRUCTION_ARGS)
 {
-    StackFrame* topFrame = thread->currentFrame;
+    StackFrame* topFrame = thread->m_currentFrame;
     const u2 index = readShort(thread);
     const CPMethodRef* methodRef = topFrame->constantPool->getMethodRef(index);
     const CPClassInfo* cpClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
@@ -168,7 +168,7 @@ void invokevirtual(INSTRUCTION_ARGS)
 
 void invokespecial(INSTRUCTION_ARGS)
 {
-    StackFrame* topFrame = thread->currentFrame;
+    StackFrame* topFrame = thread->m_currentFrame;
     uint16_t index = readShort(thread);
     CPMethodRef* methodRef = topFrame->constantPool->getMethodRef(index);
     CPClassInfo* cpClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
@@ -183,13 +183,13 @@ void invokespecial(INSTRUCTION_ARGS)
 
     // TODO: Check argument types
     thread->pushStackFrameSpecial(targetClassInfo, methodInfo, topFrame, heap);
-    printf("> Created new stack frame for method call %s on: %s\n", thread->currentFrame->methodName, thread->currentFrame->className);
+    printf("> Created new stack frame for method call %s on: %s\n", thread->m_currentFrame->methodName, thread->m_currentFrame->className);
 
 }
 
 void invokestatic(INSTRUCTION_ARGS)
 {
-    StackFrame* topFrame = thread->currentFrame;
+    StackFrame* topFrame = thread->m_currentFrame;
     uint16_t index = readShort(thread);
     CPMethodRef* methodRef = topFrame->constantPool->getMethodRef(index);
     CPClassInfo* targetClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
@@ -231,10 +231,10 @@ void invokestatic(INSTRUCTION_ARGS)
 }
 
 void invokeinterface(INSTRUCTION_ARGS) {
-    StackFrame* topFrame = thread->currentFrame;
+    StackFrame* topFrame = thread->m_currentFrame;
     const u2 index = combineBytes(args[0], args[1]);
     [[maybe_unused]] const u1 count = args[2];
-    CPInterfaceRef* interfaceMethodRef =  thread->currentClass->constantPool->getInterfaceMethodRef(index);
+    CPInterfaceRef* interfaceMethodRef =  thread->m_currentClass->constantPool->getInterfaceMethodRef(index);
     CPClassInfo* targetClassInfo = topFrame->constantPool->getClassInfo(interfaceMethodRef->classIndex);
     CPNameAndTypeInfo* nameAndTypeInfo = topFrame->constantPool->getNameAndTypeInfo(interfaceMethodRef->nameAndTypeIndex);
     ClassInfo* targetClass = VM->getClass(topFrame->constantPool->getString(targetClassInfo->nameIndex), thread);
@@ -249,13 +249,13 @@ void invokeinterface(INSTRUCTION_ARGS) {
     } else
     {
         thread->pushStackFrameVirtual(targetClass, methodInfo, topFrame, heap);
-        printf("> Created new stack frame for virtual call on: %s.%s()\n", thread->currentFrame->className, thread->currentFrame->methodName);
+        printf("> Created new stack frame for virtual call on: %s.%s()\n", thread->m_currentFrame->className, thread->m_currentFrame->methodName);
     }
 }
 
 void newInstruction(INSTRUCTION_ARGS)
 {
-    StackFrame* topFrame = thread->currentFrame;
+    StackFrame* topFrame = thread->m_currentFrame;
     uint16_t index = readShort(thread);
     CPClassInfo* cpClasInfo = topFrame->constantPool->getClassInfo(index);
     ClassInfo* targetClass = VM->getClass(topFrame->constantPool->getString(cpClasInfo->nameIndex), thread);
@@ -285,18 +285,18 @@ void newarray(INSTRUCTION_ARGS)
 
     ArrayType type = (ArrayType) typeArg;
 
-    const Variable countVar = thread->currentFrame->popOperand();
+    const Variable countVar = thread->m_currentFrame->popOperand();
     VM->checkType(countVar, VariableType_INT, thread);
 
     const uint32_t reference = heap->createArray(type, countVar.data);
     const Variable variable{VariableType_REFERENCE, reference};
 
-    thread->currentFrame->operands.push_back(variable);
+    thread->m_currentFrame->operands.push_back(variable);
 }
 
 void anewarray(INSTRUCTION_ARGS)
 {
-    StackFrame* topFrame = thread->currentFrame;
+    StackFrame* topFrame = thread->m_currentFrame;
     uint16_t index = readShort(thread);
     CPClassInfo* cpclassInfo = topFrame->constantPool->getClassInfo(index);
     [[maybe_unused]] ClassInfo* classInfo = VM->getClass(topFrame->constantPool->getString(cpclassInfo->nameIndex), thread);
@@ -316,18 +316,18 @@ void anewarray(INSTRUCTION_ARGS)
 
 void arraylength(INSTRUCTION_ARGS)
 {
-    const Variable arrayRef = thread->currentFrame->popOperand();
+    const Variable arrayRef = thread->m_currentFrame->popOperand();
     VM->checkType(arrayRef, VariableType_REFERENCE, thread);
     const Array* array = heap->getArray(arrayRef.data);
 
     const Variable lengthVar{VariableType_INT, static_cast<uint32_t>(array->length)};
-    thread->currentFrame->operands.push_back(lengthVar);
+    thread->m_currentFrame->operands.push_back(lengthVar);
 }
 
 void monitorenter(INSTRUCTION_ARGS)
 {
     // TODO: Implement when real threading is implemented
-    Variable ref = thread->currentFrame->popOperand();
+    Variable ref = thread->m_currentFrame->popOperand();
     if (ref.type != VariableType_REFERENCE)
     {
         thread->internalError("Expected object reference on stack");
@@ -342,7 +342,7 @@ void monitorenter(INSTRUCTION_ARGS)
 void monitorexit(INSTRUCTION_ARGS)
 {
     // TODO: Implement when real threading is implemented
-    Variable ref = thread->currentFrame->popOperand();
+    Variable ref = thread->m_currentFrame->popOperand();
     if (ref.type != VariableType_REFERENCE)
     {
         fprintf(stderr, "Error: Expected object reference on stack\n");

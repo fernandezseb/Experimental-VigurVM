@@ -13,10 +13,11 @@ public:
 	uint16_t descriptorIndex;
 	bool isPrivate;
 	AttributeCollection* attributes;
-	bool isStatic() const {
+	Variable* staticData;
+
+	[[nodiscard]] bool isStatic() const {
 		return ((accessFlags & ACC_STATIC) != 0);
 	}
-	Variable* staticData;
 };
 
 class MethodInfo {
@@ -31,23 +32,23 @@ public:
 	uint16_t argsCount;
 	const char* name;
 public:
-	bool isStatic() const {
+	[[nodiscard]] bool isStatic() const {
 		return ((accessFlags & ACC_STATIC) != 0);
 	}
 
-	bool isPublic() const {
+	[[nodiscard]] bool isPublic() const {
 		return ((accessFlags & ACC_PUBLIC) != 0);
 	}
 
-	bool isNative() const {
+	[[nodiscard]] bool isNative() const {
 		return ((accessFlags & ACC_NATIVE) != 0);
 	}
 
-	bool isConstructor() const {
-		return (strcmp(name, "<init>") == 0);
+	[[nodiscard]] bool isConstructor() const {
+		return name != nullptr && (strcmp(name, "<init>") == 0);
 	}
 
-	bool isAbstract() const {
+	[[nodiscard]] bool isAbstract() const {
 		return ((accessFlags & ACC_ABSTRACT) != 0);
 	}
 };
@@ -80,12 +81,12 @@ public:
 	Variable* staticFields; // An array of data for all static fields, the field also has a copy of this data (could be 1 or 2 items)
 	uint16_t staticFieldsCount; // Total amount of static fields
 public:
-	bool isPublic() const {
+	[[nodiscard]] bool isPublic() const {
 		return ((accessFlags & ACC_PUBLIC) != 0);
 	}
 
 	// TODO: Remove
-	MethodInfo* findMethodWithName(const char* name) const
+	[[nodiscard]] MethodInfo* findMethodWithName(const char* name) const
 	{
 		for (uint16_t currentMethod = 0; currentMethod < methodCount; ++currentMethod) {
 			if (strcmp(methods[currentMethod]->name, name) == 0)
@@ -96,7 +97,7 @@ public:
 		return nullptr;
 	}
 
-	MethodInfo* findMethodWithNameAndDescriptor(const char* name, const char* descriptor) const
+	[[nodiscard]] MethodInfo* findMethodWithNameAndDescriptor(const char* name, const char* descriptor) const
 	{
 		for (uint16_t currentMethod = 0; currentMethod < methodCount; ++currentMethod) {
 			if (strcmp(methods[currentMethod]->name, name) == 0

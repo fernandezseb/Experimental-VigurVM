@@ -6,36 +6,36 @@
 
 void istore(INSTRUCTION_ARGS)
 {
-    const Variable refVar = thread->currentFrame->popOperand();
+    const Variable refVar = thread->m_currentFrame->popOperand();
     const u1 index = args[0];
-    thread->currentFrame->localVariables[index] = refVar;
+    thread->m_currentFrame->localVariables[index] = refVar;
 }
 
 void astore(INSTRUCTION_ARGS)
 {
-    const Variable refVar = thread->currentFrame->popOperand();
+    const Variable refVar = thread->m_currentFrame->popOperand();
     const u1 index = args[0];
-    thread->currentFrame->localVariables[index] = refVar;
+    thread->m_currentFrame->localVariables[index] = refVar;
 }
 
 void istore_i(INSTRUCTION_ARGS)
 {
-    const Variable refVar = thread->currentFrame->popOperand();
+    const Variable refVar = thread->m_currentFrame->popOperand();
     VM::checkType(refVar, VariableType_INT, thread);
-    thread->currentFrame->localVariables[arg] = refVar;
+    thread->m_currentFrame->localVariables[arg] = refVar;
 }
 
 void astore_i(INSTRUCTION_ARGS)
 {
-    const Variable refVar = thread->currentFrame->popOperand();
-    thread->currentFrame->localVariables[arg] = refVar;
+    const Variable refVar = thread->m_currentFrame->popOperand();
+    thread->m_currentFrame->localVariables[arg] = refVar;
 }
 
 void iastore(INSTRUCTION_ARGS)
 {
-    Variable value = thread->currentFrame->popOperand();
-    const Variable index = thread->currentFrame->popOperand();
-    const Variable arrayref = thread->currentFrame->popOperand();
+    Variable value = thread->m_currentFrame->popOperand();
+    const Variable index = thread->m_currentFrame->popOperand();
+    const Variable arrayref = thread->m_currentFrame->popOperand();
 
     const Array* array = heap->getArray(arrayref.data);
     i4* intArray = reinterpret_cast<i4*>(array->data);
@@ -44,7 +44,7 @@ void iastore(INSTRUCTION_ARGS)
 
 void aastore(INSTRUCTION_ARGS)
 {
-    StackFrame* currentFrame = thread->currentFrame;
+    StackFrame* currentFrame = thread->m_currentFrame;
     const Variable value = currentFrame->popOperand();
     const Variable index = currentFrame->popOperand();
     const Variable arrayRef = currentFrame->popOperand();
@@ -66,7 +66,7 @@ void aastore(INSTRUCTION_ARGS)
 
 void castore(INSTRUCTION_ARGS)
 {
-    StackFrame* currentFrame = thread->currentFrame;
+    StackFrame* currentFrame = thread->m_currentFrame;
     const Variable value = currentFrame->popOperand();
     const Variable index = currentFrame->popOperand();
     const Variable arrayref = currentFrame->popOperand();
