@@ -9,7 +9,7 @@
 #include <variant>
 
 VM::VM(const Configuration configuration) noexcept
-    : bootstrapClassLoader(), configuration(configuration)
+    : m_bootstrapClassLoader(), m_configuration(configuration)
 {
 }
 
@@ -191,7 +191,7 @@ void VM::executeLoop(VMThread* thread)
                     }
                 }
                 if (instruction.instructionFunction != NULL) {
-                    instruction.instructionFunction(args, instruction.args, instruction.arg, &heap, thread, this);
+                    instruction.instructionFunction(args, instruction.args, instruction.arg, &m_heap, thread, this);
                 }
                 break;
             }
@@ -239,13 +239,13 @@ void VM::runStaticInitializer(ClassInfo* classInfo, VMThread* thread)
 
 ClassInfo* VM::getClass(const char* className, VMThread* thread)
 {
-    ClassInfo* classInfo = heap.getClassByName(className);
+    ClassInfo* classInfo = m_heap.getClassByName(className);
     if (classInfo == nullptr) {
         Memory *memory = new Memory(MIB(1), MIB(30));
         printf("Loading class %s...\n", className);
-        classInfo = bootstrapClassLoader.readClass(className, memory, configuration.classPath);
+        classInfo = m_bootstrapClassLoader.readClass(className, memory, m_configuration.classPath);
         initStaticFields(classInfo, thread);
-        heap.addClassInfo(classInfo);
+        m_heap.addClassInfo(classInfo);
         runStaticInitializer(classInfo, thread);
         return classInfo;
     }

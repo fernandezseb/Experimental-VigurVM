@@ -139,10 +139,10 @@ private:
         // Extended
         {i_ifnonnull, 0, "ifnonnull", 0, ifnonnull},
     };
-    ClassLoader bootstrapClassLoader;
-    JavaHeap heap;
+    ClassLoader m_bootstrapClassLoader;
+    JavaHeap m_heap;
     VMThread m_mainThread{"main", 200};
-    Configuration configuration;
+    Configuration m_configuration;
     void initStaticFields(ClassInfo* class_info, VMThread* thread);
     void executeLoop(VMThread* thread);
     void runStaticInitializer(ClassInfo* classInfo, VMThread* thread);
