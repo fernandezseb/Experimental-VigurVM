@@ -218,7 +218,7 @@ void VM::runStaticInitializer(ClassInfo* classInfo, VMThread* thread)
         return;
     }
 
-    u4 oldPc = thread->m_pc;
+    const u4 oldPc = thread->m_pc;
     ClassInfo* oldCurrentClass = thread->m_currentClass;
     const MethodInfo* oldCurrentMethod = thread->m_currentMethod;
     StackFrame* oldFrame = thread->m_currentFrame;

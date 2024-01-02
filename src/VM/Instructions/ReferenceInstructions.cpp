@@ -141,6 +141,77 @@ void putfield(INSTRUCTION_ARGS)
     }
 }
 
+static void invokeVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread* thread, VM* VM, JavaHeap* heap) {
+    StackFrame* topFrame = thread->m_currentFrame;
+    std::deque<Variable> arguments;
+
+    MethodInfo* targetMethod = nullptr;
+    ClassInfo* targetClass = nullptr;
+
+    if (topFrame != nullptr)
+    {
+        // The arguments and the pointer to the object
+        for (int i = methodInfo->argsCount; i >= 0; --i)
+        {
+            arguments.push_front(topFrame->popOperand());
+        }
+
+        const Variable ref = arguments[0];
+        if (ref.type == VariableType_REFERENCE && ref.data == 0)
+        {
+            thread->internalError("NullpointerException in virtual call");
+        }
+
+        // Look for method based on the object
+        Object* object = heap->getObject(ref.data);
+        targetClass = object->classInfo;
+        MethodInfo* foundMethod = targetClass->findMethodWithNameAndDescriptor(methodInfo->name,
+            classInfo->constantPool->getString(methodInfo->descriptorIndex));
+        if (foundMethod != nullptr)
+        {
+            targetMethod = foundMethod;
+        } else
+        {
+
+            ClassInfo* currentClass = targetClass;
+            while (currentClass->superClass != 0) {
+                CPClassInfo* ci = currentClass->constantPool->getClassInfo(currentClass->superClass);
+                [[maybe_unused]] const char* superClass = currentClass->constantPool->getString(ci->nameIndex);
+                currentClass = VM->getClass(superClass, thread);
+                if (currentClass != nullptr) {
+                    foundMethod = currentClass->findMethodWithNameAndDescriptor(methodInfo->name,
+                classInfo->constantPool->getString(methodInfo->descriptorIndex));
+                    if (foundMethod != nullptr) {
+                        targetClass = currentClass;
+                        targetMethod = foundMethod;
+                        break;
+                    }
+                } else {
+                    break;
+                }
+            }
+
+            if (foundMethod == nullptr) {
+                thread->internalError("Failed to get the correct method on the object.\n"
+                                " Searching on superclass and generic search is not implemented yet.");
+            }
+        }
+    }
+
+    if (methodInfo->isNative()) {
+        thread->internalError("Native virtual methods are not implemented yet");
+    } else {
+        thread->pushStackFrameWithoutParams(targetClass, targetMethod);
+        if (!arguments.empty())
+        {
+            for (int i = 0; i <= methodInfo->argsCount; ++i)
+            {
+                thread->m_currentFrame->localVariables[i] = arguments[i];
+            }
+        }
+    }
+}
+
 void invokevirtual(INSTRUCTION_ARGS)
 {
     StackFrame* topFrame = thread->m_currentFrame;
@@ -152,18 +223,10 @@ void invokevirtual(INSTRUCTION_ARGS)
     const char* methodDescriptor = topFrame->constantPool->getString(nameAndTypeInfo->descriptorIndex);
     const char* className = topFrame->constantPool->getString(cpClassInfo->nameIndex);
     ClassInfo* targetClassInfo = VM->getClass(className, thread);
-    const MethodInfo* methodInfo = targetClassInfo->findMethodWithNameAndDescriptor(methodName, methodDescriptor);
+    MethodInfo* methodInfo = targetClassInfo->findMethodWithNameAndDescriptor(methodName, methodDescriptor);
 
-    if (methodInfo->isNative())
-    {
-        // TODO: Implement virtual native calls
-        // TODO: In the future we maybe should create a new stackframe for native callS?
-        thread->internalError("Virtual native methods are not supported yet!");
-    } else
-    {
-        thread->pushStackFrameVirtual(targetClassInfo, methodInfo, topFrame, heap);
-        printf("> Created new stack frame for virtual call on: %s.%s()\n", className, methodName);
-    }
+    invokeVirtual(targetClassInfo, methodInfo, thread, VM, heap);
+    printf("> Created new stack frame for virtual call on: %s.%s()\n", className, methodName);
 }
 
 void invokespecial(INSTRUCTION_ARGS)
@@ -184,7 +247,6 @@ void invokespecial(INSTRUCTION_ARGS)
     // TODO: Check argument types
     thread->pushStackFrameSpecial(targetClassInfo, methodInfo, topFrame, heap);
     printf("> Created new stack frame for method call %s on: %s\n", thread->m_currentFrame->methodName, thread->m_currentFrame->className);
-
 }
 
 void invokestatic(INSTRUCTION_ARGS)
@@ -241,16 +303,8 @@ void invokeinterface(INSTRUCTION_ARGS) {
     // TODO: Take in account descriptor of method as well, for overriding and such
     MethodInfo* methodInfo = targetClass->findMethodWithName(topFrame->constantPool->getString(nameAndTypeInfo->nameIndex));
 
-    if (methodInfo->isNative())
-    {
-        // TODO: Implement virtual native calls
-        // TODO: In the future we maybe should create a new stackframe for native callS?
-        thread->internalError("Virtual native methods are not supported yet!");
-    } else
-    {
-        thread->pushStackFrameVirtual(targetClass, methodInfo, topFrame, heap);
-        printf("> Created new stack frame for virtual call on: %s.%s()\n", thread->m_currentFrame->className, thread->m_currentFrame->methodName);
-    }
+    invokeVirtual(targetClass, methodInfo, thread, VM, heap);
+    printf("> Created new stack frame for virtual call on: %s.%s()\n", thread->m_currentFrame->className, thread->m_currentFrame->methodName);
 }
 
 void newInstruction(INSTRUCTION_ARGS)

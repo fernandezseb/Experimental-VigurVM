@@ -30,58 +30,6 @@ void VMThread::pushStackFrameWithoutParams(ClassInfo* classInfo, const MethodInf
     m_currentFrame = &this->m_stackstack.top().frames[this->m_stackstack.top().frames.size()-1];
 }
 
-void VMThread::pushStackFrameVirtual(ClassInfo* classInfo, const MethodInfo* methodInfo, StackFrame* previousFrame, JavaHeap* heap)
-{
-    std::deque<Variable> arguments;
-    const MethodInfo* targetMethod;
-    ClassInfo* targetClass;
-    if (previousFrame != nullptr)
-    {
-        // The arguments and the pointer to the object
-        for (int i = methodInfo->argsCount; i >= 0; --i)
-        {
-            arguments.push_front(previousFrame->popOperand());
-        }
-
-        const Variable ref = arguments[0];
-        if (ref.type == VariableType_REFERENCE && ref.data == 0)
-        {
-            internalError("NullpointerException in virtual call");
-        }
-
-        // Look for method based on the object
-        Object* object = heap->getObject(ref.data);
-        targetClass = object->classInfo;
-        MethodInfo* foundMethod = targetClass->findMethodWithNameAndDescriptor(methodInfo->name,
-            classInfo->constantPool->getString(methodInfo->descriptorIndex));
-        if (foundMethod != nullptr)
-        {
-            targetMethod = foundMethod;
-        } else
-        {
-
-            CPClassInfo* ci = targetClass->constantPool->getClassInfo(targetClass->superClass);
-            [[maybe_unused]] const char* superClass = targetClass->constantPool->getString(ci->nameIndex);
-            internalError("Failed to get the correct method on the object.\n"
-                            " Searching on superclass and generic search is not implemented yet.");
-            targetMethod = nullptr;
-        }
-    } else
-    {
-        targetMethod = methodInfo;
-        targetClass = classInfo;
-    }
-
-
-    pushStackFrameWithoutParams(targetClass, targetMethod);
-    if (!arguments.empty())
-    {
-        for (int i = 0; i <= methodInfo->argsCount; ++i)
-        {
-            m_currentFrame->localVariables[i] = arguments[i];
-        }
-    }
-}
 
 void VMThread::pushStackFrameSpecial(ClassInfo* classInfo, const MethodInfo* methodInfo, StackFrame* previousFrame,
     [[maybe_unused]] JavaHeap* heap)

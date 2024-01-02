@@ -196,7 +196,7 @@ Object* JavaHeap::getObject(const uint32_t id) const
         Platform::exitProgram(1);
     }
     Reference* ref = objects[id];
-    if (ref->type == OBJECT)
+    if (ref->type == OBJECT || ref->type == CLASSOBJECT)
     {
         return static_cast<Object*>(objects[id]);
     } else
