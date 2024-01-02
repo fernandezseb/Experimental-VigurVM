@@ -5,6 +5,7 @@
 #include "Library/Builtin.h"
 
 #include <stack>
+#include <string>
 #include <variant>
 
 VM::VM(const Configuration configuration) noexcept
@@ -249,6 +250,29 @@ ClassInfo* VM::getClass(const char* className, VMThread* thread)
         return classInfo;
     }
     return classInfo;
+}
+
+void VM::executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* methodInfo, JavaHeap* heap, VMThread* thread)
+{
+    // TODO: Push native stackframe before executing and pop after executing
+    const char* className = targetClass->getName();
+    printf("Running native code of method: %s\n", className);
+    const char* description = targetClass->constantPool->getString(methodInfo->descriptorIndex);
+    const char* methodName = methodInfo->name;
+    std::string fullName = className;
+    fullName += "/";
+    fullName += methodName;
+    nativeImplementation impl = findNativeMethod(fullName.c_str(), description);
+    if (impl != nullptr)
+    {
+        impl(heap, thread, this);
+    }
+    else
+    {
+        char errorString[400];
+        snprintf(errorString, 400, "Can't find native method %s %s", fullName.c_str(), description);
+        thread->internalError(errorString);
+    }
 }
 
 void VM::runMain(const char* className)

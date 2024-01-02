@@ -199,7 +199,7 @@ static void invokeVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread
     }
 
     if (methodInfo->isNative()) {
-        thread->internalError("Native virtual methods are not implemented yet");
+        VM->executeNativeMethod(targetClass, targetMethod, heap, thread);
     } else {
         thread->pushStackFrameWithoutParams(targetClass, targetMethod);
         if (!arguments.empty())
@@ -267,23 +267,7 @@ void invokestatic(INSTRUCTION_ARGS)
 
     if (methodInfo->isNative())
     {
-        const char* className = targetClass->getName();
-        printf("Running native code of method: %s\n", methodInfo->name);
-        const char* description = topFrame->constantPool->getString(nameAndTypeInfo->descriptorIndex);
-        const char* methodName = methodInfo->name;
-        std::string fullName = className;
-        fullName += "/";
-        fullName += methodName;
-        nativeImplementation impl = findNativeMethod(fullName.c_str(), description);
-        if (impl != nullptr)
-        {
-            impl(heap, thread, VM);
-        } else
-        {
-            char errorString[400];
-            snprintf(errorString, 400, "Can't find native method %s%s", fullName.c_str(), description);
-            thread->internalError(errorString);
-        }
+        VM->executeNativeMethod(targetClass, methodInfo, heap, thread);
     } else
     {
         thread->pushStackFrameStatic(targetClass, methodInfo, topFrame);

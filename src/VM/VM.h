@@ -40,6 +40,7 @@ public:
     [[nodiscard]] static u1 getDescriptorVarCategory(const char* descriptor) noexcept;
     void start();
     ClassInfo* getClass(const char* className, VMThread* thread);
+    void executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* methodInfo, JavaHeap* heap, VMThread* thread);
     void runMain(const char* className);
     void shutdown();
     static void checkType(Variable var, VariableType type, VMThread *thread);
