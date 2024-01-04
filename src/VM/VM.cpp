@@ -243,7 +243,7 @@ ClassInfo* VM::getClass(const char* className, VMThread* thread)
     if (classInfo == nullptr) {
         Memory *memory = new Memory(MIB(1), MIB(30));
         printf("Loading class %s...\n", className);
-        classInfo = m_bootstrapClassLoader.readClass(className, memory, m_configuration.classPath);
+        classInfo = m_bootstrapClassLoader.readClass(className, memory, m_configuration.classPath.data());
         initStaticFields(classInfo, thread);
         m_heap.addClassInfo(classInfo);
         runStaticInitializer(classInfo, thread);
@@ -275,17 +275,17 @@ void VM::executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* met
     }
 }
 
-void VM::runMain(const char* className)
+void VM::runMain()
 {
     VMThread* mainThread = &m_mainThread;
-    if (className == nullptr)
+    if (m_configuration.mainClassName.empty())
     {
         fprintf(stderr, "Error: Class name of starting class not defined..\n");
         Platform::exitProgram(6);
     }
 
     Memory memory(1000, KIB(5));
-    ClassInfo* startupClass = getClass(className, mainThread);
+    ClassInfo* startupClass = getClass(m_configuration.mainClassName.data(), mainThread);
     MethodInfo* entryPoint = startupClass->findMethodWithNameAndDescriptor("main", "([Ljava/lang/String;)V");
 
     if (entryPoint == nullptr)

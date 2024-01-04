@@ -2,18 +2,20 @@
 #include "VM/VM.h"
 
 #include <span>
+#include <string_view>
 
-Configuration parseArguments(const std::span<const char*> args)
+static Configuration parseArguments(const std::span<const char*> args)
 {
     Configuration config;
     bool mainNameFound = false;
     for (int currentArg = 1; currentArg < args.size(); ++currentArg)
     {
-        if (strcmp(args[currentArg], "-classpath") == 0 )
+        const std::string_view arg{args[currentArg]};
+        if (arg  == "-classpath")
         {
             if (currentArg+1 < args.size())
             {
-                config.classPath = args[currentArg+1];
+                config.classPath = std::string_view{args[currentArg+1]};
                 currentArg++;
             }
         }
@@ -21,11 +23,11 @@ Configuration parseArguments(const std::span<const char*> args)
         {
             if (!mainNameFound)
             {
-                config.mainClassName = args[currentArg];
+                config.mainClassName = arg;
                 mainNameFound = true;
             } else
             {
-                config.args.push_back(args[currentArg]);
+                config.args.push_back(arg);
             }
         }
     }
@@ -41,7 +43,7 @@ int main(const int argc, const char* argv[])
 
     VM vm(config);
     vm.start();
-    vm.runMain(config.mainClassName);
+    vm.runMain();
     vm.shutdown();
 
     return 0;
