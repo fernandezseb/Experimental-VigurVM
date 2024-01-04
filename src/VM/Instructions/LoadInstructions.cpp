@@ -15,6 +15,13 @@ void iload(INSTRUCTION_ARGS)
     thread->m_currentFrame->operands.push_back(var);
 }
 
+void aload(INSTRUCTION_ARGS) {
+    const u1 index = args[0];
+    const Variable var = thread->m_currentFrame->localVariables[index];
+    VM::checkType(var, VariableType_REFERENCE, thread);
+    thread->m_currentFrame->operands.push_back(var);
+}
+
 void aload_i(INSTRUCTION_ARGS)
 {
     Variable var = thread->m_currentFrame->localVariables[arg];
@@ -42,6 +49,20 @@ void iaload(INSTRUCTION_ARGS)
     const i4 data = intArray[index.data];
 
     const Variable dataVar{VariableType_INT, std::bit_cast<u4>(data)};
+    thread->m_currentFrame->operands.push_back(dataVar);
+}
+
+void aaload(INSTRUCTION_ARGS)
+{
+    const Variable index = thread->m_currentFrame->popOperand();
+    const Variable arrayRef = thread->m_currentFrame->popOperand();
+
+    const Array* array = heap->getArray(arrayRef.data);
+    const u4* referenceArray = (u4*) array->data;
+
+    const u4 data = referenceArray[index.data];
+
+    const Variable dataVar{VariableType_REFERENCE, std::bit_cast<u4>(data)};
     thread->m_currentFrame->operands.push_back(dataVar);
 }
 

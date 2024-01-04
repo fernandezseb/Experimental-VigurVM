@@ -13,7 +13,6 @@ void iadd(INSTRUCTION_ARGS)
     const Variable added{VariableType_INT,
         std::bit_cast<u4>((i4)var1.data + (i4)var2.data)};
     thread->m_currentFrame->operands.push_back(added);
-    thread->internalError("test exception");
 }
 
 void isub(INSTRUCTION_ARGS)
@@ -61,6 +60,16 @@ void iushr(INSTRUCTION_ARGS)
         resultVal = ((i4)value1.data >> s) + (2 << ~s) ;
     }
 
+    const Variable result{VariableType_INT,
+        std::bit_cast<u4>(resultVal)};
+    thread->m_currentFrame->operands.push_back(result);
+}
+
+void iand(INSTRUCTION_ARGS)
+{
+    const Variable value2 = thread->m_currentFrame->popOperand();
+    const Variable value1 = thread->m_currentFrame->popOperand();
+    const u4 resultVal = value1.data & value2.data;
     const Variable result{VariableType_INT,
         std::bit_cast<u4>(resultVal)};
     thread->m_currentFrame->operands.push_back(result);

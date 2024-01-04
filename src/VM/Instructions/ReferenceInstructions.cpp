@@ -371,6 +371,10 @@ void arraylength(INSTRUCTION_ARGS)
     thread->m_currentFrame->operands.push_back(lengthVar);
 }
 
+void checkCast(INSTRUCTION_ARGS) {
+    // TODO: Implement actual type check
+}
+
 void monitorenter(INSTRUCTION_ARGS)
 {
     // TODO: Implement when real threading is implemented

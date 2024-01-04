@@ -11,5 +11,6 @@ void isub(INSTRUCTION_ARGS);
 void imul(INSTRUCTION_ARGS);
 void ishl(INSTRUCTION_ARGS);
 void iushr(INSTRUCTION_ARGS);
+void iand(INSTRUCTION_ARGS);
 void ixor(INSTRUCTION_ARGS);
 void iinc(INSTRUCTION_ARGS);

@@ -45,7 +45,7 @@ public:
     void shutdown();
     static void checkType(Variable var, VariableType type, VMThread *thread);
 private:
-    Instruction instructions[84] =
+    Instruction instructions[88] =
     {
         // Constants
         {i_nop, 0, "nop", 0, nop},
@@ -71,6 +71,7 @@ private:
         {i_ldc2_w, 2, "ldc2_w", 0, ldc2_w},
         // Loads
         {i_iload, 1, "iload", 0, iload},
+        {i_aload, 1, "aload", 0, aload},
         {i_iload_0, 0, "iload_0", 0, iload_i},
         {i_iload_1, 0, "iload_1", 1, iload_i},
         {i_iload_2, 0, "iload_2", 2, iload_i},
@@ -80,6 +81,7 @@ private:
         {i_aload_2, 0, "aload_2", 2, aload_i},
         {i_aload_3, 0, "aload_3", 3, aload_i},
         {i_iaload, 0, "iaload", 0, iaload},
+        {i_aaload, 0, "aaload", 0, aaload},
         {i_caload, 0, "caload", 0, caload},
         // Stores
         {i_istore, 1, "istore", 0, istore},
@@ -104,6 +106,7 @@ private:
         {i_imul, 0, "imul", 0, imul},
         {i_ishl, 0, "ishl", 0, ishl},
         {i_iushr, 0, "iushr", 0, iushr},
+        {i_iand, 0, "iand", 0, iand},
         {i_ixor, 0, "ixor", 0, ixor},
         {i_iinc, 2, "iinc", 0, iinc},
         // Comparisons
@@ -130,6 +133,7 @@ private:
         {i_newarray, 1, "newarray", 0, newarray},
         {i_anewarray, 0, "anewarray", 0, anewarray},
         {i_arraylength, 0, "arraylength", 0, arraylength},
+        {i_checkcast, 2, "checkcast", 0, checkCast},
         {i_monitorenter, 0, "monitorenter", 0, monitorenter},
         {i_monitorexit, 0, "monitorexit", 0, monitorexit},
         // Control
