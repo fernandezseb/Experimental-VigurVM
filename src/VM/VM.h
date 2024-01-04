@@ -45,7 +45,7 @@ public:
     void shutdown();
     static void checkType(Variable var, VariableType type, VMThread *thread);
 private:
-    Instruction instructions[82] =
+    Instruction instructions[84] =
     {
         // Constants
         {i_nop, 0, "nop", 0, nop},
@@ -104,6 +104,7 @@ private:
         {i_imul, 0, "imul", 0, imul},
         {i_ishl, 0, "ishl", 0, ishl},
         {i_iushr, 0, "iushr", 0, iushr},
+        {i_ixor, 0, "ixor", 0, ixor},
         {i_iinc, 2, "iinc", 0, iinc},
         // Comparisons
         {i_ifeq, 2, "ifeq", 0, ifeq},
@@ -137,6 +138,7 @@ private:
         {i_areturn, 0, "areturn", 0, areturnInstruction},
         {i_return, 0, "return", 0, returnInstruction},
         // Extended
+        {i_ifnull, 0, "ifnull", 0, ifnull},
         {i_ifnonnull, 0, "ifnonnull", 0, ifnonnull},
     };
     ClassLoader m_bootstrapClassLoader;

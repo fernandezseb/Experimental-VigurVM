@@ -66,6 +66,18 @@ void iushr(INSTRUCTION_ARGS)
     thread->m_currentFrame->operands.push_back(result);
 }
 
+void ixor(INSTRUCTION_ARGS)
+{
+    const Variable value2 = thread->m_currentFrame->popOperand();
+    const Variable value1 = thread->m_currentFrame->popOperand();
+
+    const u4 resultVal = value1.data | value2.data;
+
+    const Variable result{VariableType_INT,
+        std::bit_cast<u4>(resultVal)};
+    thread->m_currentFrame->operands.push_back(result);
+}
+
 void iinc(INSTRUCTION_ARGS)
 {
     u1 index = args[0];
