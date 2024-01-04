@@ -71,10 +71,10 @@ uint32_t JavaHeap::createObject(ClassInfo* classInfo, VM* VM)
 
     object->classInfo = classInfo;
     object->type = OBJECT;
-    object->fields = 0;
     if (fieldsCount > 0)
     {
-        object->fields = (FieldData*) Platform::allocateMemory(sizeof(FieldData) * fieldsCount, 0);
+        const auto fields = static_cast<FieldData*>(Platform::allocateMemory(sizeof(FieldData) * fieldsCount, 0));
+        object->fields = std::span{fields,fieldsCount};
     }
     object->fieldsCount = fieldsCount;
     object->superClassObject = 0;
@@ -135,10 +135,10 @@ uint32_t JavaHeap::createClassObject(ClassInfo* classInfo, VM* VM, ClassInfo* ta
 
     object->classInfo = classInfo;
     object->type = CLASSOBJECT;
-    object->fields = 0;
     if (fieldsCount > 0)
     {
-        object->fields = (FieldData*) Platform::allocateMemory(sizeof(FieldData) * fieldsCount, 0);
+        const auto fields = static_cast<FieldData*>(Platform::allocateMemory(sizeof(FieldData) * fieldsCount, 0));
+        object->fields = std::span(fields, fieldsCount);
     }
     object->fieldsCount = fieldsCount;
     object->superClassObject = 0;

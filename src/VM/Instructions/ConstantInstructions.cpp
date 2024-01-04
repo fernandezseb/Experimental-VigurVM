@@ -89,19 +89,19 @@ void loadConstant(VMThread* thread, const u4 index, JavaHeap* heap, VM* VM)
     const ConstantPoolItem* cpItem = thread->m_currentFrame->constantPool->constants[index - 1];
     if (cpItem->getType() == CT_INTEGER)
     {
-        const CPIntegerInfo* integerInfo = static_cast<const CPIntegerInfo*>(cpItem);
+        const auto* integerInfo = static_cast<const CPIntegerInfo*>(cpItem);
         const Variable var{VariableType_INT, integerInfo->bytes};
         thread->m_currentFrame->operands.push_back(var);
     }
     else if (cpItem->getType() == CT_FLOAT)
     {
-        const CPFloatInfo* floatInfo = static_cast<const CPFloatInfo*>(cpItem);
+        const auto* floatInfo = static_cast<const CPFloatInfo*>(cpItem);
         const Variable var{VariableType_FLOAT, floatInfo->bytes};
         thread->m_currentFrame->operands.push_back(var);
     }
     else if (cpItem->getType() == CT_STRING)
     {
-        const CPStringInfo* stringInfo = static_cast<const CPStringInfo*>(cpItem);
+        const auto* stringInfo = static_cast<const CPStringInfo*>(cpItem);
         const char* utf8String = thread->m_currentClass->constantPool->getString(stringInfo->stringIndex);
         const uint32_t strObjectId = heap->createString(utf8String, VM);
         const Variable strVar{VariableType_REFERENCE, strObjectId};
@@ -109,11 +109,17 @@ void loadConstant(VMThread* thread, const u4 index, JavaHeap* heap, VM* VM)
     }
     else if (cpItem->getType() == CT_CLASS)
     {
-        const CPClassInfo* classInfo = static_cast<const CPClassInfo*>(cpItem);
-        const char* className = thread->m_currentClass->constantPool->getString(classInfo->nameIndex);
-        ClassInfo* targetClassInfo = VM->getClass(className, const_cast<VMThread*>(thread));
+        const auto* classInfo = static_cast<const CPClassInfo*>(cpItem);
+        std::string_view className = thread->m_currentClass->constantPool->getString(classInfo->nameIndex);
+        ClassInfo* targetClassInfo = nullptr;
+        if (className[0] == '[')
+        {
+            // TODO: Save the name in the classObject instead of the ClassInfo pointer
+            // TODO: Don't recreeate array objects, see: sun.misc.Unsafe.arrayBaseOffset
+        } else {
+            targetClassInfo = VM->getClass(className.data(), const_cast<VMThread*>(thread));
+        }
         const u4 classObjectRef =  heap->createClassObject(heap->getClassByName("java/lang/Class"), VM, targetClassInfo);
-        // const ClassObject * classObject = heap->getClassObject(classObjectRef);
         const Variable classObjectVar{VariableType_REFERENCE, classObjectRef};
         thread->m_currentFrame->operands.push_back(classObjectVar);
     }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <span>
+
 #include "Core.h"
 #include "DynamicArray.h"
 #include "Data/Class.h"
@@ -54,7 +56,7 @@ public:
 
 class Object : public Reference {
 public:
-    FieldData* fields{nullptr};
+    std::span<FieldData> fields;
     uint16_t fieldsCount{0};
     ClassInfo* classInfo{nullptr};
     u4 superClassObject{0};
