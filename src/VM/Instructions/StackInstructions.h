@@ -8,3 +8,4 @@ class JavaHeap;
 
 void pop(INSTRUCTION_ARGS);
 void dup(INSTRUCTION_ARGS);
+void dup_x1(INSTRUCTION_ARGS);

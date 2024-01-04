@@ -45,7 +45,7 @@ public:
     void shutdown();
     static void checkType(Variable var, VariableType type, VMThread *thread);
 private:
-    Instruction instructions[88] =
+    Instruction instructions[89] =
     {
         // Constants
         {i_nop, 0, "nop", 0, nop},
@@ -100,6 +100,7 @@ private:
         // Stack
         {i_pop, 0, "pop", 0, pop},
         {i_dup, 0, "dup", 0, dup},
+        {i_dup_x1, 0, "dup_x1", 0, dup_x1},
         // Math
         {i_iadd, 0, "iadd", 0, iadd},
         {i_isub, 0, "isub", 0, isub},
