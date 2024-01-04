@@ -26,6 +26,7 @@ struct StackFrame {
 
     const char* className{};
     const char* methodName{};
+    bool isNative = false;
 
     Variable popOperand()
     {

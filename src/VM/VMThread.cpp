@@ -30,6 +30,48 @@ void VMThread::pushStackFrameWithoutParams(ClassInfo* classInfo, const MethodInf
     m_currentFrame = &this->m_stackstack.top().frames[this->m_stackstack.top().frames.size()-1];
 }
 
+void VMThread::pushNativeStackFrame(ClassInfo* classInfo, const MethodInfo* methodInfo, size_t argumentsSize)
+{
+    StackFrame stackFrame;
+    for (size_t currentLocal = 0; currentLocal < argumentsSize; ++currentLocal)
+    {
+        constexpr Variable var{VariableType_UNDEFINED};
+        stackFrame.localVariables.push_back(var);
+    }
+    stackFrame.constantPool = classInfo->constantPool;
+    stackFrame.previousPc = m_pc;
+    stackFrame.previousClass = m_currentClass;
+    stackFrame.previousMethod = m_currentMethod;
+    stackFrame.className = classInfo->getName();
+    stackFrame.methodName = methodInfo->name;
+    stackFrame.isNative = true;
+
+
+    m_pc = 0;
+    m_currentClass = classInfo;
+    m_currentMethod = methodInfo;
+
+    this->m_stackstack.top().frames.push_back(stackFrame);
+    m_currentFrame = &this->m_stackstack.top().frames[this->m_stackstack.top().frames.size()-1];
+}
+
+void VMThread::popFrame()
+{
+    const StackFrame* stackFrame = m_currentFrame;
+    m_pc = stackFrame->previousPc;
+    m_currentClass = stackFrame->previousClass;
+    m_currentMethod = stackFrame->previousMethod;
+
+    m_stackstack.top().frames.pop_back();
+    if (!m_stackstack.top().frames.empty())
+    {
+        m_currentFrame = &m_stackstack.top().frames[m_stackstack.top().frames.size()-1];
+    } else
+    {
+        m_currentFrame = nullptr;
+    }
+}
+
 
 void VMThread::pushStackFrameSpecial(ClassInfo* classInfo, const MethodInfo* methodInfo, StackFrame* previousFrame,
     [[maybe_unused]] JavaHeap* heap)
@@ -69,12 +111,30 @@ void VMThread::internalError(const char* error)
             for (i8 currentFrame = m_stackstack.top().frames.size() - 1; currentFrame >= 0; --currentFrame)
             {
                 const StackFrame frame = m_stackstack.top().frames[currentFrame];
-                printf("    at %s.%s\n", frame.className, frame.methodName);
+                const char *nativeText = "";
+                if (frame.isNative)
+                {
+                    nativeText = " (native)";
+                }
+                printf("    at %s.%s%s\n", frame.className, frame.methodName, nativeText);
             }
         }
         m_stackstack.pop();
     }
     Platform::exitProgram(6);
+}
+
+void VMThread::returnVar(const Variable returnValue)
+{
+    JavaStack* topStack = &m_stackstack.top();
+    if (topStack->frames.size() > 1)
+    {
+        StackFrame* previousStackFrame = &topStack->frames[topStack->frames.size()-2];
+        previousStackFrame->operands.push_back(returnValue);
+    } else
+    {
+        internalError("Can't return to previous frame because there is no previous frame");
+    }
 }
 
 void VMThread::pushStackFrameStatic(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame)

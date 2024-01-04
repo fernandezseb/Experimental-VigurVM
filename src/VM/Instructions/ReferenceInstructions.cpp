@@ -199,16 +199,23 @@ static void invokeVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread
     }
 
     if (methodInfo->isNative()) {
-        VM->executeNativeMethod(targetClass, targetMethod, heap, thread);
+        thread->pushNativeStackFrame(targetClass, targetMethod, arguments.size());
     } else {
         thread->pushStackFrameWithoutParams(targetClass, targetMethod);
-        if (!arguments.empty())
+    }
+
+    if (!arguments.empty())
+    {
+        for (int i = 0; i <= methodInfo->argsCount; ++i)
         {
-            for (int i = 0; i <= methodInfo->argsCount; ++i)
-            {
-                thread->m_currentFrame->localVariables[i] = arguments[i];
-            }
+            thread->m_currentFrame->localVariables[i] = arguments[i];
         }
+    }
+
+    if (methodInfo->isNative())
+    {
+        VM->executeNativeMethod(targetClass, targetMethod, heap, thread);
+        thread->popFrame();
     }
 }
 
@@ -267,7 +274,9 @@ void invokestatic(INSTRUCTION_ARGS)
 
     if (methodInfo->isNative())
     {
+        thread->pushNativeStackFrame(targetClass, methodInfo, methodInfo->argsCount);
         VM->executeNativeMethod(targetClass, methodInfo, heap, thread);
+        thread->popFrame();
     } else
     {
         thread->pushStackFrameStatic(targetClass, methodInfo, topFrame);

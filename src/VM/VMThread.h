@@ -26,7 +26,10 @@ public:
         m_stackstack.emplace(frameSize);
     }
     void pushStackFrameWithoutParams(ClassInfo* classInfo, const MethodInfo* methodInfo);
+    void pushNativeStackFrame(ClassInfo* classInfo, const MethodInfo* methodInfo, size_t argumentsSize);
+    void popFrame();
     void pushStackFrameStatic(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame);
     void pushStackFrameSpecial(ClassInfo* classInfo, const MethodInfo* methodInfo, StackFrame* previousFrame, JavaHeap* heap);
+    void returnVar(Variable returnValue);
     void internalError(const char* error);
 };
