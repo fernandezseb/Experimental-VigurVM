@@ -15,6 +15,7 @@
 
 #include "VM/Configuration.h"
 #include "VM/VM.h"
+#include "physfs.h"
 
 #include <span>
 #include <string_view>
@@ -52,6 +53,9 @@ static Configuration parseArguments(const std::span<const char*> args)
 
 int main(const int argc, const char* argv[])
 {
+    PHYSFS_init(argv[0]);
+    PHYSFS_permitSymbolicLinks(1);
+
     const size_t size = argc;
     const std::span args{argv, size};
     const Configuration config = parseArguments(args);
@@ -60,6 +64,8 @@ int main(const int argc, const char* argv[])
     vm.start();
     vm.runMain();
     vm.shutdown();
+
+    PHYSFS_deinit();
 
     return 0;
 }

@@ -89,7 +89,13 @@ target_link_libraries(${PROJECT_NAME} Library)
 
 enable_testing()
 
+set(PHYSFS_BUILD_STATIC TRUE)
+
 add_subdirectory(extern/md5)
+add_subdirectory(extern/physfs)
 add_subdirectory(src/Library)
 add_subdirectory(test)
 add_subdirectory(tools/ClassDump)
+
+target_link_directories(${PROJECT_NAME} PRIVATE extern/physfs/src)
+target_link_libraries(${PROJECT_NAME} physfs-static)

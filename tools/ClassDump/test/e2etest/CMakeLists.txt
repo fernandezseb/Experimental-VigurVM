@@ -4,7 +4,7 @@ include(UseJava)
 
 project (e2etest NONE)
 
-set(CMAKE_JAVA_COMPILE_FLAGS "-source" "1.8" "-target" "1.8")
+set(CMAKE_JAVA_COMPILE_FLAGS "-source" "1.8" "-target" "1.8" "--permit-unidentified-artifacts" "-Xlint:none" "-XDignore.symbol.file=true" "-Xbootclasspath:." "-classpath:." "-Xlint:all,-deprecation,-unchecked,-rawtypes,-cast,-serial,-dep-ann,-static,-fallthrough,-try,-varargs,-empty,-finally" )
 
 add_jar(e2etest
 	Main.java

@@ -15,11 +15,14 @@
 
 #include "ClassLoader.h"
 
+#include <ctime>
+
 #include "Core.h"
 #include "DescriptorParser.h"
 #include "Util.h"
 #include "Platform.h"
 #include "Memory.h"
+#include "physfs.h"
 
 void ClassLoader::checkMagicNumber(ByteArray& byteArray) {
     uint32_t magic = byteArray.readUnsignedInt();
@@ -263,37 +266,34 @@ ClassInfo* ClassLoader::readClass(const char* className, Memory* memory, const c
     this->m_memory = memory;
     char name[300] = {0};
     snprintf(name, 300, "%s.class", className);
-    PlatformFile *file = Platform::getFile(name);
 
-    if (file == NULL)
+    PHYSFS_addToSearchPath(".", 1);
+    PHYSFS_addToSearchPath(classPath, 1);
+    const int exists = PHYSFS_exists(name);
+    if (!exists)
     {
-        char cpName[300] = {0};
-        snprintf(cpName, 300, "%s%s",classPath, name);
-        file = Platform::getFile(cpName);
-
-
-        if (file == NULL)
-        {
-            fprintf(stderr, "Class file not found for className: %s\n", className);
-            Platform::exitProgram(6);
-        }
+        fprintf(stderr, "Class file not found for className: %s\n", className);
+        Platform::exitProgram(6);
     }
 
+    PHYSFS_file* file = PHYSFS_openRead(name);
+    const size_t size = PHYSFS_fileLength(file);
+    const auto fileContent = static_cast<u1*>(Platform::allocateMemory(size, 0));
 
-    size_t size;
-    uint8_t* fileContent = Platform::readEntireFile(file, &size);
+    PHYSFS_read(file, fileContent, 1, size);
+
     ByteArray byteArray(fileContent, size);
 
     ClassInfo* classInfo = readClass(byteArray);
     classInfo->memory = this->m_memory;
-    char* path = (char*)this->m_memory->alloc(500);
-    Platform::getFullPath(file, path);
-    // TODO: Resize path string memory
-    classInfo->filePath = path;
+    const char* path = PHYSFS_getRealDir(name);
+    classInfo->filePath = const_cast<char*>(path);
     classInfo->size = byteArray.getSize();
-    Platform::getLastModifiedString(file, classInfo->lastModifiedString);
-
-    Platform::closeFile(file);
+    const i8 modTime = PHYSFS_getLastModTime(name);
+    char time[50];
+    strftime(time, 20, "%d-%m-%y", localtime(&modTime));
+    strncpy(classInfo->lastModifiedString, time, 50);
+    PHYSFS_close(file);
     Platform::freeMemory(fileContent);
 
     return classInfo;
