@@ -90,6 +90,7 @@ target_link_libraries(${PROJECT_NAME} Library)
 enable_testing()
 
 set(PHYSFS_BUILD_STATIC TRUE)
+set(PHYSFS_BUILD_TEST FALSE)
 
 add_subdirectory(extern/md5)
 add_subdirectory(extern/physfs)
