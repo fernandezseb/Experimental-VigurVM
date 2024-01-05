@@ -4,6 +4,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 
+cmake_policy(SET CMP0077 NEW)
+
 project(VigurVM
         VERSION 0.1
         DESCRIPTION "A simple Java Virtual Machine for learning purposes"
