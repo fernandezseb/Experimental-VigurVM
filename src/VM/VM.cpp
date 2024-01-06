@@ -192,7 +192,7 @@ void VM::executeLoop(VMThread* thread)
 
         bool found = false;
 
-        for (const Instruction& instruction : instructions) {
+        for (const Instruction& instruction : m_instructions) {
             if (((u1)instruction.opcode) == opcode)
             {
                 found = true;

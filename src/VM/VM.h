@@ -19,6 +19,7 @@
 #include "Instructions/MathInstructions.h"
 
 #include <vector>
+#include <array>
 
 class VM;
 
@@ -45,8 +46,7 @@ public:
     void shutdown();
     static void checkType(Variable var, VariableType type, VMThread *thread);
 private:
-    Instruction instructions[89] =
-    {
+    inline static constexpr std::array<Instruction,89> m_instructions{{
         // Constants
         {i_nop, 0, "nop", 0, nop},
         {i_aconst_null, 0, "aconst_null", 0, aconst_null},
@@ -145,7 +145,7 @@ private:
         // Extended
         {i_ifnull, 0, "ifnull", 0, ifnull},
         {i_ifnonnull, 0, "ifnonnull", 0, ifnonnull},
-    };
+    }};
     ClassLoader m_bootstrapClassLoader;
     JavaHeap m_heap;
     VMThread m_mainThread{"main", 200};
