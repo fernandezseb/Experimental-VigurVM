@@ -91,10 +91,9 @@ target_link_libraries(${PROJECT_NAME} Library)
 
 enable_testing()
 
-set(PHYSFS_BUILD_STATIC TRUE)
-set(PHYSFS_BUILD_TEST FALSE)
-
 add_subdirectory(extern/md5)
+SET(PHYSFS_BUILD_TEST OFF CACHE BOOL "Build stdio test program." FORCE)
+SET(PHYSFS_BUILD_SHARED OFF CACHE BOOL "Build shared library" FORCE)
 add_subdirectory(extern/physfs)
 add_subdirectory(src/Library)
 add_subdirectory(test)
