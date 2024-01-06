@@ -43,16 +43,6 @@ void Platform::freeMemory(void* allocatedMemory)
 	free(allocatedMemory);
 }
 
-void Platform::getLastModifiedString(PlatformFile* file, char* stringOut)
-{
-
-	char time[50];
-	struct stat attrib;
-    stat(file->name, &attrib);
-	strftime(time, 20, "%d-%m-%y", localtime(&(attrib.st_ctime)));
-	strcpy(stringOut, time);
-}
-
 void Platform::print(const char* string, uint64_t length)
 {
 	fwrite(string, 1 ,length, stdout);
