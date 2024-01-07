@@ -21,6 +21,8 @@ JCALL void lib_sun_misc_Unsafe_registerNatives(NATIVE_ARGS)
 {
     printf("[Running sun/misc/Unsafe/registerNatives()V]\n");
     registerNative("sun/misc/Unsafe/arrayBaseOffset", "(Ljava/lang/Class;)I", lib_sun_misc_Unsafe_arrayBaseOffset);
+    registerNative("sun/misc/Unsafe/arrayIndexScale", "(Ljava/lang/Class;)I", lib_sun_misc_Unsafe_arrayIndexScale);
+    registerNative("sun/misc/Unsafe/addressSize", "()I", lib_sun_misc_Unsafe_addressSize);
 }
 
 JCALL void lib_sun_misc_Unsafe_arrayBaseOffset(NATIVE_ARGS)
@@ -28,4 +30,25 @@ JCALL void lib_sun_misc_Unsafe_arrayBaseOffset(NATIVE_ARGS)
     constexpr u4 offset = offsetof(Array, data);
     constexpr u4 val = std::bit_cast<u4>(offset);
     thread->returnVar(Variable{VariableType_INT,  val});
+}
+
+JCALL void lib_sun_misc_Unsafe_arrayIndexScale(NATIVE_ARGS)
+{
+    const Variable classObjectRef = thread->m_currentFrame->localVariables[1];
+    const ClassObject* classObject = heap->getClassObject(classObjectRef.data);
+    u4 length = 4;
+    if (classObject->name[1] == 'C')
+    {
+        length = 1;
+    } else if (classObject->name[1] == 'D' || classObject->name[1] == 'J')
+    {
+        length = 8;
+    }
+    thread->returnVar(Variable{VariableType_INT, length});
+}
+
+void lib_sun_misc_Unsafe_addressSize(NATIVE_ARGS)
+{
+    constexpr Variable size{VariableType_INT, 64};
+    thread->returnVar(size);
 }

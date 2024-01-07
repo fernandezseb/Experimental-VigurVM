@@ -35,4 +35,3 @@ Alongside that, there are still some major things that need to be done:
 * Implement multithreading logic in VM
 * Implement [Exception handling](https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-2.html#jvms-2.10)
 * Implement full [Format Checking](https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.8)
-* Implement [creating of array classes](https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-5.html#jvms-5.3.3)
