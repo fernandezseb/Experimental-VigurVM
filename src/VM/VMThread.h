@@ -18,9 +18,9 @@ public:
     const MethodInfo* m_currentMethod{nullptr};
     // current class
     ClassInfo* m_currentClass{nullptr};
-    const char* m_name{nullptr};
+    std::string_view m_name;
 
-    explicit VMThread(const char* name, const size_t frameSize) noexcept
+    explicit VMThread(const std::string_view name, const size_t frameSize) noexcept
         : m_name(name)
     {
         m_stackstack.emplace(frameSize);

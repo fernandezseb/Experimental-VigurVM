@@ -119,7 +119,7 @@ void VMThread::pushStackFrameSpecial(ClassInfo* classInfo, const MethodInfo* met
 
 void VMThread::internalError(const char* error)
 {
-    fprintf(stdout, "Unhandled VM error in thread \"%s\": %s\n", m_name, error);
+    fprintf(stdout, "Unhandled VM error in thread \"%s\": %s\n", m_name.data(), error);
     while (!m_stackstack.empty()) {
         if (!m_stackstack.top().frames.empty())
         {

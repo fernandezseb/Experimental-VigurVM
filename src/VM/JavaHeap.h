@@ -26,7 +26,7 @@ public:
 
     Array* getArray() {
         if (type == ARRAY) {
-            return (Array*)this;
+            return reinterpret_cast<Array*>(this);
         }
         else {
             fprintf(stderr, "Error: Reference is not of type 'Array'");
@@ -37,7 +37,7 @@ public:
 
     Object* getObject() {
         if (type == OBJECT) {
-            return (Object*)this;
+            return reinterpret_cast<Object*>(this);
         }
         else {
             fprintf(stderr, "Error: Reference is not of type 'Object'");
