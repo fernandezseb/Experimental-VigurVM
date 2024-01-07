@@ -47,7 +47,7 @@ JCALL void lib_sun_misc_Unsafe_arrayIndexScale(NATIVE_ARGS)
     thread->returnVar(Variable{VariableType_INT, length});
 }
 
-void lib_sun_misc_Unsafe_addressSize(NATIVE_ARGS)
+JCALL void lib_sun_misc_Unsafe_addressSize(NATIVE_ARGS)
 {
     constexpr Variable size{VariableType_INT, 64};
     thread->returnVar(size);

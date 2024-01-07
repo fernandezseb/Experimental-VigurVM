@@ -13,5 +13,8 @@ add_library(Library
         java/io/FileDescriptor.h
         java/io/FileDescriptor.cpp
         sun/misc/Unsafe.h
-        sun/misc/Unsafe.cpp)
+        sun/misc/Unsafe.cpp
+        sun/reflect/Reflection.h
+        sun/reflect/Reflection.cpp
+)
 target_include_directories(Library PRIVATE ${PROJECT_SOURCE_DIR}/src/)

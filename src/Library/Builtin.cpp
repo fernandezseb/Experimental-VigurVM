@@ -21,6 +21,7 @@
 #include "java/lang/Object.h"
 #include "java/lang/System.h"
 #include "sun/misc/Unsafe.h"
+#include "sun/reflect/Reflection.h"
 #include "Vigur/lang/System.h"
 
 void registerBuiltinRegisterNatives()
@@ -36,4 +37,6 @@ void registerBuiltinRegisterNatives()
     registerNative("sun/misc/Unsafe/registerNatives", "()V", lib_sun_misc_Unsafe_registerNatives);
     // Vigur/lang package
     // registerNative("Vigur/lang/System/registerNatives", "()V", lib_Vigur_lang_System_registerNatives);
+    // Reflection API
+    registerNative("sun/reflect/Reflection/getCallerClass", "()Ljava/lang/Class;", lib_sun_reflect_Reflection_getCallerClass);
 }

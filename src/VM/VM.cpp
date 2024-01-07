@@ -140,7 +140,8 @@ void VM::updateVariableFromVariable(Variable* variable, const char* descriptor, 
     } else if (strcmp(descriptor, "Z") == 0)
     {
         checkType(*variable, VariableType_BOOLEAN, thread);
-        checkType(operand, VariableType_INT, thread);
+        // TODO: Check if it is BOOLEAN OR INT?
+        // checkType(operand, VariableType_INT, thread);
 
         variable->data = operand.data;
     } else if (descriptor[0] == '[' || descriptor[0] == 'L') {
