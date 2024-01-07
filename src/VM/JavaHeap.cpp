@@ -179,6 +179,7 @@ u4 JavaHeap::createClassObject(ClassInfo* classInfo, VM* VM, std::string_view na
         const char* superClassName = classInfo->constantPool->getString(classInfo->constantPool->getClassInfo(classInfo->superClass)->nameIndex);
         if (strcmp(superClassName, "java/lang/Object") != 0)
         {
+            // TODO: Load the class if needed
             ClassInfo* superClass = getClassByName(superClassName);
             u4 superClassObject = createObject(superClass, VM);
             object->superClassObject = superClassObject;

@@ -46,7 +46,7 @@ public:
     void shutdown();
     static void checkType(Variable var, VariableType type, VMThread *thread);
 private:
-    inline static constexpr std::array<Instruction,89> m_instructions{{
+    inline static constexpr std::array<Instruction,95> m_instructions{{
         // Constants
         {i_nop, 0, "nop", 0, nop},
         {i_aconst_null, 0, "aconst_null", 0, aconst_null},
@@ -76,6 +76,10 @@ private:
         {i_iload_1, 0, "iload_1", 1, iload_i},
         {i_iload_2, 0, "iload_2", 2, iload_i},
         {i_iload_3, 0, "iload_3", 3, iload_i},
+        {i_fload_0, 0, "fload_0", 0, fload_i},
+        {i_fload_1, 0, "fload_1", 1, fload_i},
+        {i_fload_2, 0, "fload_2", 2, fload_i},
+        {i_fload_3, 0, "fload_3", 3, fload_i},
         {i_aload_0, 0, "aload_0", 0, aload_i},
         {i_aload_1, 0, "aload_1", 1, aload_i},
         {i_aload_2, 0, "aload_2", 2, aload_i},
@@ -111,6 +115,8 @@ private:
         {i_ixor, 0, "ixor", 0, ixor},
         {i_iinc, 2, "iinc", 0, iinc},
         // Comparisons
+        {i_fcmpl, 0, "fcmpl", 0, fcmpl},
+        {i_fcmpg, 0, "fcmpg", 0, fcmpg},
         {i_ifeq, 2, "ifeq", 0, ifeq},
         {i_ifne, 2, "ifne", 0, ifne},
         {i_ifge, 2, "ifge", 0, ifge},

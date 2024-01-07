@@ -23,8 +23,8 @@
 
 void iload(INSTRUCTION_ARGS)
 {
-    u1 index = args[0];
-    Variable var = thread->m_currentFrame->localVariables[index];
+    const u1 index = args[0];
+    const Variable var = thread->m_currentFrame->localVariables[index];
     VM::checkType(var, VariableType_INT, thread);
 
     thread->m_currentFrame->operands.push_back(var);
@@ -39,7 +39,7 @@ void aload(INSTRUCTION_ARGS) {
 
 void aload_i(INSTRUCTION_ARGS)
 {
-    Variable var = thread->m_currentFrame->localVariables[arg];
+    const Variable var = thread->m_currentFrame->localVariables[arg];
     VM::checkType(var, VariableType_REFERENCE, thread);
 
     thread->m_currentFrame->operands.push_back(var);
@@ -47,8 +47,16 @@ void aload_i(INSTRUCTION_ARGS)
 
 void iload_i(INSTRUCTION_ARGS)
 {
-    Variable var = thread->m_currentFrame->localVariables[arg];
+    const Variable var = thread->m_currentFrame->localVariables[arg];
     VM::checkType(var, VariableType_INT, thread);
+
+    thread->m_currentFrame->operands.push_back(var);
+}
+
+void fload_i(INSTRUCTION_ARGS)
+{
+    const Variable var = thread->m_currentFrame->localVariables[arg];
+    VM::checkType(var, VariableType_FLOAT, thread);
 
     thread->m_currentFrame->operands.push_back(var);
 }
@@ -91,6 +99,6 @@ void caload(INSTRUCTION_ARGS)
 
     const i1 data = intArray[index.data];
 
-    Variable dataVar{VariableType_INT, static_cast<uint32_t>(static_cast<int32_t>(data))};
+    const Variable dataVar{VariableType_INT, static_cast<uint32_t>(static_cast<int32_t>(data))};
     thread->m_currentFrame->operands.push_back(dataVar);
 }

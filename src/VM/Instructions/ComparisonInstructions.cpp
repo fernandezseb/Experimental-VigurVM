@@ -15,8 +15,75 @@
 
 #include "ComparisonInstructions.h"
 
+#include <bit>
+
 #include "VM/VM.h"
 #include "Data/Variable.h"
+
+void fcmpl(const u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM)
+{
+    const Variable var2 = thread->m_currentFrame->popOperand();
+    const Variable var1 = thread->m_currentFrame->popOperand();
+    VM->checkType(var2, VariableType_FLOAT, thread);
+    VM->checkType(var1, VariableType_FLOAT, thread);
+
+    float f2 = std::bit_cast<float>(var2.data);
+    float f1 = std::bit_cast<float>(var1.data);
+
+    i4 result = 0;
+
+    if (f1 > f2)
+    {
+        result = 1;
+    } else if (f1 < f2)
+    {
+        result = -1;
+    } else if (f1 == f2)
+    {
+        result = 0;
+    } else
+    {
+        // one of the two should be NaN
+        result = -1;
+    }
+
+    const u4 resultUnsigned = std::bit_cast<u4>(result);
+
+    thread->m_currentFrame->operands.emplace_back(Variable{VariableType_INT, resultUnsigned});
+
+}
+
+void fcmpg(INSTRUCTION_ARGS)
+{
+    const Variable var2 = thread->m_currentFrame->popOperand();
+    const Variable var1 = thread->m_currentFrame->popOperand();
+    VM->checkType(var2, VariableType_FLOAT, thread);
+    VM->checkType(var1, VariableType_FLOAT, thread);
+
+    float f2 = std::bit_cast<float>(var2.data);
+    float f1 = std::bit_cast<float>(var1.data);
+
+    i4 result = 0;
+
+    if (f1 > f2)
+    {
+        result = 1;
+    } else if (f1 < f2)
+    {
+        result = -1;
+    } else if (f1 == f2)
+    {
+        result = 0;
+    } else
+    {
+        // one of the two should be NaN
+        result = 1;
+    }
+
+    const u4 resultUnsigned = std::bit_cast<u4>(result);
+
+    thread->m_currentFrame->operands.emplace_back(Variable{VariableType_INT, resultUnsigned});
+}
 
 void ifeq(INSTRUCTION_ARGS)
 {

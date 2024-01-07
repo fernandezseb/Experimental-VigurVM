@@ -36,6 +36,7 @@ void VM::start()
     getClass("java/lang/OutOfMemoryError", &m_mainThread);
     getClass("java/lang/VirtualMachineError", &m_mainThread);
     getClass("java/lang/Object", &m_mainThread);
+    getClass("java/lang/Number", &m_mainThread);
     getClass("java/lang/Class", &m_mainThread);
     getClass("java/lang/String", &m_mainThread);
     getClass("java/lang/System", &m_mainThread);

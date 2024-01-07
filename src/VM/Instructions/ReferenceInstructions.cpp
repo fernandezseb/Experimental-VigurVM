@@ -289,7 +289,23 @@ void invokestatic(INSTRUCTION_ARGS)
 
     if (methodInfo->isNative())
     {
+        std::deque<Variable> arguments;
+        // The arguments and the pointer to the object
+        for (int i = methodInfo->argsCount; i > 0; --i)
+        {
+            arguments.push_front(topFrame->popOperand());
+        }
         thread->pushNativeStackFrame(targetClass, methodInfo, methodInfo->argsCount);
+
+        if (!arguments.empty())
+        {
+            for (int i = 0; i < methodInfo->argsCount; ++i)
+            {
+                thread->m_currentFrame->localVariables[i] = arguments[i];
+            }
+        }
+
+
         VM->executeNativeMethod(targetClass, methodInfo, heap, thread);
         thread->popFrame();
     } else
