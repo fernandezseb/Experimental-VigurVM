@@ -20,15 +20,15 @@
 #include "VM/VM.h"
 #include "Data/Variable.h"
 
-void fcmpl(const u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void fcmpl(INSTRUCTION_ARGS)
 {
     const Variable var2 = thread->m_currentFrame->popOperand();
     const Variable var1 = thread->m_currentFrame->popOperand();
     VM->checkType(var2, VariableType_FLOAT, thread);
     VM->checkType(var1, VariableType_FLOAT, thread);
 
-    float f2 = std::bit_cast<float>(var2.data);
-    float f1 = std::bit_cast<float>(var1.data);
+    const auto f2 = std::bit_cast<float>(var2.data);
+    const auto f1 = std::bit_cast<float>(var1.data);
 
     i4 result = 0;
 
@@ -60,8 +60,8 @@ void fcmpg(INSTRUCTION_ARGS)
     VM->checkType(var2, VariableType_FLOAT, thread);
     VM->checkType(var1, VariableType_FLOAT, thread);
 
-    float f2 = std::bit_cast<float>(var2.data);
-    float f1 = std::bit_cast<float>(var1.data);
+    const auto f2 = std::bit_cast<float>(var2.data);
+    const auto f1 = std::bit_cast<float>(var1.data);
 
     i4 result = 0;
 
@@ -87,14 +87,14 @@ void fcmpg(INSTRUCTION_ARGS)
 
 void ifeq(INSTRUCTION_ARGS)
 {
-    u1 byte1 = args[0];
-    u1 byte2 = args[1];
+    const u1 byte1 = args[0];
+    const u1 byte2 = args[1];
 
-    i2 branchByte = (byte1 << 8) | byte2;
+    const i2 branchByte = (byte1 << 8) | byte2;
 
-    Variable intVar = thread->m_currentFrame->popOperand();
+    const Variable intVar = thread->m_currentFrame->popOperand();
     VM->checkType(intVar, VariableType_INT, thread);
-    if (((i4)intVar.data) == 0)
+    if (intVar.data == 0)
     {
         thread->m_pc = thread->m_pc-3+branchByte;
     }
@@ -102,15 +102,15 @@ void ifeq(INSTRUCTION_ARGS)
 
 void ifne(INSTRUCTION_ARGS)
 {
-    u1 byte1 = args[0];
-    u1 byte2 = args[1];
+    const u1 byte1 = args[0];
+    const u1 byte2 = args[1];
 
-    i2 branchByte = (byte1 << 8) | byte2;
+    const i2 branchByte = (byte1 << 8) | byte2;
 
-    Variable intVar = thread->m_currentFrame->popOperand();
+    const Variable intVar = thread->m_currentFrame->popOperand();
     VM->checkType(intVar, VariableType_INT, thread);
 
-    if (((i4)intVar.data) != 0)
+    if (intVar.data != 0)
     {
         thread->m_pc = thread->m_pc-3+branchByte;
     }
@@ -118,15 +118,15 @@ void ifne(INSTRUCTION_ARGS)
 
 void ifge(INSTRUCTION_ARGS)
 {
-    u1 byte1 = args[0];
-    u1 byte2 = args[1];
+    const u1 byte1 = args[0];
+    const u1 byte2 = args[1];
 
-    i2 branchByte = (byte1 << 8) | byte2;
+    const i2 branchByte = (byte1 << 8) | byte2;
 
-    Variable intVar = thread->m_currentFrame->popOperand();
+    const Variable intVar = thread->m_currentFrame->popOperand();
     VM->checkType(intVar, VariableType_INT, thread);
 
-    if (((i4)intVar.data) >= 0)
+    if (std::bit_cast<i4>(intVar.data) >= 0)
     {
         thread->m_pc = thread->m_pc-3+branchByte;
     }
@@ -134,15 +134,15 @@ void ifge(INSTRUCTION_ARGS)
 
 void ifgt(INSTRUCTION_ARGS)
 {
-    u1 byte1 = args[0];
-    u1 byte2 = args[1];
+    const u1 byte1 = args[0];
+    const u1 byte2 = args[1];
 
-    i2 branchByte = (byte1 << 8) | byte2;
+    const i2 branchByte = (byte1 << 8) | byte2;
 
-    Variable intVar = thread->m_currentFrame->popOperand();
+    const Variable intVar = thread->m_currentFrame->popOperand();
     VM->checkType(intVar, VariableType_INT, thread);
 
-    if (((i4)intVar.data) > 0)
+    if (std::bit_cast<i4>(intVar.data) > 0)
     {
         thread->m_pc = thread->m_pc-3+branchByte;
     }
@@ -150,15 +150,15 @@ void ifgt(INSTRUCTION_ARGS)
 
 void ifle(INSTRUCTION_ARGS)
 {
-    u1 byte1 = args[0];
-    u1 byte2 = args[1];
+    const u1 byte1 = args[0];
+    const u1 byte2 = args[1];
 
-    i2 branchByte = (byte1 << 8) | byte2;
+    const i2 branchByte = (byte1 << 8) | byte2;
 
-    Variable intVar = thread->m_currentFrame->popOperand();
+    const Variable intVar = thread->m_currentFrame->popOperand();
     VM->checkType(intVar, VariableType_INT, thread);
 
-    if (((i4)intVar.data) <= 0)
+    if (std::bit_cast<i4>(intVar.data) <= 0)
     {
         thread->m_pc = thread->m_pc-3+branchByte;
     }
@@ -166,15 +166,15 @@ void ifle(INSTRUCTION_ARGS)
 
 void if_icmpne(INSTRUCTION_ARGS)
 {
-    u1 byte1 = args[0];
-    u1 byte2 = args[1];
+    const u1 byte1 = args[0];
+    const u1 byte2 = args[1];
 
-    i2 branchByte = (byte1 << 8) | byte2;
+    const i2 branchByte = (byte1 << 8) | byte2;
 
-    Variable var2 = thread->m_currentFrame->popOperand();
-    Variable var1 = thread->m_currentFrame->popOperand();
+    const Variable var2 = thread->m_currentFrame->popOperand();
+    const Variable var1 = thread->m_currentFrame->popOperand();
 
-    if (((i4)var1.data) != ((i4)var2.data))
+    if (std::bit_cast<i4>(var1.data) != std::bit_cast<i4>(var2.data))
     {
         thread->m_pc = thread->m_pc-3+branchByte;
     }
@@ -182,15 +182,15 @@ void if_icmpne(INSTRUCTION_ARGS)
 
 void if_icmplt(INSTRUCTION_ARGS)
 {
-    u1 byte1 = args[0];
-    u1 byte2 = args[1];
+    const u1 byte1 = args[0];
+    const u1 byte2 = args[1];
 
-    i2 branchByte = (byte1 << 8) | byte2;
+    const i2 branchByte = (byte1 << 8) | byte2;
 
-    Variable var2 = thread->m_currentFrame->popOperand();
-    Variable var1 = thread->m_currentFrame->popOperand();
+    const Variable var2 = thread->m_currentFrame->popOperand();
+    const Variable var1 = thread->m_currentFrame->popOperand();
 
-    if (((i4)var1.data) < ((i4)var2.data))
+    if (std::bit_cast<i4>(var1.data) < std::bit_cast<i4>(var2.data))
     {
         thread->m_pc = thread->m_pc-3+branchByte;
     }
@@ -198,15 +198,15 @@ void if_icmplt(INSTRUCTION_ARGS)
 
 void if_icmpgt(INSTRUCTION_ARGS)
 {
-    u1 byte1 = args[0];
-    u1 byte2 = args[1];
+    const u1 byte1 = args[0];
+    const u1 byte2 = args[1];
 
-    i2 branchByte = (byte1 << 8) | byte2;
+    const i2 branchByte = (byte1 << 8) | byte2;
 
     Variable var2 = thread->m_currentFrame->popOperand();
     Variable var1 = thread->m_currentFrame->popOperand();
 
-    if (((i4)var1.data) > ((i4)var2.data))
+    if (std::bit_cast<i4>(var1.data) > std::bit_cast<i4>(var2.data))
     {
         thread->m_pc = thread->m_pc-3+branchByte;
     }
@@ -214,15 +214,15 @@ void if_icmpgt(INSTRUCTION_ARGS)
 
 void if_icmple(INSTRUCTION_ARGS)
 {
-    u1 byte1 = args[0];
-    u1 byte2 = args[1];
+    const u1 byte1 = args[0];
+    const u1 byte2 = args[1];
 
-    i2 branchByte = (byte1 << 8) | byte2;
+    const i2 branchByte = (byte1 << 8) | byte2;
 
     Variable var2 = thread->m_currentFrame->popOperand();
     Variable var1 = thread->m_currentFrame->popOperand();
 
-    if (((i4)var1.data) <= ((i4)var2.data))
+    if (std::bit_cast<i4>(var1.data) <= std::bit_cast<i4>(var2.data))
     {
         thread->m_pc = thread->m_pc-3+branchByte;
     }
@@ -230,15 +230,15 @@ void if_icmple(INSTRUCTION_ARGS)
 
 void if_acmpne(INSTRUCTION_ARGS)
 {
-    u1 byte1 = args[0];
-    u1 byte2 = args[1];
+    const u1 byte1 = args[0];
+    const u1 byte2 = args[1];
 
-    i2 branchByte = (byte1 << 8) | byte2;
+    const i2 branchByte = (byte1 << 8) | byte2;
 
     Variable var2 = thread->m_currentFrame->popOperand();
     Variable var1 = thread->m_currentFrame->popOperand();
 
-    if (((i4)var1.data) != ((i4)var2.data))
+    if (std::bit_cast<i4>(var1.data) != std::bit_cast<i4>(var2.data))
     {
         thread->m_pc = thread->m_pc-3+branchByte;
     }
