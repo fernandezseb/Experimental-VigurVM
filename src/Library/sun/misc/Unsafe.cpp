@@ -15,7 +15,17 @@
 
 #include "Unsafe.h"
 
-void lib_sun_misc_Unsafe_registerNatives(NATIVE_ARGS)
+#include <bit>
+
+JCALL void lib_sun_misc_Unsafe_registerNatives(NATIVE_ARGS)
 {
     printf("[Running sun/misc/Unsafe/registerNatives()V]\n");
+    registerNative("sun/misc/Unsafe/arrayBaseOffset", "(Ljava/lang/Class;)I", lib_sun_misc_Unsafe_arrayBaseOffset);
+}
+
+JCALL void lib_sun_misc_Unsafe_arrayBaseOffset(NATIVE_ARGS)
+{
+    constexpr u4 offset = offsetof(Array, data);
+    constexpr u4 val = std::bit_cast<u4>(offset);
+    thread->returnVar(Variable{VariableType_INT,  val});
 }
