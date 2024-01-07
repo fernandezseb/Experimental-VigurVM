@@ -277,10 +277,10 @@ ClassInfo* ClassLoader::readClass(const char* className, Memory* memory, const c
     }
 
     PHYSFS_file* file = PHYSFS_openRead(name);
-    const size_t size = PHYSFS_fileLength(file);
+    const u8 size = PHYSFS_fileLength(file);
     const auto fileContent = static_cast<u1*>(Platform::allocateMemory(size, 0));
 
-    PHYSFS_read(file, fileContent, 1, size);
+    PHYSFS_read(file, fileContent, 1, castToU4(size));
 
     ByteArray byteArray(fileContent, size);
 
