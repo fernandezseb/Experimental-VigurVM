@@ -17,6 +17,7 @@
 #include "Instructions/StackInstructions.h"
 #include "Instructions/ExtendedInstructions.h"
 #include "Instructions/MathInstructions.h"
+#include "Instructions/ConversionInstructions.h"
 
 #include <vector>
 #include <array>
@@ -46,7 +47,7 @@ public:
     void shutdown();
     static void checkType(Variable var, VariableType type, VMThread *thread);
 private:
-    inline static constexpr std::array<Instruction,95> m_instructions{{
+    inline static constexpr std::array<Instruction,97> m_instructions{{
         // Constants
         {i_nop, 0, "nop", 0, nop},
         {i_aconst_null, 0, "aconst_null", 0, aconst_null},
@@ -109,11 +110,14 @@ private:
         {i_iadd, 0, "iadd", 0, iadd},
         {i_isub, 0, "isub", 0, isub},
         {i_imul, 0, "imul", 0, imul},
+        {i_fmul, 0, "fmul", 0, fmul},
         {i_ishl, 0, "ishl", 0, ishl},
         {i_iushr, 0, "iushr", 0, iushr},
         {i_iand, 0, "iand", 0, iand},
         {i_ixor, 0, "ixor", 0, ixor},
         {i_iinc, 2, "iinc", 0, iinc},
+        // Conversions
+        {i_i2f, 0, "i2f", 0, i2f},
         // Comparisons
         {i_fcmpl, 0, "fcmpl", 0, fcmpl},
         {i_fcmpg, 0, "fcmpg", 0, fcmpg},

@@ -18,6 +18,7 @@
 JCALL void lib_java_lang_Class_registerNatives(NATIVE_ARGS)
 {
     registerNative("java/lang/Class/getPrimitiveClass", "(Ljava/lang/String;)Ljava/lang/Class;", lib_java_lang_Class_getPrimitiveClass);
+    registerNative("java/lang/Class/desiredAssertionStatus0", "(Ljava/lang/Class;)Z", lib_java_lang_Class_desiredAssertionStatus0);
 }
 
 JCALL void lib_java_lang_Class_getPrimitiveClass(NATIVE_ARGS)
@@ -56,4 +57,9 @@ JCALL void lib_java_lang_Class_getPrimitiveClass(NATIVE_ARGS)
         thread->internalError("Typestring not found");
     }
     thread->returnVar(Variable{VariableType_REFERENCE, classRef});
+}
+
+JCALL void lib_java_lang_Class_desiredAssertionStatus0(NATIVE_ARGS)
+{
+    thread->returnVar(Variable{VariableType_INT, 0});
 }

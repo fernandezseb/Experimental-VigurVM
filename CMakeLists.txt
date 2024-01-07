@@ -69,6 +69,8 @@ add_executable(${PROJECT_NAME}
         src/VM/Instructions/MathInstructions.cpp
         src/VM/Instructions/ComparisonInstructions.h
         src/VM/Instructions/ComparisonInstructions.cpp
+        src/VM/Instructions/ConversionInstructions.h
+        src/VM/Instructions/ConversionInstructions.cpp
 
 )
 

@@ -49,6 +49,16 @@ void imul(INSTRUCTION_ARGS)
     thread->m_currentFrame->operands.push_back(added);
 }
 
+void fmul(INSTRUCTION_ARGS)
+{
+    const Variable var2 = thread->m_currentFrame->popOperand();
+    const Variable var1 = thread->m_currentFrame->popOperand();
+    const Variable added{VariableType_FLOAT,
+        std::bit_cast<u4>(std::bit_cast<float>(var1.data)
+            * std::bit_cast<float>(var2.data))};
+    thread->m_currentFrame->operands.push_back(added);
+}
+
 void ishl(INSTRUCTION_ARGS)
 {
     Variable value2 = thread->m_currentFrame->popOperand();

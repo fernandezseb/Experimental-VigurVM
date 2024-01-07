@@ -63,6 +63,12 @@ std::vector<Variable> VM::createVariableForDescriptor(const char* descriptor)
         constexpr Variable variableHigh{VariableType_LONG};
         variables.push_back(variableHigh);
         variables.push_back(variableLow);
+    } else if (strcmp(descriptor, "D") == 0)
+    {
+        constexpr Variable variableLow{VariableType_LONG};
+        constexpr Variable variableHigh{VariableType_LONG};
+        variables.push_back(variableHigh);
+        variables.push_back(variableLow);
     } else if (descriptor[0] == '[')
     {
         constexpr Variable variable{VariableType_REFERENCE};

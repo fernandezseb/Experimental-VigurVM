@@ -9,6 +9,7 @@ class JavaHeap;
 void iadd(INSTRUCTION_ARGS);
 void isub(INSTRUCTION_ARGS);
 void imul(INSTRUCTION_ARGS);
+void fmul(INSTRUCTION_ARGS);
 void ishl(INSTRUCTION_ARGS);
 void iushr(INSTRUCTION_ARGS);
 void iand(INSTRUCTION_ARGS);
