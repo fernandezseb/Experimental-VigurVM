@@ -261,7 +261,7 @@ ClassInfo* ClassLoader::readClass(ByteArray& byteArray)
     return classInfo;
 }
 
-ClassInfo* ClassLoader::readClass(const char* className, Memory* memory, const char* classPath)
+ClassInfo* ClassLoader::readClass(const char* className, Memory* memory, [[maybe_unused]]const char* classPath)
 {
     this->m_memory = memory;
     char name[300] = {0};

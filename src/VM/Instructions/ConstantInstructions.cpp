@@ -111,15 +111,7 @@ void loadConstant(VMThread* thread, const u4 index, JavaHeap* heap, VM* VM)
     {
         const auto* classInfo = static_cast<const CPClassInfo*>(cpItem);
         std::string_view className = thread->m_currentClass->constantPool->getString(classInfo->nameIndex);
-        ClassInfo* targetClassInfo = nullptr;
-        if (className[0] == '[')
-        {
-            // TODO: Save the name in the classObject instead of the ClassInfo pointer
-            // TODO: Don't recreeate array objects, see: sun.misc.Unsafe.arrayBaseOffset
-        } else {
-            targetClassInfo = VM->getClass(className.data(), const_cast<VMThread*>(thread));
-        }
-        const u4 classObjectRef =  heap->createClassObject(heap->getClassByName("java/lang/Class"), VM, targetClassInfo);
+        const u4 classObjectRef =  heap->createClassObject(heap->getClassByName("java/lang/Class"), VM, className);
         const Variable classObjectVar{VariableType_REFERENCE, classObjectRef};
         thread->m_currentFrame->operands.push_back(classObjectVar);
     }

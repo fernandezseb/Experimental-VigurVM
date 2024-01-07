@@ -111,7 +111,7 @@ public:
 
 	[[nodiscard]] char* getName() const
 	{
-		CPClassInfo* classInfo = constantPool->getClassInfo(thisClass);
+		const CPClassInfo* classInfo = constantPool->getClassInfo(thisClass);
 		return constantPool->getString(classInfo->nameIndex);
 	}
 

@@ -37,7 +37,7 @@ maxSize(size), size(0)
 }
 
 template <class T>
-T DynamicArray<T>::get(size_t index)
+T DynamicArray<T>::get(size_t index) const
 {
     return array[index];
 }

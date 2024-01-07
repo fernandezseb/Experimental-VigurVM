@@ -25,7 +25,7 @@ JavaHeap::JavaHeap()
     objects.push_back(0);
 }
 
-uint32_t JavaHeap::createArray(ArrayType type, uint64_t size)
+u4 JavaHeap::createArray(ArrayType type, uint64_t size)
 {
     Array* array = static_cast<Array*>(Platform::allocateMemory(sizeof(Array), 0));
     array->length = size;
@@ -54,7 +54,7 @@ uint32_t JavaHeap::createArray(ArrayType type, uint64_t size)
     return castToU4<std::size_t>(objects.size()-1);
 }
 
-uint32_t JavaHeap::createObject(ClassInfo* classInfo, VM* VM)
+u4 JavaHeap::createObject(ClassInfo* classInfo, VM* VM)
 {
     // TODO: Fix undefined behavior with uninitialized memory in object
     // We are NOT calling the constructor of the object here
@@ -118,8 +118,15 @@ uint32_t JavaHeap::createObject(ClassInfo* classInfo, VM* VM)
 }
 
 // TODO: De-duplicate code from createObject
-uint32_t JavaHeap::createClassObject(ClassInfo* classInfo, VM* VM, ClassInfo* targetClassInfo)
+u4 JavaHeap::createClassObject(ClassInfo* classInfo, VM* VM, std::string_view name)
 {
+    const u4 existingClassObject = getClassObjectByName(name);
+    if (existingClassObject != 0)
+    {
+        return existingClassObject;
+    }
+
+
     // TODO: Fix undefined behavior with uninitialized memory in object
     // We are NOT calling the constructor of the object here
     ClassObject* object = (ClassObject*) Platform::allocateMemory(sizeof(ClassObject), 0);
@@ -142,7 +149,7 @@ uint32_t JavaHeap::createClassObject(ClassInfo* classInfo, VM* VM, ClassInfo* ta
     }
     object->fieldsCount = fieldsCount;
     object->superClassObject = 0;
-    object->targetClassInfo = targetClassInfo;
+    object->name = name;
 
     fieldsCount = 0;
     for (u2 currentField = 0; currentField < classInfo->fieldsCount; ++currentField)
@@ -183,7 +190,7 @@ uint32_t JavaHeap::createClassObject(ClassInfo* classInfo, VM* VM, ClassInfo* ta
 }
 
 
-uint32_t JavaHeap::createString(const char* utf8String, VM* VM) {
+u4 JavaHeap::createString(const char* utf8String, VM* VM) {
     const u4 existingString = getString(utf8String);
     if (existingString != 0) {
         return existingString;
@@ -299,12 +306,27 @@ u4 JavaHeap::getString(const char* utf8String) const
     return 0;
 }
 
+u4 JavaHeap::getClassObjectByName(std::string_view name) const
+{
+    for (uint32_t currentObj = 1; currentObj < objects.size(); ++currentObj)
+    {
+        const Reference* ref = objects[currentObj];
+        if (ref->type == ReferenceType::CLASSOBJECT) {
+            const auto* obj = static_cast<const ClassObject*>(ref);
+            if (obj->name == name) {
+                return currentObj;
+            }
+        }
+    }
+    return 0;
+}
+
 void JavaHeap::addClassInfo(ClassInfo* classInfo)
 {
     methodArea.classes.add(classInfo);
 }
 
-ClassInfo* JavaHeap::getClassByName(const char* className)
+ClassInfo* JavaHeap::getClassByName(const char* className) const
 {
     for (size_t currentClass = 0; currentClass < methodArea.classes.getSize() ; currentClass++)
     {

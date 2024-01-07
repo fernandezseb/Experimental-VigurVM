@@ -1,6 +1,7 @@
 #pragma once
 
 #include <span>
+#include <string_view>
 
 #include "Core.h"
 #include "DynamicArray.h"
@@ -66,7 +67,7 @@ public:
 class ClassObject : public Object
 {
 public:
-    ClassInfo* targetClassInfo{nullptr};
+    std::string_view name;
 };
 
 class Array : public Reference {
@@ -94,20 +95,21 @@ public:
     /*
      * Object operations
      */
-    uint32_t createArray(ArrayType type, uint64_t size);
-    uint32_t createObject(ClassInfo* classInfo, VM* VM);
-    uint32_t createClassObject(ClassInfo* classInfo, VM* VM, ClassInfo* targetClassInfo);
-    uint32_t createString(const char* utf8String, VM* VM);
+    u4 createArray(ArrayType type, uint64_t size);
+    u4 createObject(ClassInfo* classInfo, VM* VM);
+    u4 createClassObject(ClassInfo* classInfo, VM* VM, std::string_view name);
+    u4 createString(const char* utf8String, VM* VM);
 
     [[nodiscard]] Object* getObject(uint32_t id) const;
     [[nodiscard]] ClassObject* getClassObject(uint32_t id) const;
     [[nodiscard]] Object* getChildObject(uint32_t id, ClassInfo* classInfo);
     [[nodiscard]] Array* getArray(u4 id) const;
     [[nodiscard]] u4 getString(const char* utf8String) const;
+    [[nodiscard]] u4 getClassObjectByName(std::string_view name) const;
 
     /*
      * Class Operations
      */
     void addClassInfo(ClassInfo* classInfo);
-    ClassInfo* getClassByName(const char* className);
+    [[nodiscard]] ClassInfo* getClassByName(const char* className) const;
 };

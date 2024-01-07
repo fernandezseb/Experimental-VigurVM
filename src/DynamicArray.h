@@ -12,7 +12,7 @@ private:
     void expand();
 public:
     explicit DynamicArray(size_t size);
-    T get(size_t index);
+    T get(size_t index) const;
     int set(size_t index, T element);
     void add(T element);
     [[nodiscard]] inline size_t getSize() const;
