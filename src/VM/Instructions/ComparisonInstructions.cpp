@@ -16,6 +16,7 @@
 #include "ComparisonInstructions.h"
 
 #include <bit>
+#include <cmath>
 
 #include "VM/VM.h"
 #include "Data/Variable.h"
@@ -38,13 +39,13 @@ void fcmpl(INSTRUCTION_ARGS)
     } else if (f1 < f2)
     {
         result = -1;
-    } else if (f1 == f2)
+    } else if (std::isnan(f1) || std::isnan(f2))
+    {
+        result = -1;
+    }
+    else if (f1 == f2)
     {
         result = 0;
-    } else
-    {
-        // one of the two should be NaN
-        result = -1;
     }
 
     const u4 resultUnsigned = std::bit_cast<u4>(result);
@@ -71,13 +72,12 @@ void fcmpg(INSTRUCTION_ARGS)
     } else if (f1 < f2)
     {
         result = -1;
+    } else if (std::isnan(f1) || std::isnan(f2))
+    {
+        result = 1;
     } else if (f1 == f2)
     {
         result = 0;
-    } else
-    {
-        // one of the two should be NaN
-        result = 1;
     }
 
     const u4 resultUnsigned = std::bit_cast<u4>(result);

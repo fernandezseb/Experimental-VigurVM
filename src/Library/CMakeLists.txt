@@ -8,6 +8,8 @@ add_library(Library
         java/lang/Class.cpp
         java/lang/System.h
         java/lang/System.cpp
+        java/lang/Float.h
+        java/lang/Float.cpp
         java/io/FileOutputStream.h
         java/io/FileOutputStream.cpp
         java/io/FileDescriptor.h
