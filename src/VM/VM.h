@@ -47,7 +47,7 @@ public:
     void shutdown();
     static void checkType(Variable var, VariableType type, VMThread *thread);
 private:
-    inline static constexpr std::array<Instruction,97> m_instructions{{
+    inline static constexpr std::array<Instruction,98> m_instructions{{
         // Constants
         {i_nop, 0, "nop", 0, nop},
         {i_aconst_null, 0, "aconst_null", 0, aconst_null},
@@ -117,6 +117,7 @@ private:
         {i_ixor, 0, "ixor", 0, ixor},
         {i_iinc, 2, "iinc", 0, iinc},
         // Conversions
+        {i_i2l, 0, "i2l", 0, i2l},
         {i_i2f, 0, "i2f", 0, i2f},
         // Comparisons
         {i_fcmpl, 0, "fcmpl", 0, fcmpl},
