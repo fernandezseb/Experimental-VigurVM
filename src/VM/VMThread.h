@@ -31,5 +31,6 @@ public:
     void pushStackFrameStatic(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame);
     void pushStackFrameSpecial(ClassInfo* classInfo, const MethodInfo* methodInfo, StackFrame* previousFrame, JavaHeap* heap);
     void returnVar(Variable returnValue);
+    void returnVar(Variable highByte, Variable lowByte);
     void internalError(const char* error);
 };

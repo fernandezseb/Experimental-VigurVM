@@ -10,6 +10,8 @@ add_library(Library
         java/lang/System.cpp
         java/lang/Float.h
         java/lang/Float.cpp
+        java/lang/Double.h
+        java/lang/Double.cpp
         java/io/FileOutputStream.h
         java/io/FileOutputStream.cpp
         java/io/FileDescriptor.h

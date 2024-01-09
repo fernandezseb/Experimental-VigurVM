@@ -168,7 +168,13 @@ static void invokeVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread
         // The arguments and the pointer to the object
         for (int i = methodInfo->argsCount; i >= 0; --i)
         {
-            arguments.push_front(topFrame->popOperand());
+            Variable operand = topFrame->popOperand();
+            if (operand.getCategory() == 2)
+            {
+                Variable highByte = topFrame->popOperand();
+                arguments.push_front(highByte);
+            }
+            arguments.push_front(operand);
         }
 
         const Variable ref = arguments[0];
@@ -221,7 +227,7 @@ static void invokeVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread
 
     if (!arguments.empty())
     {
-        for (int i = 0; i <= methodInfo->argsCount; ++i)
+        for (int i = 0; i < arguments.size(); ++i)
         {
             thread->m_currentFrame->localVariables[i] = arguments[i];
         }
@@ -293,18 +299,23 @@ void invokestatic(INSTRUCTION_ARGS)
         // The arguments and the pointer to the object
         for (int i = methodInfo->argsCount; i > 0; --i)
         {
-            arguments.push_front(topFrame->popOperand());
+            Variable operand = topFrame->popOperand();
+            if (operand.getCategory() == 2)
+            {
+                Variable highByte = topFrame->popOperand();
+                arguments.push_front(highByte);
+            }
+            arguments.push_front(operand);
         }
-        thread->pushNativeStackFrame(targetClass, methodInfo, methodInfo->argsCount);
+        thread->pushNativeStackFrame(targetClass, methodInfo, arguments.size());
 
         if (!arguments.empty())
         {
-            for (int i = 0; i < methodInfo->argsCount; ++i)
+            for (int i = 0; i < arguments.size(); ++i)
             {
                 thread->m_currentFrame->localVariables[i] = arguments[i];
             }
         }
-
 
         VM->executeNativeMethod(targetClass, methodInfo, heap, thread);
         thread->popFrame();

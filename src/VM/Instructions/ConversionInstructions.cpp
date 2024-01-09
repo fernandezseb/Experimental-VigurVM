@@ -26,7 +26,7 @@ void i2l(INSTRUCTION_ARGS)
     const Variable valueVar = thread->m_currentFrame->popOperand();
     VM->checkType(valueVar, VariableType_INT, thread);
     const i4 intValue = std::bit_cast<i4>(valueVar.data);
-    const long l = intValue;
+    const i8 l = intValue;
     const u4* bytes = (u4*)(&l);
     const u4 highByte = bytes[1];
     const u4 lowByte = bytes[0];

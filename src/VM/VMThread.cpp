@@ -97,7 +97,13 @@ void VMThread::pushStackFrameSpecial(ClassInfo* classInfo, const MethodInfo* met
         // The arguments and the pointer to the object
         for (int i = methodInfo->argsCount; i >= 0; --i)
         {
-            arguments.push_front(previousFrame->popOperand());
+            Variable operand = previousFrame->popOperand();
+            if (operand.getCategory() == 2)
+            {
+                Variable highByte = previousFrame->popOperand();
+                arguments.push_front(highByte);
+            }
+            arguments.push_front(operand);
         }
 
         const Variable ref = arguments[0];
@@ -110,7 +116,7 @@ void VMThread::pushStackFrameSpecial(ClassInfo* classInfo, const MethodInfo* met
     pushStackFrameWithoutParams(classInfo, methodInfo);
     if (!arguments.empty())
     {
-        for (int i = 0; i <= methodInfo->argsCount; ++i)
+        for (int i = 0; i < arguments.size(); ++i)
         {
             m_currentFrame->localVariables[i] = arguments[i];
         }
@@ -146,6 +152,20 @@ void VMThread::returnVar(const Variable returnValue)
     {
         StackFrame* previousStackFrame = &topStack->frames[topStack->frames.size()-2];
         previousStackFrame->operands.push_back(returnValue);
+    } else
+    {
+        internalError("Can't return to previous frame because there is no previous frame");
+    }
+}
+
+void VMThread::returnVar(Variable highByte, Variable lowByte)
+{
+    JavaStack* topStack = &m_stackstack.top();
+    if (topStack->frames.size() > 1)
+    {
+        StackFrame* previousStackFrame = &topStack->frames[topStack->frames.size()-2];
+        previousStackFrame->operands.push_back(highByte);
+        previousStackFrame->operands.push_back(lowByte);
     } else
     {
         internalError("Can't return to previous frame because there is no previous frame");

@@ -7,6 +7,7 @@ class VMThread;
 class JavaHeap;
 
 void iadd(INSTRUCTION_ARGS);
+void ladd(INSTRUCTION_ARGS);
 void isub(INSTRUCTION_ARGS);
 void imul(INSTRUCTION_ARGS);
 void fmul(INSTRUCTION_ARGS);
