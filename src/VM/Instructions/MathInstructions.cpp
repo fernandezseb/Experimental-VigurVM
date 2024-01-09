@@ -22,35 +22,18 @@
 
 void iadd(INSTRUCTION_ARGS)
 {
-    // TODO: Check types and convert to int correctly
-    const Variable var1 = thread->m_currentFrame->popOperand();
-    const Variable var2 = thread->m_currentFrame->popOperand();
-    const Variable added{VariableType_INT,
-        std::bit_cast<u4>(std::bit_cast<i4>(var1.data) + std::bit_cast<i4>(var2.data))};
-    thread->m_currentFrame->operands.push_back(added);
+    const i4 val2 = thread->m_currentFrame->popInt();
+    const i4 val1 = thread->m_currentFrame->popInt();
+    thread->m_currentFrame->pushInt(val1+val2);
 }
 
 void ladd(INSTRUCTION_ARGS)
 {
-    const Variable var1lowByte = thread->m_currentFrame->popOperand();
-    const Variable var1HighByte = thread->m_currentFrame->popOperand();
-
-    const u8 u1 = (static_cast<u8>(var1HighByte.data) << 32) | (var1lowByte.data);
-    const i8 i1 = std::bit_cast<i8>(u1);
-
-
-    const Variable var2lowByte = thread->m_currentFrame->popOperand();
-    const Variable var2HighByte = thread->m_currentFrame->popOperand();
-
-    const u8 u2 = (static_cast<u8>(var2HighByte.data) << 32) | (var2lowByte.data);
-    const i8 i2 = std::bit_cast<i8>(u2);
-
-    i8 sum = i1 + i2;
-
-    const auto parts = reinterpret_cast<u4*>(&sum);
-
-    thread->m_currentFrame->operands.push_back(Variable{VariableType_LONG, parts[0]});
-    thread->m_currentFrame->operands.push_back(Variable{VariableType_LONG, parts[1]});
+    StackFrame* currentFrame = thread->m_currentFrame;
+    const i8 long2 = currentFrame->popLong();
+    const i8 long1 = currentFrame->popLong();
+    const i8 sum = long1 + long2;
+    thread->m_currentFrame->pushLong(sum);
 }
 
 void isub(INSTRUCTION_ARGS)

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <bit>
 #include <vector>
 
 #include "Core.h"
@@ -35,9 +36,37 @@ struct StackFrame {
             fprintf(stderr, "Error: No operands on stack found!\n");
             Platform::exitProgram(78);
         }
-        Variable var = operands.back();
+        const Variable var = operands.back();
         operands.pop_back();
         return var;
+    }
+
+    i8 popLong()
+    {
+        const Variable varlowByte = popOperand();
+        const Variable varHighByte = popOperand();
+
+        const u8 u1 = (static_cast<u8>(varHighByte.data) << 32) | (varlowByte.data);
+        return std::bit_cast<i8>(u1);
+    }
+
+    void pushLong(i8 value)
+    {
+        const auto parts = reinterpret_cast<u4*>(&value);
+
+        operands.emplace_back(VariableType_LONG, parts[0]);
+        operands.emplace_back(VariableType_LONG, parts[1]);
+    }
+
+    i4 popInt()
+    {
+        const Variable var = popOperand();
+        return std::bit_cast<i4>(var.data);
+    }
+
+    void pushInt(const i4 value)
+    {
+        operands.emplace_back(VariableType_INT, std::bit_cast<u4>(value));
     }
 
     [[nodiscard]] Variable peekOperand() const
