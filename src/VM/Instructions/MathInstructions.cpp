@@ -60,6 +60,15 @@ void fmul(INSTRUCTION_ARGS)
     thread->m_currentFrame->operands.push_back(added);
 }
 
+void lshl(INSTRUCTION_ARGS)
+{
+    StackFrame* currentFrame = thread->m_currentFrame;
+    const i4 int2 = currentFrame->popInt();
+    const i8 long1 = currentFrame->popLong();
+    const i8 result = long1 << (int2 & 0x3f);
+    thread->m_currentFrame->pushLong(result);
+}
+
 void ishl(INSTRUCTION_ARGS)
 {
     const Variable value2 = thread->m_currentFrame->popOperand();
@@ -96,6 +105,15 @@ void iand(INSTRUCTION_ARGS)
     const i4 val2 = thread->m_currentFrame->popInt();
     const i4 val1 = thread->m_currentFrame->popInt();
     thread->m_currentFrame->pushInt(val1&val2);
+}
+
+void land(INSTRUCTION_ARGS)
+{
+    StackFrame* currentFrame = thread->m_currentFrame;
+    const i8 long2 = currentFrame->popLong();
+    const i8 long1 = currentFrame->popLong();
+    const i8 conjunction = long1 & long2;
+    thread->m_currentFrame->pushLong(conjunction);
 }
 
 void ixor(INSTRUCTION_ARGS)

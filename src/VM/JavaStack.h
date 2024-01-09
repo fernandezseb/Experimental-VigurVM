@@ -46,7 +46,7 @@ struct StackFrame {
         const Variable varlowByte = popOperand();
         const Variable varHighByte = popOperand();
 
-        const u8 u1 = (static_cast<u8>(varHighByte.data) << 32) | (varlowByte.data);
+        const u8 u1 = ((static_cast<u8>(varHighByte.data) << 32) | static_cast<u8>(varlowByte.data));
         return std::bit_cast<i8>(u1);
     }
 
@@ -54,8 +54,8 @@ struct StackFrame {
     {
         const auto parts = reinterpret_cast<u4*>(&value);
 
-        operands.emplace_back(VariableType_LONG, parts[0]);
         operands.emplace_back(VariableType_LONG, parts[1]);
+        operands.emplace_back(VariableType_LONG, parts[0]);
     }
 
     i4 popInt()
