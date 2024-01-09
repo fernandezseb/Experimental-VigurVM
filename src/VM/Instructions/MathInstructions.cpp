@@ -38,21 +38,16 @@ void ladd(INSTRUCTION_ARGS)
 
 void isub(INSTRUCTION_ARGS)
 {
-    // TODO: Check types and convert to int correctly
-    const Variable var2 = thread->m_currentFrame->popOperand();
-    const Variable var1 = thread->m_currentFrame->popOperand();
-    const Variable added{VariableType_INT,
-        std::bit_cast<u4>((i4)var1.data - (i4)var2.data)};
-    thread->m_currentFrame->operands.push_back(added);
+    const i4 val2 = thread->m_currentFrame->popInt();
+    const i4 val1 = thread->m_currentFrame->popInt();
+    thread->m_currentFrame->pushInt(val1-val2);
 }
 
 void imul(INSTRUCTION_ARGS)
 {
-    const Variable var2 = thread->m_currentFrame->popOperand();
-    const Variable var1 = thread->m_currentFrame->popOperand();
-    const Variable added{VariableType_INT,
-        std::bit_cast<u4>((i4)var1.data * (i4)var2.data)};
-    thread->m_currentFrame->operands.push_back(added);
+    const i4 val2 = thread->m_currentFrame->popInt();
+    const i4 val1 = thread->m_currentFrame->popInt();
+    thread->m_currentFrame->pushInt(val1*val2);
 }
 
 void fmul(INSTRUCTION_ARGS)
@@ -67,8 +62,8 @@ void fmul(INSTRUCTION_ARGS)
 
 void ishl(INSTRUCTION_ARGS)
 {
-    Variable value2 = thread->m_currentFrame->popOperand();
-    Variable value1 = thread->m_currentFrame->popOperand();
+    const Variable value2 = thread->m_currentFrame->popOperand();
+    const Variable value1 = thread->m_currentFrame->popOperand();
 
     const i4 s = ((i4)value2.data) & 0x1f;
     const i4 resultVal = value1.data << s;
@@ -98,12 +93,9 @@ void iushr(INSTRUCTION_ARGS)
 
 void iand(INSTRUCTION_ARGS)
 {
-    const Variable value2 = thread->m_currentFrame->popOperand();
-    const Variable value1 = thread->m_currentFrame->popOperand();
-    const u4 resultVal = value1.data & value2.data;
-    const Variable result{VariableType_INT,
-        std::bit_cast<u4>(resultVal)};
-    thread->m_currentFrame->operands.push_back(result);
+    const i4 val2 = thread->m_currentFrame->popInt();
+    const i4 val1 = thread->m_currentFrame->popInt();
+    thread->m_currentFrame->pushInt(val1&val2);
 }
 
 void ixor(INSTRUCTION_ARGS)
@@ -120,9 +112,9 @@ void ixor(INSTRUCTION_ARGS)
 
 void iinc(INSTRUCTION_ARGS)
 {
-    u1 index = args[0];
-    i1* argsArr = ((i1*)args);
-    i1 constData = argsArr[1];
+    const u1 index = args[0];
+    const i1* argsArr = ((i1*)args);
+    const i1 constData = argsArr[1];
     Variable* var =  &thread->m_currentFrame->localVariables[index];
     var->data += constData;
 }
