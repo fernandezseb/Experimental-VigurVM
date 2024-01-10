@@ -18,6 +18,8 @@ add_library(Library
         java/io/FileDescriptor.cpp
         sun/misc/Unsafe.h
         sun/misc/Unsafe.cpp
+        sun/misc/VM.h
+        sun/misc/VM.cpp
         sun/reflect/Reflection.h
         sun/reflect/Reflection.cpp
 )

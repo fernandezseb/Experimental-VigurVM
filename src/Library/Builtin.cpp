@@ -23,6 +23,7 @@
 #include "java/lang/Object.h"
 #include "java/lang/System.h"
 #include "sun/misc/Unsafe.h"
+#include "sun/misc/VM.h"
 #include "sun/reflect/Reflection.h"
 
 void registerBuiltinRegisterNatives()
@@ -39,6 +40,7 @@ void registerBuiltinRegisterNatives()
     registerNative("java/io/FileDescriptor/initIDs", "()V", lib_java_io_FileDescriptor_initIDs);
     // sun/misc
     registerNative("sun/misc/Unsafe/registerNatives", "()V", lib_sun_misc_Unsafe_registerNatives);
+    registerNative("sun/misc/VM/initialize", "()V", lib_sun_misc_VM_initialize);
     // Vigur/lang package
     // registerNative("Vigur/lang/System/registerNatives", "()V", lib_Vigur_lang_System_registerNatives);
     // Reflection API
