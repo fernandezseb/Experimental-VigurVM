@@ -285,8 +285,9 @@ void invokestatic(INSTRUCTION_ARGS)
     CPClassInfo* targetClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
     CPNameAndTypeInfo* nameAndTypeInfo = topFrame->constantPool->getNameAndTypeInfo(methodRef->nameAndTypeIndex);
     ClassInfo* targetClass = VM->getClass(topFrame->constantPool->getString(targetClassInfo->nameIndex), thread);
-    // TODO: Take in account descriptor of method as well, for overriding and such
-    MethodInfo* methodInfo = targetClass->findMethodWithName(topFrame->constantPool->getString(nameAndTypeInfo->nameIndex));
+    MethodInfo* methodInfo = targetClass->findMethodWithNameAndDescriptor(
+        topFrame->constantPool->getString(nameAndTypeInfo->nameIndex),
+        topFrame->constantPool->getString(nameAndTypeInfo->descriptorIndex));
 
     if (!methodInfo->isStatic())
     {

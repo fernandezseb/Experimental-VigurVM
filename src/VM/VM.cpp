@@ -65,8 +65,8 @@ std::vector<Variable> VM::createVariableForDescriptor(const char* descriptor)
         variables.push_back(variableLow);
     } else if (strcmp(descriptor, "D") == 0)
     {
-        constexpr Variable variableLow{VariableType_LONG};
-        constexpr Variable variableHigh{VariableType_LONG};
+        constexpr Variable variableLow{VariableType_DOUBLE};
+        constexpr Variable variableHigh{VariableType_DOUBLE};
         variables.push_back(variableHigh);
         variables.push_back(variableLow);
     } else if (descriptor[0] == '[')
@@ -157,13 +157,13 @@ void VM::updateVariableFromVariable(Variable* variable, const char* descriptor, 
         checkType(operand, VariableType_REFERENCE, thread);
 
         variable->data = operand.data;
-    } else if (descriptor[0] == 'J' || descriptor[0] == 'J')
+    } else if (descriptor[0] == 'J')
     {
         checkType(*variable, VariableType_LONG, thread);
         checkType(operand, VariableType_LONG, thread);
         variable[0].data = operand2.data;
         variable[1].data = operand.data;
-    } else if (descriptor[0] == 'D' || descriptor[0] == 'D')
+    } else if (descriptor[0] == 'D')
     {
         checkType(*variable, VariableType_DOUBLE, thread);
         checkType(operand, VariableType_DOUBLE, thread);

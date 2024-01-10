@@ -48,6 +48,27 @@ void ireturnInstruction(INSTRUCTION_ARGS)
     }
 }
 
+void dreturnInstruction(INSTRUCTION_ARGS) {
+    StackFrame* stackFrame = thread->m_currentFrame;
+    thread->m_pc = stackFrame->previousPc;
+    thread->m_currentClass = stackFrame->previousClass;
+    thread->m_currentMethod = stackFrame->previousMethod;
+
+    Variable lowByte = thread->m_currentFrame->popOperand();
+    Variable highByte = thread->m_currentFrame->popOperand();
+
+    thread->m_stackstack.top().frames.pop_back();
+    if (thread->m_stackstack.top().frames.size() > 0)
+    {
+        thread->m_currentFrame = &thread->m_stackstack.top().frames[thread->m_stackstack.top().frames.size()-1];
+        thread->m_currentFrame->operands.push_back(highByte);
+        thread->m_currentFrame->operands.push_back(lowByte);
+    } else
+    {
+        thread->m_currentFrame = 0;
+    }
+}
+
 void areturnInstruction(INSTRUCTION_ARGS)
 {
     StackFrame* stackFrame = thread->m_currentFrame;
