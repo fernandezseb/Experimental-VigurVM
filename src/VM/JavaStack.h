@@ -53,7 +53,6 @@ struct StackFrame {
     void pushLong(i8 value)
     {
         const auto parts = reinterpret_cast<u4*>(&value);
-
         operands.emplace_back(VariableType_LONG, parts[1]);
         operands.emplace_back(VariableType_LONG, parts[0]);
     }
@@ -67,6 +66,17 @@ struct StackFrame {
     void pushInt(const i4 value)
     {
         operands.emplace_back(VariableType_INT, std::bit_cast<u4>(value));
+    }
+
+    float popFloat()
+    {
+        const Variable var = popOperand();
+        return std::bit_cast<float>(var.data);
+    }
+
+    void pushFloat(const float value)
+    {
+        operands.emplace_back(VariableType_FLOAT, std::bit_cast<u4>(value));
     }
 
     [[nodiscard]] Variable peekOperand() const

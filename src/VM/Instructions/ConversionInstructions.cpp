@@ -36,8 +36,14 @@ void i2l(INSTRUCTION_ARGS)
 
 void i2f(INSTRUCTION_ARGS)
 {
-    const Variable valueVar = thread->m_currentFrame->popOperand();
-    const i4 intValue = std::bit_cast<i4>(valueVar.data);
+    const i4 intValue = thread->m_currentFrame->popInt();
     const float f = static_cast<float>(intValue);
-    thread->m_currentFrame->operands.emplace_back(Variable{VariableType_FLOAT, std::bit_cast<u4>(f)});
+    thread->m_currentFrame->pushFloat(f);
+}
+
+void f2i(INSTRUCTION_ARGS)
+{
+    const float f = thread->m_currentFrame->popFloat();
+    const i4 intValue = static_cast<i4>(f);
+    thread->m_currentFrame->pushInt(intValue);
 }
