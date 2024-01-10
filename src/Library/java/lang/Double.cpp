@@ -18,9 +18,8 @@
 
 JCALL void lib_java_lang_Double_doubleToRawLongBits(NATIVE_ARGS)
 {
-    // thread->internalError("Double needs two values");
-    const Variable highByte = thread->m_currentFrame->localVariables[0];
-    const Variable lowByte = thread->m_currentFrame->localVariables[1];
+    const Variable highByte = thread->m_currentFrame->localVariables[1];
+    const Variable lowByte = thread->m_currentFrame->localVariables[0];
     VM->checkType(highByte, VariableType_DOUBLE, thread);
     VM->checkType(lowByte, VariableType_DOUBLE, thread);
 
@@ -28,6 +27,16 @@ JCALL void lib_java_lang_Double_doubleToRawLongBits(NATIVE_ARGS)
         Variable{VariableType_LONG, highByte.data},
         Variable{VariableType_LONG, lowByte.data}
         );
+}
 
-    printf("");
+JCALL void lib_java_lang_Double_longBitsToDouble(NATIVE_ARGS) {
+    const Variable highByte = thread->m_currentFrame->localVariables[1];
+    const Variable lowByte = thread->m_currentFrame->localVariables[0];
+    VM->checkType(highByte, VariableType_LONG, thread);
+    VM->checkType(lowByte, VariableType_LONG, thread);
+
+    thread->returnVar(
+        Variable{VariableType_DOUBLE, highByte.data},
+        Variable{VariableType_DOUBLE, lowByte.data}
+        );
 }

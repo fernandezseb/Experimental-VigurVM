@@ -33,6 +33,7 @@ void registerBuiltinRegisterNatives()
     registerNative("java/lang/System/registerNatives", "()V", lib_java_lang_System_registerNatives);
     registerNative("java/lang/Float/floatToRawIntBits", "(F)I", lib_java_lang_Float_floatToRawIntBits);
     registerNative("java/lang/Double/doubleToRawLongBits", "(D)J", lib_java_lang_Double_doubleToRawLongBits);
+    registerNative("java/lang/Double/longBitsToDouble", "(J)D", lib_java_lang_Double_longBitsToDouble);
     // java/io package
     registerNative("java/io/FileOutputStream/initIDs", "()V", lib_java_io_FileOutputStream_initIDs);
     registerNative("java/io/FileDescriptor/initIDs", "()V", lib_java_io_FileDescriptor_initIDs);
