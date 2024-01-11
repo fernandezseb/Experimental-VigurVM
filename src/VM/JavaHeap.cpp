@@ -56,9 +56,8 @@ u4 JavaHeap::createArray(ArrayType type, uint64_t size)
 
 u4 JavaHeap::createObject(ClassInfo* classInfo, VM* VM)
 {
-    // TODO: Fix undefined behavior with uninitialized memory in object
-    // We are NOT calling the constructor of the object here
-    Object* object = (Object*) Platform::allocateMemory(sizeof(Object), 0);
+    void* objectMemory = Platform::allocateMemory(sizeof(Object), 0);
+    const auto object = new (objectMemory) Object;
     u2 fieldsCount = 0;
     for (u2 currentField = 0; currentField < classInfo->fieldsCount; ++currentField)
     {
@@ -82,7 +81,7 @@ u4 JavaHeap::createObject(ClassInfo* classInfo, VM* VM)
     fieldsCount = 0;
     for (u2 currentField = 0; currentField < classInfo->fieldsCount; ++currentField)
     {
-        FieldInfo* fieldInfo = classInfo->fields[currentField];
+        const FieldInfo* fieldInfo = classInfo->fields[currentField];
         if (!fieldInfo->isStatic())
         {
             FieldData data = {};
@@ -126,14 +125,12 @@ u4 JavaHeap::createClassObject(ClassInfo* classInfo, VM* VM, std::string_view na
         return existingClassObject;
     }
 
-
-    // TODO: Fix undefined behavior with uninitialized memory in object
-    // We are NOT calling the constructor of the object here
-    ClassObject* object = (ClassObject*) Platform::allocateMemory(sizeof(ClassObject), 0);
+    void* objectMemory = Platform::allocateMemory(sizeof(ClassObject), 0);
+    const auto object = new (objectMemory) ClassObject();
     u2 fieldsCount = 0;
     for (u2 currentField = 0; currentField < classInfo->fieldsCount; ++currentField)
     {
-        FieldInfo* fieldInfo = classInfo->fields[currentField];
+        const FieldInfo* fieldInfo = classInfo->fields[currentField];
         if (!fieldInfo->isStatic())
         {
             ++fieldsCount;
@@ -154,7 +151,7 @@ u4 JavaHeap::createClassObject(ClassInfo* classInfo, VM* VM, std::string_view na
     fieldsCount = 0;
     for (u2 currentField = 0; currentField < classInfo->fieldsCount; ++currentField)
     {
-        FieldInfo* fieldInfo = classInfo->fields[currentField];
+        const FieldInfo* fieldInfo = classInfo->fields[currentField];
         if (!fieldInfo->isStatic())
         {
             FieldData data = {};

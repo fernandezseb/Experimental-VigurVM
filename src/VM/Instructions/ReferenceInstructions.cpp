@@ -48,7 +48,7 @@ void getstatic(INSTRUCTION_ARGS)
     const char* descriptor = thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex);
     const u1 varCount = VM::getDescriptorVarCategory(descriptor);
     // TODO: Check type
-    Variable *vars = targetField->staticData;
+    const Variable *vars = targetField->staticData;
     for (u1 currentVar = 0; currentVar < varCount; ++currentVar)
     {
         if (vars[currentVar].type == VariableType_UNDEFINED)
@@ -336,8 +336,9 @@ void invokeinterface(INSTRUCTION_ARGS) {
     CPClassInfo* targetClassInfo = topFrame->constantPool->getClassInfo(interfaceMethodRef->classIndex);
     CPNameAndTypeInfo* nameAndTypeInfo = topFrame->constantPool->getNameAndTypeInfo(interfaceMethodRef->nameAndTypeIndex);
     ClassInfo* targetClass = VM->getClass(topFrame->constantPool->getString(targetClassInfo->nameIndex), thread);
-    // TODO: Take in account descriptor of method as well, for overriding and such
-    MethodInfo* methodInfo = targetClass->findMethodWithName(topFrame->constantPool->getString(nameAndTypeInfo->nameIndex));
+    MethodInfo* methodInfo = targetClass->findMethodWithNameAndDescriptor(
+        topFrame->constantPool->getString(nameAndTypeInfo->nameIndex),
+        topFrame->constantPool->getString(nameAndTypeInfo->descriptorIndex));
 
     invokeVirtual(targetClass, methodInfo, thread, VM, heap);
     printf("> Created new stack frame for virtual call on: %s.%s()\n", thread->m_currentFrame->className, thread->m_currentFrame->methodName);

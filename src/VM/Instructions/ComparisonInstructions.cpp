@@ -108,9 +108,6 @@ void ifne(INSTRUCTION_ARGS)
     const i2 branchByte = (byte1 << 8) | byte2;
 
     const Variable intVar = thread->m_currentFrame->popOperand();
-    // TODO: Should be INT but we use BOOLEAN in VM incorrectly as Boolean
-    // VM->checkType(intVar, VariableType_INT, thread);
-
     if (intVar.data != 0)
     {
         thread->m_pc = thread->m_pc-3+branchByte;

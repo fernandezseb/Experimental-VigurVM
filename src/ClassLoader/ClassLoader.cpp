@@ -124,7 +124,6 @@ ConstantPoolItem* ClassLoader::readConstantPoolItem(uint8_t tag, ByteArray& byte
     }
     case CT_FIELDREF:
     {
-        // TODO: De-duplicate from methodref
         uint16_t classIndex = byteArray.readUnsignedShort();
         uint16_t nameAndTypeIndex = byteArray.readUnsignedShort();
         CPFieldRef* fieldRef = (CPFieldRef*)m_memory->alloc(sizeof(CPFieldRef));
@@ -136,7 +135,6 @@ ConstantPoolItem* ClassLoader::readConstantPoolItem(uint8_t tag, ByteArray& byte
     }
     case CT_INTERFACEMETHOD:
     {
-        // TODO: De-duplicate from methodref
         uint16_t classIndex = byteArray.readUnsignedShort();
         uint16_t nameAndTypeIndex = byteArray.readUnsignedShort();
         CPInterfaceRef* interfaceRef = (CPInterfaceRef*)m_memory->alloc(sizeof(CPInterfaceRef));
@@ -148,7 +146,6 @@ ConstantPoolItem* ClassLoader::readConstantPoolItem(uint8_t tag, ByteArray& byte
     }
     case CT_INTEGER:
     {
-        // TODO: Parse the int as the correct type
         uint32_t intBytes = byteArray.readUnsignedInt();
         CPIntegerInfo* integerInfo = (CPIntegerInfo*)m_memory->alloc(sizeof(CPIntegerInfo));
         integerInfo->tag = tag;
@@ -158,7 +155,6 @@ ConstantPoolItem* ClassLoader::readConstantPoolItem(uint8_t tag, ByteArray& byte
     }
     case CT_FLOAT:
     {
-        // TODO: Parse the int as the correct type
         uint32_t floatBytes = byteArray.readUnsignedInt();
         CPFloatInfo* floatInfo = (CPFloatInfo*)m_memory->alloc(sizeof(CPFloatInfo));
         floatInfo->tag = tag;
