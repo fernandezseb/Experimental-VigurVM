@@ -13,18 +13,6 @@
 
 #define CCALL extern "C"
 
-// Type strings
-#define T_VOID    "void"
-#define T_BYTE    "byte"
-#define T_CHAR    "char"
-#define T_DOUBLE  "double"
-#define T_FLOAT   "float"
-#define T_INT     "int"
-#define T_LONG    "long"
-#define T_SHORT   "short"
-#define T_BOOLEAN "boolean"
-#define T_DOUBLE  "double"
-
 // Fundamental JVM sizes
 typedef uint8_t  u1;
 typedef uint16_t u2;
@@ -40,15 +28,6 @@ typedef int64_t i8;
 #define KIB(x)   ((size_t) (x) << 10)
 #define MIB(x)   ((size_t) (x) << 20)
 
-/*
- * A string containing real UTF-8 characters.
- * Not like the ones in class files
- */
-struct JString
-{
-    uint64_t length;
-    char* chars;
-};
 
 #define INSTRUCTION_ARGS \
     [[maybe_unused]] const u1* args, \

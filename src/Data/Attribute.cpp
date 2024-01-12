@@ -17,7 +17,7 @@
 
 AttributeInfo* AttributeCollection::findAttributeWithName(ConstantPool* constantPool, const char* name) const
 {
-	AttributeInfo* attrib = 0;
+	AttributeInfo* attrib = nullptr;
 
 	for (int currentAttrib = 0; currentAttrib < attributesCount; ++currentAttrib) {
 		attrib = attributes[currentAttrib];

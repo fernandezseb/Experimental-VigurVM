@@ -15,7 +15,7 @@ public:
     T get(size_t index) const;
     int set(size_t index, T element);
     void add(T element);
-    [[nodiscard]] inline size_t getSize() const;
+    [[nodiscard]] size_t getSize() const;
     ~DynamicArray();
 };
 

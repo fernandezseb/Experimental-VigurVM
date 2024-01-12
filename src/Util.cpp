@@ -15,29 +15,29 @@
 
 #include "Util.h"
 
-void modifiedUtf8ToStandardUtf8(char *input, JString *jstring)
+std::string_view modifiedUtf8ToStandardUtf8(const char *input, char* outputMemory)
 {
-	int currentOut = 0;
+	std::size_t currentOut = 0;
 	for (int i = 0; i < strlen(input); ++i)
 	{
-		if (((uint8_t)input[i]) == 0xED)
+		if (static_cast<uint8_t>(input[i]) == 0xED)
 		{
-			uint32_t codepoint = 0x10000 +
+			const uint32_t codepoint = 0x10000 +
 						   ((input[i + 1] & 0x0f) << 16) +
 						   ((input[i + 2] & 0x3f) << 10) +
 						   ((input[i + 4] & 0x0f) << 6) +
 						   (input[i + 5] & 0x3f);
-			jstring->chars[currentOut++] = (char)(((codepoint >> 18) & 0x07) | 0xF0);
-			jstring->chars[currentOut++] = (char)(((codepoint >> 12) & 0x3F) | 0x80);
-			jstring->chars[currentOut++] = (char)(((codepoint >> 6) & 0x3F) | 0x80);
-			jstring->chars[currentOut++] = (char)(((codepoint >> 0) & 0x3F) | 0x80);
+			outputMemory[currentOut++] = static_cast<char>(codepoint >> 18 & 0x07 | 0xF0);
+			outputMemory[currentOut++] = static_cast<char>(codepoint >> 12 & 0x3F | 0x80);
+			outputMemory[currentOut++] = static_cast<char>(codepoint >> 6 & 0x3F | 0x80);
+			outputMemory[currentOut++] = static_cast<char>(codepoint >> 0 & 0x3F | 0x80);
 			i += 5;
-		} else if ((((uint8_t)input[i]) == 0xC0)&&(((uint8_t)input[i+1]) == 0x80) ) {
-			jstring->chars[currentOut++] = 0;
+		} else if (static_cast<uint8_t>(input[i]) == 0xC0 && static_cast<uint8_t>(input[i + 1]) == 0x80 ) {
+			outputMemory[currentOut++] = 0;
 		} else {
-			jstring->chars[currentOut++] = input[i];
+			outputMemory[currentOut++] = input[i];
 		}
 	}
 
-	jstring->length = currentOut;
+	return std::string_view{outputMemory, currentOut};
 }

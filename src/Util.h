@@ -1,10 +1,11 @@
 #pragma once
 
 #include <cstdlib>
+#include <string_view>
 
 #include "Core.h"
 
-void modifiedUtf8ToStandardUtf8(char *input, JString *jstring);
+std::string_view modifiedUtf8ToStandardUtf8(const char *input, const char* memory);
 
 template <typename T>
 [[nodiscard]] static constexpr u1 castToU1(const T value)

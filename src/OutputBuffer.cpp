@@ -15,8 +15,9 @@
 
 #include "OutputBuffer.h"
 
-#include <cstring>
 #include <Platform.h>
+
+#include <cstring>
 
 OutputBuffer::OutputBuffer(size_t bufferSize)
     : bufferSize(bufferSize), currentSize(0)
