@@ -51,11 +51,11 @@ std::vector<Variable> VM::createVariableForDescriptor(const char* descriptor)
         variables.push_back(variable);
     } else if (strcmp(descriptor, "Z") == 0)
     {
-        constexpr Variable variable{VariableType_BOOLEAN};
+        constexpr Variable variable{VariableType_INT};
         variables.push_back(variable);
     } else if (strcmp(descriptor, "B") == 0)
     {
-        constexpr Variable variable{VariableType_BYTE};
+        constexpr Variable variable{VariableType_INT};
         variables.push_back(variable);
     } else if (strcmp(descriptor, "J") == 0)
     {
@@ -114,7 +114,8 @@ void VM::initStaticFields(ClassInfo* class_info, [[maybe_unused]] VMThread* thre
     }
 
     class_info->staticFieldsCount = staticFieldsCount;
-    class_info->staticFields = (Variable*) class_info->memory->alloc(sizeof(Variable) * staticFieldsCount);
+    const auto variablesMemory = (Variable*) class_info->memory->alloc(sizeof(Variable) * staticFieldsCount);
+    class_info->staticFields = std::span(variablesMemory, staticFieldsCount);
 
     u2 currentStaticField = 0;
     for (u2 currentField = 0; currentField < class_info->fieldsCount; ++currentField)
@@ -127,10 +128,6 @@ void VM::initStaticFields(ClassInfo* class_info, [[maybe_unused]] VMThread* thre
                 class_info->staticFields[currentStaticField++] = variable;
             }
             const std::size_t index = currentStaticField-variables.size();
-            // if (index > staticFieldsCount-1 || index < 0)
-            // {
-            //     thread->internalError("Going outside of index!");
-            // TODO: Replace above commented code by using typechecked data structure
             field->staticData = &class_info->staticFields[index];
         }
     }
@@ -146,9 +143,7 @@ void VM::updateVariableFromVariable(Variable* variable, const char* descriptor, 
         variable->data = operand.data;
     } else if (strcmp(descriptor, "Z") == 0)
     {
-        checkType(*variable, VariableType_BOOLEAN, thread);
-        // TODO: Check if it is BOOLEAN OR INT?
-        // checkType(operand, VariableType_INT, thread);
+        checkType(*variable, VariableType_INT, thread);
 
         variable->data = operand.data;
     } else if (descriptor[0] == '[' || descriptor[0] == 'L') {
