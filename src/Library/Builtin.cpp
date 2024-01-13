@@ -38,6 +38,7 @@ void registerBuiltinRegisterNatives()
     // java/io package
     registerNative("java/io/FileOutputStream/initIDs", "()V", lib_java_io_FileOutputStream_initIDs);
     registerNative("java/io/FileDescriptor/initIDs", "()V", lib_java_io_FileDescriptor_initIDs);
+    registerNative("java/io/FileDescriptor/set", "(I)J", lib_java_io_FileDescriptor_set);
     // sun/misc
     registerNative("sun/misc/Unsafe/registerNatives", "()V", lib_sun_misc_Unsafe_registerNatives);
     registerNative("sun/misc/VM/initialize", "()V", lib_sun_misc_VM_initialize);

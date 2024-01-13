@@ -19,3 +19,31 @@ JCALL void lib_java_io_FileDescriptor_initIDs(NATIVE_ARGS)
 {
     printf("[Running initIDs from FileDescriptor]\n");
 }
+
+JCALL void lib_java_io_FileDescriptor_set(NATIVE_ARGS)
+{
+    const StackFrame* currentFrame = thread->m_currentFrame;
+    const Variable var = currentFrame->localVariables[0];
+
+    FILE* filePtr = nullptr;
+    switch (var.data)
+    {
+    case 0:
+        filePtr = stdout;
+        break;
+    case 1:
+        filePtr = stdin;
+        break;
+    case 2:
+        filePtr = stderr;
+        break;
+    default:
+        thread->internalError("Filedescriptor not found");
+    }
+
+    u8 handle = reinterpret_cast<u8>(filePtr);
+
+    const auto parts = reinterpret_cast<u4*>(&handle);
+    thread->returnVar(Variable{VariableType_LONG, parts[1]});
+    thread->returnVar(Variable{VariableType_LONG, parts[0]});
+}
