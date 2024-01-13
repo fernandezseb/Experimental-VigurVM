@@ -265,6 +265,10 @@ ClassInfo* ClassLoader::readClass(const char* className, Memory* memory, [[maybe
 
     PHYSFS_addToSearchPath(".", 1);
     PHYSFS_addToSearchPath("extern/classpath/rt.jar/rt.jar", 1);
+    if (classPath != nullptr && strlen(classPath) > 0) {
+        PHYSFS_addToSearchPath(classPath, 1);
+    }
+
     const int exists = PHYSFS_exists(name);
     if (!exists)
     {
