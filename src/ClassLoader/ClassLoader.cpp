@@ -243,7 +243,6 @@ ClassInfo* ClassLoader::readClass(ByteArray& byteArray)
 
     uint16_t methodsCount = byteArray.readUnsignedShort();
     classInfo->methods = readMethods(byteArray, classInfo->constantPool, methodsCount);
-    classInfo->methodCount = methodsCount;
 
     AttributeCollection* attributeInfo = AttributeParser::readAttributes(byteArray, classInfo->constantPool, m_memory);
     classInfo->attributes = attributeInfo;
@@ -341,7 +340,7 @@ void ClassLoader::parseDescriptor(const char* descriptor, MethodInfo* method)
     method->argsCount = desc.argsCount;
 }
 
-MethodInfo** ClassLoader::readMethods(ByteArray& byteArray, ConstantPool* constantPool, uint16_t methodCount)
+std::span<MethodInfo*> ClassLoader::readMethods(ByteArray& byteArray, ConstantPool* constantPool, uint16_t methodCount)
 {
     MethodInfo** methods = (MethodInfo**)m_memory->alloc(sizeof(MethodInfo*) * methodCount);
 
@@ -369,5 +368,5 @@ MethodInfo** ClassLoader::readMethods(ByteArray& byteArray, ConstantPool* consta
         methods[currentMethod] = info;
     }
 
-    return methods;
+    return {methods, methodCount};
 }

@@ -21,7 +21,7 @@ private:
 	void parseDescriptor(const char* descriptor, MethodInfo* method);
 	uint16_t* readInterfaces(ByteArray& byteArray, uint16_t interfacesCount);
 	FieldInfo** readFields(ByteArray& byteArray, ConstantPool* constantPool, uint16_t fieldsCount);
-	MethodInfo** readMethods(ByteArray& byteArray, ConstantPool* constantPool, uint16_t methodCount);
+	std::span<MethodInfo*> readMethods(ByteArray& byteArray, ConstantPool* constantPool, uint16_t methodCount);
 	ClassInfo* readClass(ByteArray& byteArray);
 	Memory* m_memory;
 };

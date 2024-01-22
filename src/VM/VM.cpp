@@ -188,7 +188,7 @@ static u2 readShort(VMThread* thread)
 
 void VM::executeLoop(VMThread* thread)
 {
-    while(!thread->m_stackstack.top().frames.empty())
+    while(!thread->m_stackstack.back().frames.empty())
     {
         uint8_t opcode = readByte(thread);
         printf("Running instruction with opcode: 0x%0x ", opcode);
@@ -241,7 +241,7 @@ void VM::runStaticInitializer(ClassInfo* classInfo, VMThread* thread)
     ClassInfo* oldCurrentClass = thread->m_currentClass;
     const MethodInfo* oldCurrentMethod = thread->m_currentMethod;
     StackFrame* oldFrame = thread->m_currentFrame;
-    thread->m_stackstack.emplace(200);
+    thread->m_stackstack.emplace_back(200);
 
     thread->pushStackFrameWithoutParams(classInfo, entryPoint);
 
@@ -251,7 +251,7 @@ void VM::runStaticInitializer(ClassInfo* classInfo, VMThread* thread)
     thread->m_pc = oldPc;
     thread->m_currentClass = oldCurrentClass;
     thread->m_currentMethod = oldCurrentMethod;
-    thread->m_stackstack.pop();
+    thread->m_stackstack.pop_back();
     thread->m_currentFrame = oldFrame;
 }
 

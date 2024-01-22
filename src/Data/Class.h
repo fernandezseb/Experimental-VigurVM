@@ -73,8 +73,7 @@ public:
 	FieldInfo** fields;
 	uint16_t fieldsCount;
 
-	MethodInfo** methods;
-	uint16_t methodCount;
+	std::span<MethodInfo*> methods;
 
 	AttributeCollection* attributes;
 	char* sourceFile;
@@ -89,7 +88,7 @@ public:
 
 	[[nodiscard]] MethodInfo* findMethodWithNameAndDescriptor(const char* name, const char* descriptor) const
 	{
-		for (uint16_t currentMethod = 0; currentMethod < methodCount; ++currentMethod) {
+		for (uint16_t currentMethod = 0; currentMethod < methods.size(); ++currentMethod) {
 			if (strcmp(methods[currentMethod]->name, name) == 0
 				&& strcmp(constantPool->getString(methods[currentMethod]->descriptorIndex), descriptor) == 0)
 			{

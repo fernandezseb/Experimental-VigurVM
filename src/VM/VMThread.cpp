@@ -41,8 +41,8 @@ void VMThread::pushStackFrameWithoutParams(ClassInfo* classInfo, const MethodInf
     m_currentClass = classInfo;
     m_currentMethod = methodInfo;
 
-    this->m_stackstack.top().frames.push_back(stackFrame);
-    m_currentFrame = &this->m_stackstack.top().frames[this->m_stackstack.top().frames.size()-1];
+    this->m_stackstack.back().frames.push_back(stackFrame);
+    m_currentFrame = &this->m_stackstack.back().frames[this->m_stackstack.back().frames.size()-1];
 }
 
 void VMThread::pushNativeStackFrame(ClassInfo* classInfo, const MethodInfo* methodInfo, size_t argumentsSize)
@@ -66,8 +66,8 @@ void VMThread::pushNativeStackFrame(ClassInfo* classInfo, const MethodInfo* meth
     m_currentClass = classInfo;
     m_currentMethod = methodInfo;
 
-    this->m_stackstack.top().frames.push_back(stackFrame);
-    m_currentFrame = &this->m_stackstack.top().frames[this->m_stackstack.top().frames.size()-1];
+    this->m_stackstack.back().frames.push_back(stackFrame);
+    m_currentFrame = &this->m_stackstack.back().frames[this->m_stackstack.back().frames.size()-1];
 }
 
 void VMThread::popFrame()
@@ -77,10 +77,10 @@ void VMThread::popFrame()
     m_currentClass = stackFrame->previousClass;
     m_currentMethod = stackFrame->previousMethod;
 
-    m_stackstack.top().frames.pop_back();
-    if (!m_stackstack.top().frames.empty())
+    m_stackstack.back().frames.pop_back();
+    if (!m_stackstack.back().frames.empty())
     {
-        m_currentFrame = &m_stackstack.top().frames[m_stackstack.top().frames.size()-1];
+        m_currentFrame = &m_stackstack.back().frames[m_stackstack.back().frames.size()-1];
     } else
     {
         m_currentFrame = nullptr;
@@ -127,11 +127,11 @@ void VMThread::internalError(const char* error)
 {
     fprintf(stdout, "Unhandled VM error in thread \"%s\": %s\n", m_name.data(), error);
     while (!m_stackstack.empty()) {
-        if (!m_stackstack.top().frames.empty())
+        if (!m_stackstack.back().frames.empty())
         {
-            for (i8 currentFrame = m_stackstack.top().frames.size() - 1; currentFrame >= 0; --currentFrame)
+            for (i8 currentFrame = m_stackstack.back().frames.size() - 1; currentFrame >= 0; --currentFrame)
             {
-                const StackFrame frame = m_stackstack.top().frames[currentFrame];
+                const StackFrame frame = m_stackstack.back().frames[currentFrame];
                 const char *nativeText = "";
                 if (frame.isNative)
                 {
@@ -140,14 +140,38 @@ void VMThread::internalError(const char* error)
                 printf("    at %s.%s%s\n", frame.className, frame.methodName, nativeText);
             }
         }
-        m_stackstack.pop();
+        m_stackstack.pop_back();
     }
     Platform::exitProgram(6);
 }
 
+StackFrame* VMThread::getTopFrameNonNative()
+{
+    StackFrame* foundFrame = nullptr;
+
+
+    for (i8 currentStack = m_stackstack.size() - 1;  currentStack >= 0 ; --currentStack)
+    {
+        JavaStack* stack = &m_stackstack[currentStack];
+        if (stack->frames.size() > 0)
+        {
+            for (i8 currentFrame = stack->frames.size()-1; currentFrame>=0; --currentFrame)
+            {
+                StackFrame* frame = &stack->frames[currentFrame];
+                if (!frame->isNative)
+                {
+                    foundFrame = frame;
+                }
+            }
+        }
+    }
+
+    return foundFrame;
+}
+
 void VMThread::returnVar(const Variable returnValue)
 {
-    JavaStack* topStack = &m_stackstack.top();
+    JavaStack* topStack = &m_stackstack.back();
     if (topStack->frames.size() > 1)
     {
         StackFrame* previousStackFrame = &topStack->frames[topStack->frames.size()-2];
@@ -160,7 +184,7 @@ void VMThread::returnVar(const Variable returnValue)
 
 void VMThread::returnVar(Variable highByte, Variable lowByte)
 {
-    JavaStack* topStack = &m_stackstack.top();
+    JavaStack* topStack = &m_stackstack.back();
     if (topStack->frames.size() > 1)
     {
         StackFrame* previousStackFrame = &topStack->frames[topStack->frames.size()-2];

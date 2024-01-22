@@ -22,5 +22,7 @@ add_library(Library
         sun/misc/VM.cpp
         sun/reflect/Reflection.h
         sun/reflect/Reflection.cpp
+        java/security/AccessController.h
+        java/security/AccessController.cpp
 )
 target_include_directories(Library PRIVATE ${PROJECT_SOURCE_DIR}/src/)

@@ -22,6 +22,7 @@
 #include "java/lang/Float.h"
 #include "java/lang/Object.h"
 #include "java/lang/System.h"
+#include "java/security/AccessController.h"
 #include "sun/misc/Unsafe.h"
 #include "sun/misc/VM.h"
 #include "sun/reflect/Reflection.h"
@@ -42,6 +43,8 @@ void registerBuiltinRegisterNatives()
     // sun/misc
     registerNative("sun/misc/Unsafe/registerNatives", "()V", lib_sun_misc_Unsafe_registerNatives);
     registerNative("sun/misc/VM/initialize", "()V", lib_sun_misc_VM_initialize);
+    // Security API
+    registerNative("java/security/AccessController/doPrivileged", "(Ljava/security/PrivilegedAction;)Ljava/lang/Object;", lib_java_security_AccessController_doPriviliged);
     // Vigur/lang package
     // registerNative("Vigur/lang/System/registerNatives", "()V", lib_Vigur_lang_System_registerNatives);
     // Reflection API
