@@ -45,6 +45,7 @@ public:
     void executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* methodInfo, JavaHeap* heap, VMThread* thread);
     void runMain();
     void shutdown();
+    void executeLoop(VMThread* thread);
     static void checkType(Variable var, VariableType type, VMThread *thread);
 private:
     inline static constexpr std::array<Instruction,104> m_instructions{{
@@ -168,7 +169,6 @@ private:
     VMThread m_mainThread{"main", 200};
     Configuration m_configuration;
     void initStaticFields(ClassInfo* class_info, VMThread* thread);
-    void executeLoop(VMThread* thread);
     void runStaticInitializer(ClassInfo* classInfo, VMThread* thread);
 };
 

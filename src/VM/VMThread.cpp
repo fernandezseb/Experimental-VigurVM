@@ -19,6 +19,8 @@
 
 #include <stack>
 
+static constexpr std::string_view NoNonNativeStackFrameFound{"Can't return to previous frame because there is no previous non-native frame"};
+
 void VMThread::pushStackFrameWithoutParams(ClassInfo* classInfo, const MethodInfo* methodInfo)
 {
     StackFrame stackFrame;
@@ -41,8 +43,8 @@ void VMThread::pushStackFrameWithoutParams(ClassInfo* classInfo, const MethodInf
     m_currentClass = classInfo;
     m_currentMethod = methodInfo;
 
-    this->m_stackstack.top().frames.push_back(stackFrame);
-    m_currentFrame = &this->m_stackstack.top().frames[this->m_stackstack.top().frames.size()-1];
+    this->m_stack.frames.push_back(stackFrame);
+    m_currentFrame = &this->m_stack.frames[this->m_stack.frames.size()-1];
 }
 
 void VMThread::pushNativeStackFrame(ClassInfo* classInfo, const MethodInfo* methodInfo, size_t argumentsSize)
@@ -66,8 +68,8 @@ void VMThread::pushNativeStackFrame(ClassInfo* classInfo, const MethodInfo* meth
     m_currentClass = classInfo;
     m_currentMethod = methodInfo;
 
-    this->m_stackstack.top().frames.push_back(stackFrame);
-    m_currentFrame = &this->m_stackstack.top().frames[this->m_stackstack.top().frames.size()-1];
+    this->m_stack.frames.push_back(stackFrame);
+    m_currentFrame = &this->m_stack.frames[this->m_stack.frames.size()-1];
 }
 
 void VMThread::popFrame()
@@ -77,10 +79,10 @@ void VMThread::popFrame()
     m_currentClass = stackFrame->previousClass;
     m_currentMethod = stackFrame->previousMethod;
 
-    m_stackstack.top().frames.pop_back();
-    if (!m_stackstack.top().frames.empty())
+    m_stack.frames.pop_back();
+    if (!m_stack.frames.empty())
     {
-        m_currentFrame = &m_stackstack.top().frames[m_stackstack.top().frames.size()-1];
+        m_currentFrame = &m_stack.frames[m_stack.frames.size()-1];
     } else
     {
         m_currentFrame = nullptr;
@@ -123,52 +125,59 @@ void VMThread::pushStackFrameSpecial(ClassInfo* classInfo, const MethodInfo* met
     }
 }
 
-void VMThread::internalError(const char* error)
+void VMThread::internalError(const std::string_view error) const
 {
-    fprintf(stdout, "Unhandled VM error in thread \"%s\": %s\n", m_name.data(), error);
-    while (!m_stackstack.empty()) {
-        if (!m_stackstack.top().frames.empty())
+    fprintf(stdout, "Unhandled VM error in thread \"%s\": %s\n", m_name.data(), error.data());
+    for (i8 currentFrame = m_stack.frames.size() - 1; currentFrame >= 0; --currentFrame)
+    {
+        const StackFrame frame = m_stack.frames[currentFrame];
+        const char *nativeText = "";
+        if (frame.isNative)
         {
-            for (i8 currentFrame = m_stackstack.top().frames.size() - 1; currentFrame >= 0; --currentFrame)
-            {
-                const StackFrame frame = m_stackstack.top().frames[currentFrame];
-                const char *nativeText = "";
-                if (frame.isNative)
-                {
-                    nativeText = " (native)";
-                }
-                printf("    at %s.%s%s\n", frame.className, frame.methodName, nativeText);
-            }
+            nativeText = " (native)";
         }
-        m_stackstack.pop();
+        printf("    at %s.%s%s\n", frame.className, frame.methodName, nativeText);
     }
     Platform::exitProgram(6);
 }
 
+StackFrame* VMThread::getTopFrameNonNative()
+{
+    for (i8 currentFrame = m_stack.frames.size()-1; currentFrame>=0; --currentFrame)
+    {
+        StackFrame* frame = &m_stack.frames[currentFrame];
+        if (!frame->isNative)
+        {
+            return frame;
+        }
+    }
+
+    return nullptr;
+}
+
 void VMThread::returnVar(const Variable returnValue)
 {
-    JavaStack* topStack = &m_stackstack.top();
-    if (topStack->frames.size() > 1)
+    StackFrame* targetFrame = getTopFrameNonNative();
+    if (targetFrame != nullptr)
     {
-        StackFrame* previousStackFrame = &topStack->frames[topStack->frames.size()-2];
-        previousStackFrame->operands.push_back(returnValue);
-    } else
+        targetFrame->operands.push_back(returnValue);
+    }
+    else
     {
-        internalError("Can't return to previous frame because there is no previous frame");
+        internalError(NoNonNativeStackFrameFound);
     }
 }
 
 void VMThread::returnVar(Variable highByte, Variable lowByte)
 {
-    JavaStack* topStack = &m_stackstack.top();
-    if (topStack->frames.size() > 1)
+    StackFrame* targetFrame = getTopFrameNonNative();
+    if (targetFrame != nullptr)
     {
-        StackFrame* previousStackFrame = &topStack->frames[topStack->frames.size()-2];
-        previousStackFrame->operands.push_back(highByte);
-        previousStackFrame->operands.push_back(lowByte);
+        targetFrame->operands.push_back(highByte);
+        targetFrame->operands.push_back(lowByte);
     } else
     {
-        internalError("Can't return to previous frame because there is no previous frame");
+        internalError(NoNonNativeStackFrameFound);
     }
 }
 
