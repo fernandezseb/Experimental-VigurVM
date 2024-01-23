@@ -114,6 +114,22 @@ void ifne(INSTRUCTION_ARGS)
     }
 }
 
+void iflt(const u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM)
+{
+    const u1 byte1 = args[0];
+    const u1 byte2 = args[1];
+
+    const i2 branchByte = (byte1 << 8) | byte2;
+
+    const Variable intVar = thread->m_currentFrame->popOperand();
+    VM->checkType(intVar, VariableType_INT, thread);
+
+    if (std::bit_cast<i4>(intVar.data) < 0)
+    {
+        thread->m_pc = thread->m_pc-3+branchByte;
+    }
+}
+
 void ifge(INSTRUCTION_ARGS)
 {
     const u1 byte1 = args[0];
