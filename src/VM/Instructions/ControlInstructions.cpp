@@ -37,10 +37,10 @@ void freturnInstruction(INSTRUCTION_ARGS)
 
     Variable returnVal = thread->m_currentFrame->popOperand();
 
-    thread->m_stackstack.back().frames.pop_back();
-    if (thread->m_stackstack.back().frames.size() > 0)
+    thread->m_stack.frames.pop_back();
+    if (thread->m_stack.frames.size() > 0)
     {
-        thread->m_currentFrame = &thread->m_stackstack.back().frames[thread->m_stackstack.back().frames.size()-1];
+        thread->m_currentFrame = &thread->m_stack.frames[thread->m_stack.frames.size()-1];
         thread->m_currentFrame->operands.push_back(returnVal);
     } else
     {
@@ -57,10 +57,10 @@ void ireturnInstruction(INSTRUCTION_ARGS)
 
     Variable returnVal = thread->m_currentFrame->popOperand();
 
-    thread->m_stackstack.back().frames.pop_back();
-    if (thread->m_stackstack.back().frames.size() > 0)
+    thread->m_stack.frames.pop_back();
+    if (thread->m_stack.frames.size() > 0)
     {
-        thread->m_currentFrame = &thread->m_stackstack.back().frames[thread->m_stackstack.back().frames.size()-1];
+        thread->m_currentFrame = &thread->m_stack.frames[thread->m_stack.frames.size()-1];
         thread->m_currentFrame->operands.push_back(returnVal);
     } else
     {
@@ -77,10 +77,10 @@ void dreturnInstruction(INSTRUCTION_ARGS) {
     Variable lowByte = thread->m_currentFrame->popOperand();
     Variable highByte = thread->m_currentFrame->popOperand();
 
-    thread->m_stackstack.back().frames.pop_back();
-    if (thread->m_stackstack.back().frames.size() > 0)
+    thread->m_stack.frames.pop_back();
+    if (thread->m_stack.frames.size() > 0)
     {
-        thread->m_currentFrame = &thread->m_stackstack.back().frames[thread->m_stackstack.back().frames.size()-1];
+        thread->m_currentFrame = &thread->m_stack.frames[thread->m_stack.frames.size()-1];
         thread->m_currentFrame->operands.push_back(highByte);
         thread->m_currentFrame->operands.push_back(lowByte);
     } else
@@ -99,13 +99,13 @@ void areturnInstruction(INSTRUCTION_ARGS)
     Variable returnVal = thread->m_currentFrame->popOperand();
 
 
-    thread->m_stackstack.back().frames.pop_back();
+    thread->m_stack.frames.pop_back();
 
-    // TODO: Current frame should be the first regardless of type
-    thread->m_currentFrame = thread->getTopFrameNonNative();
-    if (thread->m_currentFrame != nullptr)
+    StackFrame* nonNativeFrame = thread->getTopFrameNonNative();
+    thread->m_currentFrame = &thread->m_stack.frames[thread->m_stack.frames.size()-1];
+    if (nonNativeFrame != nullptr)
     {
-        thread->m_currentFrame->operands.push_back(returnVal);
+        nonNativeFrame->operands.push_back(returnVal);
     }
 
 }
@@ -116,10 +116,10 @@ void returnInstruction(INSTRUCTION_ARGS)
     thread->m_pc = stackFrame->previousPc;
     thread->m_currentClass = stackFrame->previousClass;
     thread->m_currentMethod = stackFrame->previousMethod;
-    thread->m_stackstack.back().frames.pop_back();
-    if (thread->m_stackstack.back().frames.size() > 0)
+    thread->m_stack.frames.pop_back();
+    if (thread->m_stack.frames.size() > 0)
     {
-        thread->m_currentFrame = &thread->m_stackstack.back().frames[thread->m_stackstack.back().frames.size()-1];
+        thread->m_currentFrame = &thread->m_stack.frames[thread->m_stack.frames.size()-1];
     } else
     {
         thread->m_currentFrame = 0;

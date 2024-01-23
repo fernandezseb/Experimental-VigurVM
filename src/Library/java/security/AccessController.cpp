@@ -23,21 +23,9 @@ void lib_java_security_AccessController_doPriviliged(NATIVE_ARGS)
     MethodInfo* methodInfo = method->classInfo->findMethodWithNameAndDescriptor("run", "()Ljava/lang/Object;");
     ClassInfo* classInfo = method->classInfo;
 
-    const u4 oldPc = thread->m_pc;
-    ClassInfo* oldCurrentClass = thread->m_currentClass;
-    const MethodInfo* oldCurrentMethod = thread->m_currentMethod;
-    StackFrame* oldFrame = thread->m_currentFrame;
-    thread->m_stackstack.emplace_back(200);
-
     thread->pushStackFrameWithoutParams(classInfo, methodInfo);
 
     thread->m_currentFrame->localVariables[0] = objectVar;
 
     VM->executeLoop(thread);
-
-    thread->m_pc = oldPc;
-    thread->m_currentClass = oldCurrentClass;
-    thread->m_currentMethod = oldCurrentMethod;
-    thread->m_stackstack.pop_back();
-    thread->m_currentFrame = oldFrame;
 }

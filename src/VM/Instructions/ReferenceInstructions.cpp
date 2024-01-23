@@ -20,6 +20,7 @@
 #include "VM/Native.h"
 
 #include <bit>
+#include <deque>
 #include <string>
 
 static u2 readShort(VMThread* thread)
