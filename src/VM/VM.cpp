@@ -262,7 +262,6 @@ ClassInfo* VM::getClass(const char* className, VMThread* thread)
 
 void VM::executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* methodInfo, JavaHeap* heap, VMThread* thread)
 {
-    // TODO: Push native stackframe before executing and pop after executing
     const char* className = targetClass->getName();
     printf("Running native code of method: %s\n", className);
     const char* description = targetClass->constantPool->getString(methodInfo->descriptorIndex);

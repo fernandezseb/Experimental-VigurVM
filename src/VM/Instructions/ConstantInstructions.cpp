@@ -15,12 +15,12 @@
 
 #include "ConstantInstructions.h"
 
-#include "Data/Variable.h"
 #include "VM/VM.h"
+#include "Data/Variable.h"
+#include "Util.h"
 
 #include <bit>
 
-#include "Util.h"
 
 void nop(INSTRUCTION_ARGS)
 {

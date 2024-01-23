@@ -114,7 +114,7 @@ void ifne(INSTRUCTION_ARGS)
     }
 }
 
-void iflt(const u1* args, u2 argsCount, i1 arg, JavaHeap* heap, VMThread* thread, VM* VM)
+void iflt(INSTRUCTION_ARGS)
 {
     const u1 byte1 = args[0];
     const u1 byte2 = args[1];
