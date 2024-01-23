@@ -18,6 +18,13 @@
 #include "VM/VM.h"
 #include "Data/Variable.h"
 
+static void returnCat1Var(VMThread* thread)
+{
+    const Variable returnVal = thread->m_currentFrame->popOperand();
+    thread->popFrame();
+    thread->returnVar(returnVal);
+}
+
 void gotoInstruction(INSTRUCTION_ARGS)
 {
     u1 byte1 = args[0];
@@ -30,98 +37,27 @@ void gotoInstruction(INSTRUCTION_ARGS)
 
 void freturnInstruction(INSTRUCTION_ARGS)
 {
-    StackFrame* stackFrame = thread->m_currentFrame;
-    thread->m_pc = stackFrame->previousPc;
-    thread->m_currentClass = stackFrame->previousClass;
-    thread->m_currentMethod = stackFrame->previousMethod;
-
-    Variable returnVal = thread->m_currentFrame->popOperand();
-
-    thread->m_stack.frames.pop_back();
-    if (thread->m_stack.frames.size() > 0)
-    {
-        thread->m_currentFrame = &thread->m_stack.frames[thread->m_stack.frames.size()-1];
-        thread->m_currentFrame->operands.push_back(returnVal);
-    } else
-    {
-        thread->m_currentFrame = 0;
-    }
+    returnCat1Var(thread);
 }
 
 void ireturnInstruction(INSTRUCTION_ARGS)
 {
-    StackFrame* stackFrame = thread->m_currentFrame;
-    thread->m_pc = stackFrame->previousPc;
-    thread->m_currentClass = stackFrame->previousClass;
-    thread->m_currentMethod = stackFrame->previousMethod;
-
-    Variable returnVal = thread->m_currentFrame->popOperand();
-
-    thread->m_stack.frames.pop_back();
-    if (thread->m_stack.frames.size() > 0)
-    {
-        thread->m_currentFrame = &thread->m_stack.frames[thread->m_stack.frames.size()-1];
-        thread->m_currentFrame->operands.push_back(returnVal);
-    } else
-    {
-        thread->m_currentFrame = 0;
-    }
+    returnCat1Var(thread);
 }
 
 void dreturnInstruction(INSTRUCTION_ARGS) {
-    StackFrame* stackFrame = thread->m_currentFrame;
-    thread->m_pc = stackFrame->previousPc;
-    thread->m_currentClass = stackFrame->previousClass;
-    thread->m_currentMethod = stackFrame->previousMethod;
-
-    Variable lowByte = thread->m_currentFrame->popOperand();
-    Variable highByte = thread->m_currentFrame->popOperand();
-
-    thread->m_stack.frames.pop_back();
-    if (thread->m_stack.frames.size() > 0)
-    {
-        thread->m_currentFrame = &thread->m_stack.frames[thread->m_stack.frames.size()-1];
-        thread->m_currentFrame->operands.push_back(highByte);
-        thread->m_currentFrame->operands.push_back(lowByte);
-    } else
-    {
-        thread->m_currentFrame = 0;
-    }
+    const Variable lowByte = thread->m_currentFrame->popOperand();
+    const Variable highByte = thread->m_currentFrame->popOperand();
+    thread->popFrame();
+    thread->returnVar(highByte, lowByte);
 }
 
 void areturnInstruction(INSTRUCTION_ARGS)
 {
-    StackFrame* stackFrame = thread->m_currentFrame;
-    thread->m_pc = stackFrame->previousPc;
-    thread->m_currentClass = stackFrame->previousClass;
-    thread->m_currentMethod = stackFrame->previousMethod;
-
-    Variable returnVal = thread->m_currentFrame->popOperand();
-
-
-    thread->m_stack.frames.pop_back();
-
-    StackFrame* nonNativeFrame = thread->getTopFrameNonNative();
-    thread->m_currentFrame = &thread->m_stack.frames[thread->m_stack.frames.size()-1];
-    if (nonNativeFrame != nullptr)
-    {
-        nonNativeFrame->operands.push_back(returnVal);
-    }
-
+    returnCat1Var(thread);
 }
 
 void returnInstruction(INSTRUCTION_ARGS)
 {
-    StackFrame* stackFrame = thread->m_currentFrame;
-    thread->m_pc = stackFrame->previousPc;
-    thread->m_currentClass = stackFrame->previousClass;
-    thread->m_currentMethod = stackFrame->previousMethod;
-    thread->m_stack.frames.pop_back();
-    if (thread->m_stack.frames.size() > 0)
-    {
-        thread->m_currentFrame = &thread->m_stack.frames[thread->m_stack.frames.size()-1];
-    } else
-    {
-        thread->m_currentFrame = 0;
-    }
+    thread->popFrame();
 }

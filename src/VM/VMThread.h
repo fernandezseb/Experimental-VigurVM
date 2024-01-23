@@ -29,7 +29,7 @@ public:
     void pushStackFrameSpecial(ClassInfo* classInfo, const MethodInfo* methodInfo, StackFrame* previousFrame, JavaHeap* heap);
     void returnVar(Variable returnValue);
     void returnVar(Variable highByte, Variable lowByte);
-    void internalError(const char* error);
+    void internalError(std::string_view error) const;
 
     StackFrame* getTopFrameNonNative();
 };

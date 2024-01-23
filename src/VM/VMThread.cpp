@@ -19,6 +19,8 @@
 
 #include <stack>
 
+static constexpr std::string_view NoNonNativeStackFrameFound{"Can't return to previous frame because there is no previous non-native frame"};
+
 void VMThread::pushStackFrameWithoutParams(ClassInfo* classInfo, const MethodInfo* methodInfo)
 {
     StackFrame stackFrame;
@@ -123,9 +125,9 @@ void VMThread::pushStackFrameSpecial(ClassInfo* classInfo, const MethodInfo* met
     }
 }
 
-void VMThread::internalError(const char* error)
+void VMThread::internalError(const std::string_view error) const
 {
-    fprintf(stdout, "Unhandled VM error in thread \"%s\": %s\n", m_name.data(), error);
+    fprintf(stdout, "Unhandled VM error in thread \"%s\": %s\n", m_name.data(), error.data());
     for (i8 currentFrame = m_stack.frames.size() - 1; currentFrame >= 0; --currentFrame)
     {
         const StackFrame frame = m_stack.frames[currentFrame];
@@ -155,26 +157,27 @@ StackFrame* VMThread::getTopFrameNonNative()
 
 void VMThread::returnVar(const Variable returnValue)
 {
-    if (m_stack.frames.size() > 1)
+    StackFrame* targetFrame = getTopFrameNonNative();
+    if (targetFrame != nullptr)
     {
-        StackFrame* previousStackFrame = &m_stack.frames[m_stack.frames.size()-2];
-        previousStackFrame->operands.push_back(returnValue);
-    } else
+        targetFrame->operands.push_back(returnValue);
+    }
+    else
     {
-        internalError("Can't return to previous frame because there is no previous frame");
+        internalError(NoNonNativeStackFrameFound);
     }
 }
 
 void VMThread::returnVar(Variable highByte, Variable lowByte)
 {
-    if (m_stack.frames.size() > 1)
+    StackFrame* targetFrame = getTopFrameNonNative();
+    if (targetFrame != nullptr)
     {
-        StackFrame* previousStackFrame = &m_stack.frames[m_stack.frames.size()-2];
-        previousStackFrame->operands.push_back(highByte);
-        previousStackFrame->operands.push_back(lowByte);
+        targetFrame->operands.push_back(highByte);
+        targetFrame->operands.push_back(lowByte);
     } else
     {
-        internalError("Can't return to previous frame because there is no previous frame");
+        internalError(NoNonNativeStackFrameFound);
     }
 }
 
