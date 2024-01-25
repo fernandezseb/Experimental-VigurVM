@@ -104,12 +104,9 @@ u4 JavaHeap::createObject(ClassInfo* classInfo, VM* VM)
     if (classInfo->superClass != 0)
     {
         const char* superClassName = classInfo->constantPool->getString(classInfo->constantPool->getClassInfo(classInfo->superClass)->nameIndex);
-        if (strcmp(superClassName, "java/lang/Object") != 0)
-        {
-            ClassInfo* superClass = getClassByName(superClassName);
-            u4 superClassObject = createObject(superClass, VM);
-            object->superClassObject = superClassObject;
-        }
+        ClassInfo* superClass = getClassByName(superClassName);
+        const u4 superClassObject = createObject(superClass, VM);
+        object->superClassObject = superClassObject;
     }
 
     objects.push_back(object);

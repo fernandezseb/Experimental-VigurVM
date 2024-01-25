@@ -19,5 +19,6 @@ void newarray(INSTRUCTION_ARGS);
 void anewarray(INSTRUCTION_ARGS);
 void arraylength(INSTRUCTION_ARGS);
 void checkCast(INSTRUCTION_ARGS);
+void instanceof(INSTRUCTION_ARGS);
 void monitorenter(INSTRUCTION_ARGS);
 void monitorexit(INSTRUCTION_ARGS);

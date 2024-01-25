@@ -420,6 +420,46 @@ void checkCast(INSTRUCTION_ARGS) {
     // TODO: Implement actual type check
 }
 
+void instanceof(INSTRUCTION_ARGS)
+{
+    const u2 index = combineBytes(args[0], args[1]);
+    const CPClassInfo* cpClassInfo =  thread->m_currentClass->constantPool->getClassInfo(index);
+    const std::string_view name =  thread->m_currentClass->constantPool->getString(cpClassInfo->nameIndex);
+
+    const Variable operand = thread->m_currentFrame->popOperand();
+    VM->checkType(operand, VariableType_REFERENCE, thread);
+
+    i4 returnVal = 0;
+
+    if (operand.data == 0)
+    {
+        thread->m_currentFrame->pushInt(returnVal);
+        return;
+    }
+
+    const Object* object = heap->getObject(operand.data);
+    std::string_view objectClassName = object->classInfo->getName();
+    // TODO: Implement interface and array class checking
+    do
+    {
+        if (name == objectClassName)
+        {
+            returnVal = 1;
+            break;
+        }
+        if (object->superClassObject == 0)
+        {
+            break;
+        }
+        object = heap->getObject(object->superClassObject);
+        if (object != nullptr)
+        {
+            objectClassName = object->classInfo->getName();
+        }
+    } while(object != nullptr);
+    thread->m_currentFrame->pushInt(returnVal);
+}
+
 void monitorenter(INSTRUCTION_ARGS)
 {
     // TODO: Implement when real threading is implemented
