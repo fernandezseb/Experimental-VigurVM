@@ -79,6 +79,11 @@ struct StackFrame {
         operands.emplace_back(VariableType_FLOAT, std::bit_cast<u4>(value));
     }
 
+    void pushObject(const u4 objectRef)
+    {
+        operands.emplace_back(VariableType_REFERENCE, objectRef);
+    }
+
     [[nodiscard]] Variable peekOperand() const
     {
         return operands.back();

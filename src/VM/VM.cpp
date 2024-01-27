@@ -40,6 +40,7 @@ void VM::start()
     getClass("java/lang/Class", &m_mainThread);
     getClass("java/lang/String", &m_mainThread);
     getClass("java/lang/System", &m_mainThread);
+    getClass("java/lang/Thread", &m_mainThread);
 }
 
 std::vector<Variable> VM::createVariableForDescriptor(const char* descriptor)
