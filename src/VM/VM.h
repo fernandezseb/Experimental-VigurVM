@@ -48,7 +48,7 @@ public:
     void executeLoop(VMThread* thread);
     static void checkType(Variable var, VariableType type, VMThread *thread);
 private:
-    inline static constexpr std::array<Instruction,105> m_instructions{{
+    inline static constexpr std::array<Instruction,106> m_instructions{{
         // Constants
         {i_nop, 0, "nop", 0, nop},
         {i_aconst_null, 0, "aconst_null", 0, aconst_null},
@@ -152,6 +152,7 @@ private:
         {i_anewarray, 0, "anewarray", 0, anewarray},
         {i_arraylength, 0, "arraylength", 0, arraylength},
         {i_checkcast, 2, "checkcast", 0, checkCast},
+        {i_instanceof, 2, "instanceof", 0, instanceof},
         {i_monitorenter, 0, "monitorenter", 0, monitorenter},
         {i_monitorexit, 0, "monitorexit", 0, monitorexit},
         // Control

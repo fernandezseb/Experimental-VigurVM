@@ -19,7 +19,7 @@ void lib_java_security_AccessController_doPriviliged(NATIVE_ARGS)
 {
     StackFrame* currentFrame = thread->m_currentFrame;
     Variable objectVar = currentFrame->localVariables[0];
-    Object* method = heap->getObject(currentFrame->localVariables[0].data);
+    const Object* method = heap->getObject(currentFrame->localVariables[0].data);
     MethodInfo* methodInfo = method->classInfo->findMethodWithNameAndDescriptor("run", "()Ljava/lang/Object;");
     ClassInfo* classInfo = method->classInfo;
 

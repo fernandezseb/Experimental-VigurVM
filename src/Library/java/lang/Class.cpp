@@ -26,9 +26,9 @@ JCALL void lib_java_lang_Class_getPrimitiveClass(NATIVE_ARGS)
     const StackFrame* currentFrame = thread->m_currentFrame;
     const Variable var = currentFrame->localVariables[0];
     VM->checkType(var, VariableType_REFERENCE, thread);
-    Object* strObject = heap->getObject(var.data);
+    const Object* strObject = heap->getObject(var.data);
     u4 arrayRefId = strObject->fields[0].data->data;
-    Array* array = heap->getArray(arrayRefId);
+    const Array* array = heap->getArray(arrayRefId);
     auto typeString = std::string_view{reinterpret_cast<char*>(array->data), array->length};
     u4 classRef = 0;
     if (typeString == "float")

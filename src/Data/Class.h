@@ -7,6 +7,7 @@
 #include "Data/Variable.h"
 
 #include <span>
+#include <string_view>
 
 class FieldInfo {
 public:
@@ -83,7 +84,18 @@ public:
 	uint16_t staticFieldsCount; // Total amount of static fields
 public:
 	[[nodiscard]] bool isPublic() const {
-		return ((accessFlags & ACC_PUBLIC) != 0);
+		return (accessFlags & ACC_PUBLIC) != 0;
+	}
+
+	[[nodiscard]] bool isInterface() const
+	{
+		return (accessFlags & ACC_INTERFACE) != 0;
+	}
+
+	[[nodiscard]] bool isArrayType() const
+	{
+		const std::string_view name = getName();
+		return name.starts_with('[');
 	}
 
 	[[nodiscard]] MethodInfo* findMethodWithNameAndDescriptor(const char* name, const char* descriptor) const

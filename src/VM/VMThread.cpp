@@ -24,6 +24,12 @@ static constexpr std::string_view NoNonNativeStackFrameFound{"Can't return to pr
 void VMThread::pushStackFrameWithoutParams(ClassInfo* classInfo, const MethodInfo* methodInfo)
 {
     StackFrame stackFrame;
+
+    if (methodInfo->code == nullptr)
+    {
+        internalError(std::string_view("No code found in method"));
+    }
+
     stackFrame.localVariables.reserve(methodInfo->code->maxLocals);
     for (u2  currentLocal = 0; currentLocal < methodInfo->code->maxLocals; ++currentLocal)
     {
