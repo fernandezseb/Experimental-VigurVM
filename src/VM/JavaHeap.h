@@ -24,25 +24,21 @@ class Reference {
 public:
     ReferenceType type;
 
-    Array* getArray() {
+    [[nodiscard]] const Array* getArray() const {
         if (type == ARRAY) {
-            return reinterpret_cast<Array*>(this);
+            return reinterpret_cast<const Array*>(this);
         }
-        else {
-            fprintf(stderr, "Error: Reference is not of type 'Array'");
-            Platform::exitProgram(23);
-        }
+        fprintf(stderr, "Error: Reference is not of type 'Array'");
+        Platform::exitProgram(23);
         return nullptr;
     };
 
-    Object* getObject() {
-        if (type == OBJECT) {
-            return reinterpret_cast<Object*>(this);
+    [[nodiscard]] const Object* getObject() const {
+        if (type == OBJECT || type == CLASSOBJECT) {
+            return reinterpret_cast<const Object*>(this);
         }
-        else {
-            fprintf(stderr, "Error: Reference is not of type 'Object'");
-            Platform::exitProgram(23);
-        }
+        fprintf(stderr, "Error: Reference is not of type 'Object'");
+        Platform::exitProgram(23);
         return nullptr;
     };
 };
@@ -100,10 +96,11 @@ public:
     u4 createClassObject(ClassInfo* classInfo, VM* VM, std::string_view name);
     u4 createString(const char* utf8String, VM* VM);
 
-    [[nodiscard]] Object* getObject(uint32_t id) const;
+    [[nodiscard]] const Object* getObject(uint32_t id) const;
+    [[nodiscard]] Reference* getReference(u4 id) const;
     [[nodiscard]] ClassObject* getClassObject(uint32_t id) const;
-    [[nodiscard]] Object* getChildObject(uint32_t id, ClassInfo* classInfo);
-    [[nodiscard]] Array* getArray(u4 id) const;
+    [[nodiscard]] const Object* getChildObject(uint32_t id, ClassInfo* classInfo);
+    [[nodiscard]] const Array* getArray(u4 id) const;
     [[nodiscard]] u4 getString(const char* utf8String) const;
     [[nodiscard]] u4 getClassObjectByName(std::string_view name) const;
 

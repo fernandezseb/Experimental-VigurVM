@@ -204,7 +204,7 @@ u4 JavaHeap::createString(const char* utf8String, VM* VM) {
     return strObjectId;
 }
 
-Object* JavaHeap::getObject(const uint32_t id) const
+const Object* JavaHeap::getObject(const uint32_t id) const
 {
     if (id == 0)
     {
@@ -212,16 +212,18 @@ Object* JavaHeap::getObject(const uint32_t id) const
         fprintf(stderr, "Error: Null pointer exception!\n");
         Platform::exitProgram(1);
     }
-    Reference* ref = objects[id];
-    if (ref->type == OBJECT || ref->type == CLASSOBJECT)
+    return objects[id]->getObject();
+}
+
+Reference* JavaHeap::getReference(u4 id) const
+{
+    if (id == 0)
     {
-        return static_cast<Object*>(objects[id]);
-    } else
-    {
-        fprintf(stderr, "Error: Array instead of Object\n");
-        Platform::exitProgram(22);
+        // Nullpointer
+        fprintf(stderr, "Error: Null pointer exception!\n");
+        Platform::exitProgram(1);
     }
-    return nullptr;
+    return objects[id];
 }
 
 ClassObject* JavaHeap::getClassObject(uint32_t id) const
@@ -244,24 +246,23 @@ ClassObject* JavaHeap::getClassObject(uint32_t id) const
     return nullptr;
 }
 
-Object* JavaHeap::getChildObject(uint32_t id, ClassInfo* classInfo)
+const Object* JavaHeap::getChildObject(const uint32_t id, ClassInfo* classInfo)
 {
-    Object* o = getObject(id);
-    if (o == 0 || strcmp(o->classInfo->getName(), classInfo->getName()) != 0)
+    const Object* o = getObject(id);
+    if (o == nullptr || strcmp(o->classInfo->getName(), classInfo->getName()) != 0)
     {
-        if (o->superClassObject != 0)
+        if (o != nullptr && o->superClassObject != 0)
         {
             return getChildObject(o->superClassObject, classInfo);
-        } else
-        {
-            fprintf(stderr, "Error: Object not found at reference with class: %s\n", classInfo->getName());
-            Platform::exitProgram(22);
         }
+
+        fprintf(stderr, "Error: Object not found at reference with class: %s\n", classInfo->getName());
+        Platform::exitProgram(22);
     }
     return o;
 }
 
-Array* JavaHeap::getArray(const uint32_t id) const
+const Array* JavaHeap::getArray(const uint32_t id) const
 {
     if (id == 0)
     {
@@ -269,16 +270,7 @@ Array* JavaHeap::getArray(const uint32_t id) const
         fprintf(stderr, "Error: Null pointer exception!");
         Platform::exitProgram(1);
     }
-    Reference* ref = objects[id];
-    if (ref->type == ARRAY)
-    {
-        return static_cast<Array*>(objects[id]);
-    } else
-    {
-        fprintf(stderr, "Error: Array instead of Object");
-        Platform::exitProgram(22);
-    }
-    return nullptr;
+    return objects[id]->getArray();
 }
 
 u4 JavaHeap::getString(const char* utf8String) const
@@ -290,7 +282,7 @@ u4 JavaHeap::getString(const char* utf8String) const
             const Object* obj = static_cast<const Object*>(ref);
             if (strcmp(obj->classInfo->getName(), "java/lang/String") == 0) {
                 Variable charArrRef =  obj->fields[0].data[0];
-                Array* arr = getArray(charArrRef.data);
+                const Array* arr = getArray(charArrRef.data);
                 if (strncmp((const char*)arr->data, utf8String,
                     (arr->length > strlen(utf8String) ? arr->length : strlen(utf8String))) == 0) {
                     return currentObj;

@@ -109,7 +109,7 @@ void getfield(INSTRUCTION_ARGS)
     }
     else
     {
-        Object* object = heap->getChildObject(referencePointer.data, targetClass);
+        const Object* object = heap->getChildObject(referencePointer.data, targetClass);
         FieldData* field = object->getField(fieldName, fieldDescr, heap);
         if (field == 0)
         {
@@ -143,7 +143,7 @@ void putfield(INSTRUCTION_ARGS)
     }
     Variable referencePointer = thread->m_currentFrame->popOperand();
 
-    Object* targetObject = heap->getChildObject(referencePointer.data, targetClass);
+    const Object* targetObject = heap->getChildObject(referencePointer.data, targetClass);
 
     FieldData* fieldData = targetObject->getField(fieldName, fieldDescr, heap);
 
@@ -185,7 +185,7 @@ static void invokeVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread
         }
 
         // Look for method based on the object
-        Object* object = heap->getObject(ref.data);
+        const Object* object = heap->getObject(ref.data);
         targetClass = object->classInfo;
         MethodInfo* foundMethod = targetClass->findMethodWithNameAndDescriptor(methodInfo->name,
             classInfo->constantPool->getString(methodInfo->descriptorIndex));
@@ -437,27 +437,50 @@ void instanceof(INSTRUCTION_ARGS)
         return;
     }
 
-    const Object* object = heap->getObject(operand.data);
-    std::string_view objectClassName = object->classInfo->getName();
-    // TODO: Implement interface and array class checking
-    do
+    const Reference* reference = heap->getReference(operand.data);
+
+    if (reference->type == OBJECT || reference->type == CLASSOBJECT)
     {
-        if (name == objectClassName)
+        const Object* object = reference->getObject();
+        const ClassInfo* classInfo = object->classInfo;
+        if (classInfo->isInterface())
         {
-            returnVal = 1;
-            break;
-        }
-        if (object->superClassObject == 0)
+            thread->internalError("Instanceof not implemented yet for interfaces");
+        } else
         {
-            break;
+            std::string_view objectClassName = classInfo->getName();
+
+            const ClassInfo* targetClassInfo = VM->getClass(name.data(), thread);
+            if (targetClassInfo->isInterface())
+            {
+                thread->internalError("Instanceof not implemented yet for interface implementation checking");
+            } else
+                // Check if it is a subclass
+            {
+                do
+                {
+                    if (name == objectClassName)
+                    {
+                        returnVal = 1;
+                        break;
+                    }
+                    if (object->superClassObject == 0)
+                    {
+                        break;
+                    }
+                    object = heap->getObject(object->superClassObject);
+                    if (object != nullptr)
+                    {
+                        objectClassName = object->classInfo->getName();
+                    }
+                } while(object != nullptr);
+                thread->m_currentFrame->pushInt(returnVal);
+            }
         }
-        object = heap->getObject(object->superClassObject);
-        if (object != nullptr)
-        {
-            objectClassName = object->classInfo->getName();
-        }
-    } while(object != nullptr);
-    thread->m_currentFrame->pushInt(returnVal);
+    } else
+    {
+        thread->internalError("Instanceof not implemented yet for arrays");
+    }
 }
 
 void monitorenter(INSTRUCTION_ARGS)

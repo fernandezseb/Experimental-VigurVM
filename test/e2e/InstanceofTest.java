@@ -1,3 +1,4 @@
+import java.io.Serializable;
 
 public class InstanceofTest {
     public static void main(String[] args) {
