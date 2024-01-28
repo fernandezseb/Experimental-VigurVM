@@ -736,7 +736,7 @@ AttributeCollection* AttributeParser::readAttributes(ByteArray& byteArray, Const
 			attributes[currentAttrib] = attribute;
 		}
 		else {
-			printf("Error: Attribute parsing not implemented yet for type: %s\n", name);
+			printf("Error: Attribute parsing not implemented yet for type: %s\n", name.data());
 			Platform::exitProgram(1);
 		}
 	}

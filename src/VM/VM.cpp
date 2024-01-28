@@ -278,7 +278,7 @@ void VM::executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* met
     else
     {
         char errorString[400];
-        snprintf(errorString, 400, "Can't find native method %s %s", fullName.c_str(), description);
+        snprintf(errorString, 400, "Can't find native method %s %s", fullName.c_str(), description.data());
         thread->internalError(errorString);
     }
 }
