@@ -12,6 +12,4 @@ public:
 	static void exitProgram(int32_t exitCode);
 	static std::size_t getPageSize();
 	static void cleanup();
-private:
-	inline static char* textBuffer = nullptr;
 };

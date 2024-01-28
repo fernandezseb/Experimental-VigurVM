@@ -37,8 +37,6 @@ void Platform::initialize()
 	}
 
 	SetConsoleCP(65001);
-
-	textBuffer = (char*) allocateMemory(getPageSize(), 0);
 }
 
 void Platform::print(const char* string, uint64_t length)
@@ -79,8 +77,4 @@ size_t Platform::getPageSize()
 
 void Platform::cleanup()
 {
-	if (textBuffer != nullptr) {
-		freeMemory(textBuffer);
-		textBuffer = nullptr;
-	}
 }

@@ -29,7 +29,6 @@
 
 void Platform::initialize()
 {
-	textBuffer = (char*) allocateMemory(getPageSize(), 0);
 }
 
 
@@ -61,8 +60,4 @@ size_t Platform::getPageSize()
 
 void Platform::cleanup()
 {
-	if (textBuffer != nullptr) {
-		freeMemory(textBuffer);
-		textBuffer = nullptr;
-	}
 }
