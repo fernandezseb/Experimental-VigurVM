@@ -3,8 +3,6 @@ add_executable(DynamicArrayTest
         ${PROJECT_SOURCE_DIR}/src/Platform.h
         ${PROJECT_SOURCE_DIR}/src/DynamicArray.h
         ${PROJECT_SOURCE_DIR}/src/DynamicArray.cpp
-        ${PROJECT_SOURCE_DIR}/src/OutputBuffer.h
-        ${PROJECT_SOURCE_DIR}/src/OutputBuffer.cpp
         ${PROJECT_SOURCE_DIR}/src/Util.h
         ${PROJECT_SOURCE_DIR}/src/Util.cpp
 )

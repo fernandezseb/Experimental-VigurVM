@@ -21,8 +21,6 @@ add_executable(${PROJECT_NAME}
         src/Util.cpp
         src/Util.h
         src/Memory.h
-        src/OutputBuffer.h
-        src/OutputBuffer.cpp
         src/DynamicArray.cpp
         src/DynamicArray.h
         src/VM/VM.cpp
