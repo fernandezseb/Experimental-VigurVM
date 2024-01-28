@@ -87,8 +87,8 @@ u4 JavaHeap::createObject(ClassInfo* classInfo, VM* VM)
             FieldData data = {};
             data.descriptorIndex = fieldInfo->descriptorIndex;
             data.nameIndex = fieldInfo->nameIndex;
-            const char* descriptorText = classInfo->constantPool->getString(fieldInfo->descriptorIndex);
-            std::vector<Variable> vars = VM->createVariableForDescriptor(descriptorText);
+            const std::string_view descriptorText = classInfo->constantPool->getString(fieldInfo->descriptorIndex);
+            std::vector<Variable> vars = VM->createVariableForDescriptor(descriptorText.data());
             Variable* varsAllocated = (Variable*) Platform::allocateMemory(sizeof(Variable) * vars.size(), 0);
             for (u1 currentVar = 0; currentVar < vars.size(); ++currentVar)
             {
@@ -103,8 +103,8 @@ u4 JavaHeap::createObject(ClassInfo* classInfo, VM* VM)
     // Check if we are not in java/lang/Object, because that class doesn't have a superClas
     if (classInfo->superClass != 0)
     {
-        const char* superClassName = classInfo->constantPool->getString(classInfo->constantPool->getClassInfo(classInfo->superClass)->nameIndex);
-        ClassInfo* superClass = getClassByName(superClassName);
+        const std::string_view superClassName = classInfo->constantPool->getString(classInfo->constantPool->getClassInfo(classInfo->superClass)->nameIndex);
+        ClassInfo* superClass = getClassByName(superClassName.data());
         const u4 superClassObject = createObject(superClass, VM);
         object->superClassObject = superClassObject;
     }
@@ -154,8 +154,8 @@ u4 JavaHeap::createClassObject(ClassInfo* classInfo, VM* VM, std::string_view na
             FieldData data = {};
             data.descriptorIndex = fieldInfo->descriptorIndex;
             data.nameIndex = fieldInfo->nameIndex;
-            const char* descriptorText = classInfo->constantPool->getString(fieldInfo->descriptorIndex);
-            std::vector<Variable> vars = VM->createVariableForDescriptor(descriptorText);
+            const std::string_view descriptorText = classInfo->constantPool->getString(fieldInfo->descriptorIndex);
+            std::vector<Variable> vars = VM->createVariableForDescriptor(descriptorText.data());
             Variable* varsAllocated = (Variable*) Platform::allocateMemory(sizeof(Variable) * vars.size(), 0);
             for (u1 currentVar = 0; currentVar < vars.size(); ++currentVar)
             {
@@ -170,11 +170,11 @@ u4 JavaHeap::createClassObject(ClassInfo* classInfo, VM* VM, std::string_view na
     // Check if we are not in java/lang/Object, because that class doesn't have a superClas
     if (classInfo->superClass != 0)
     {
-        const char* superClassName = classInfo->constantPool->getString(classInfo->constantPool->getClassInfo(classInfo->superClass)->nameIndex);
-        if (strcmp(superClassName, "java/lang/Object") != 0)
+        const std::string_view superClassName = classInfo->constantPool->getString(classInfo->constantPool->getClassInfo(classInfo->superClass)->nameIndex);
+        if (superClassName != "java/lang/Object")
         {
             // TODO: Load the class if needed
-            ClassInfo* superClass = getClassByName(superClassName);
+            ClassInfo* superClass = getClassByName(superClassName.data());
             u4 superClassObject = createObject(superClass, VM);
             object->superClassObject = superClassObject;
         }
@@ -249,14 +249,14 @@ ClassObject* JavaHeap::getClassObject(uint32_t id) const
 const Object* JavaHeap::getChildObject(const uint32_t id, ClassInfo* classInfo)
 {
     const Object* o = getObject(id);
-    if (o == nullptr || strcmp(o->classInfo->getName(), classInfo->getName()) != 0)
+    if (o == nullptr || o->classInfo->getName() != classInfo->getName())
     {
         if (o != nullptr && o->superClassObject != 0)
         {
             return getChildObject(o->superClassObject, classInfo);
         }
 
-        fprintf(stderr, "Error: Object not found at reference with class: %s\n", classInfo->getName());
+        fprintf(stderr, "Error: Object not found at reference with class: %s\n", classInfo->getName().data());
         Platform::exitProgram(22);
     }
     return o;
@@ -280,7 +280,7 @@ u4 JavaHeap::getString(const char* utf8String) const
         const Reference* ref = objects[currentObj];
         if (ref->type == ReferenceType::OBJECT) {
             const Object* obj = static_cast<const Object*>(ref);
-            if (strcmp(obj->classInfo->getName(), "java/lang/String") == 0) {
+            if (obj->classInfo->getName() == std::string_view{"java/lang/String"}) {
                 Variable charArrRef =  obj->fields[0].data[0];
                 const Array* arr = getArray(charArrRef.data);
                 if (strncmp((const char*)arr->data, utf8String,
@@ -318,7 +318,7 @@ ClassInfo* JavaHeap::getClassByName(const char* className) const
     for (size_t currentClass = 0; currentClass < methodArea.classes.getSize() ; currentClass++)
     {
         ClassInfo* classInfo = methodArea.classes.get(currentClass);
-        if (strcmp(classInfo->getName(), className) == 0)
+        if (classInfo->getName() == className)
         {
             return classInfo;
         }
@@ -331,10 +331,10 @@ FieldData* Object::getField(const char* name, const char* descriptor, JavaHeap* 
     bool found = false;
     for (u2 currentField = 0; currentField < fieldsCount; ++currentField)
     {
-        const char* targetName = classInfo->constantPool->getString(fields[currentField].nameIndex);
-        const char* targetDescriptor = classInfo->constantPool->getString(fields[currentField].descriptorIndex);
+        const std::string_view targetName = classInfo->constantPool->getString(fields[currentField].nameIndex);
+        const std::string_view targetDescriptor = classInfo->constantPool->getString(fields[currentField].descriptorIndex);
 
-        if (strcmp(name, targetName) == 0 && strcmp(targetDescriptor, descriptor) == 0)
+        if (name == targetName && targetDescriptor == descriptor)
         {
             found = true;
             return &fields[currentField];

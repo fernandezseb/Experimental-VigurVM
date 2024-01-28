@@ -33,7 +33,7 @@ public:
 	char* returnType;
 	char** args;
 	uint16_t argsCount;
-	const char* name;
+	std::string_view name;
 public:
 	[[nodiscard]] bool isStatic() const {
 		return ((accessFlags & ACC_STATIC) != 0);
@@ -48,7 +48,7 @@ public:
 	}
 
 	[[nodiscard]] bool isConstructor() const {
-		return name != nullptr && (strcmp(name, "<init>") == 0);
+		return name == "<init>";
 	}
 
 	[[nodiscard]] bool isAbstract() const {
@@ -77,7 +77,7 @@ public:
 	std::span<MethodInfo*> methods;
 
 	AttributeCollection* attributes;
-	char* sourceFile;
+	std::string_view sourceFile;
 	Memory* memory;
 	// Runtime data
 	std::span<Variable> staticFields; // An array of data for all static fields, the field also has a copy of this data (could be 1 or 2 items)
@@ -101,8 +101,8 @@ public:
 	[[nodiscard]] MethodInfo* findMethodWithNameAndDescriptor(const char* name, const char* descriptor) const
 	{
 		for (uint16_t currentMethod = 0; currentMethod < methods.size(); ++currentMethod) {
-			if (strcmp(methods[currentMethod]->name, name) == 0
-				&& strcmp(constantPool->getString(methods[currentMethod]->descriptorIndex), descriptor) == 0)
+			if (methods[currentMethod]->name == name
+				&& constantPool->getString(methods[currentMethod]->descriptorIndex) ==  descriptor)
 			{
 				return methods[currentMethod];
 			}
@@ -110,20 +110,20 @@ public:
 		return nullptr;
 	}
 
-	[[nodiscard]] char* getName() const
+	[[nodiscard]] std::string_view getName() const
 	{
 		const CPClassInfo* classInfo = constantPool->getClassInfo(thisClass);
 		return constantPool->getString(classInfo->nameIndex);
 	}
 
-	[[nodiscard]] FieldInfo* findField(char* name, char* descriptor) const
+	[[nodiscard]] FieldInfo* findField(const char* name, const char* descriptor) const
 	{
 		FieldInfo* field = nullptr;
 
 		for (u2 currentField = 0; currentField < fieldsCount; ++currentField)
 		{
-			if (strcmp(constantPool->getString(fields[currentField]->nameIndex), name) == 0 &&
-			strcmp(constantPool->getString(fields[currentField]->descriptorIndex), descriptor) == 0)
+			if (constantPool->getString(fields[currentField]->nameIndex) == name &&
+			constantPool->getString(fields[currentField]->descriptorIndex) == descriptor)
 			{
 				return fields[currentField];
 			}

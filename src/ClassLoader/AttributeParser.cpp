@@ -388,9 +388,9 @@ AttributeCollection* AttributeParser::readAttributes(ByteArray& byteArray, Const
 		uint16_t attributeNameIndex = byteArray.readUnsignedShort();
 		uint32_t attributeLength = byteArray.readUnsignedInt();
 
-		const char* name = constantPool->getString(attributeNameIndex);
+		const std::string_view name = constantPool->getString(attributeNameIndex);
 
-		if (strcmp(name, "Code") == 0) {
+		if (name ==  "Code") {
 			uint16_t maxStack = byteArray.readUnsignedShort();
 			uint16_t maxLocals = byteArray.readUnsignedShort();
 			uint32_t codeLength = byteArray.readUnsignedInt();
@@ -418,7 +418,7 @@ AttributeCollection* AttributeParser::readAttributes(ByteArray& byteArray, Const
 
 			attributes[currentAttrib] = att;
 		}
-		else if (strcmp(name, "LineNumberTable") == 0) {
+		else if (name == "LineNumberTable") {
 			uint16_t lineNumberTableLength = byteArray.readUnsignedShort();
 			AttributeLineNumberTable* att = (AttributeLineNumberTable*) memory->alloc(sizeof(AttributeLineNumberTable));
 			att->attributeNameIndex = attributeNameIndex;
@@ -438,7 +438,7 @@ AttributeCollection* AttributeParser::readAttributes(ByteArray& byteArray, Const
 			}
 			attributes[currentAttrib] = att;
 		}
-		else if (strcmp(name, "LocalVariableTable") == 0) {
+		else if (name == "LocalVariableTable") {
 			uint16_t localVariableTableLength = byteArray.readUnsignedShort();
 			AttributeLocalVariableTable* att = (AttributeLocalVariableTable*) memory->alloc(sizeof(AttributeLocalVariableTable));
 			att->attributeNameIndex = attributeNameIndex;
@@ -462,7 +462,7 @@ AttributeCollection* AttributeParser::readAttributes(ByteArray& byteArray, Const
 			}
 			attributes[currentAttrib] = att;
 		}
-		else if (strcmp(name, "LocalVariableTypeTable") == 0) {
+		else if (name == "LocalVariableTypeTable") {
 			uint16_t localVariableTypeTableLength = byteArray.readUnsignedShort();
 			LocalVariableTypeTableAttribute* att = (LocalVariableTypeTableAttribute*)memory->alloc(sizeof(LocalVariableTypeTableAttribute));
 			att->attributeNameIndex = attributeNameIndex;
@@ -486,7 +486,7 @@ AttributeCollection* AttributeParser::readAttributes(ByteArray& byteArray, Const
 			}
 			attributes[currentAttrib] = att;
 		}
-		else if (strcmp(name, "SourceFile") == 0) {
+		else if (name == "SourceFile") {
 			uint16_t sourceFileIndex = byteArray.readUnsignedShort();
 			AttributeSourceFile* att = (AttributeSourceFile*) memory->alloc(sizeof(AttributeSourceFile));
 			att->attributeNameIndex = attributeNameIndex;
@@ -496,14 +496,14 @@ AttributeCollection* AttributeParser::readAttributes(ByteArray& byteArray, Const
 
 			attributes[currentAttrib] = att;
 		}
-		else if (strcmp(name, "StackMapTable") == 0) {
+		else if (name == "StackMapTable") {
 			AttributeInfo* attribute = readStackMapTable(byteArray, memory);
 			attribute->attributeLength = attributeLength;
 			attribute->attributeNameIndex = attributeNameIndex;
 			attribute->type = StackMapTable;
 			attributes[currentAttrib] = attribute;
 		}
-		else if (strcmp(name, "ConstantValue") == 0) {
+		else if (name == "ConstantValue") {
 			AttributeConstantValue* attribute = (AttributeConstantValue*)memory->alloc(sizeof(AttributeConstantValue));
 			attribute->type = ConstantValue;
 			attribute->attributeLength = attributeLength;
@@ -511,7 +511,7 @@ AttributeCollection* AttributeParser::readAttributes(ByteArray& byteArray, Const
 			attribute->constantValueIndex = byteArray.readUnsignedShort();
 			attributes[currentAttrib] = attribute;
 		}
-		else if (strcmp(name, "Exceptions") == 0) {
+		else if (name == "Exceptions") {
 			ExceptionsAttribute* attribute = (ExceptionsAttribute*)memory->alloc(sizeof(ExceptionsAttribute));
 			attribute->type = Exceptions;
 			attribute->attributeLength = attributeLength;
@@ -524,7 +524,7 @@ AttributeCollection* AttributeParser::readAttributes(ByteArray& byteArray, Const
 			}
 			attributes[currentAttrib] = attribute;
 		}
-		else if (strcmp(name, "InnerClasses") == 0) {
+		else if (name == "InnerClasses") {
 			InnerClassesAttribute* attribute = (InnerClassesAttribute*)memory->alloc(sizeof(InnerClassesAttribute));
 			attribute->type = InnerClasses;
 			attribute->attributeLength = attributeLength;
@@ -540,7 +540,7 @@ AttributeCollection* AttributeParser::readAttributes(ByteArray& byteArray, Const
 			}
 			attributes[currentAttrib] = attribute;
 		}
-		else if (strcmp(name, "BootstrapMethods") == 0) {
+		else if (name == "BootstrapMethods") {
 			BootstrapMethodsAttribute* attribute = (BootstrapMethodsAttribute*)memory->alloc(sizeof(BootstrapMethodsAttribute));
 			attribute->type = BootstrapMethods;
 			attribute->attributeLength = attributeLength;
@@ -563,14 +563,14 @@ AttributeCollection* AttributeParser::readAttributes(ByteArray& byteArray, Const
 			}
 			attributes[currentAttrib] = attribute;
 		}
-		else if (strcmp(name, "Deprecated") == 0) {
+		else if (name == "Deprecated") {
 			DeprecatedAttribute* attribute = (DeprecatedAttribute*)memory->alloc(sizeof(DeprecatedAttribute));
 			attribute->type = Deprecated;
 			attribute->attributeLength = attributeLength;
 			attribute->attributeNameIndex = attributeNameIndex;
 			attributes[currentAttrib] = attribute;
 		}
-		else if (strcmp(name, "RuntimeVisibleAnnotations") == 0) {
+		else if (name == "RuntimeVisibleAnnotations") {
 			RuntimeVisibleAnnotationsAttribute* attribute = (RuntimeVisibleAnnotationsAttribute*)memory->alloc(sizeof(RuntimeVisibleAnnotationsAttribute));
 			attribute->type = RuntimeVisibleAnnotations;
 			attribute->attributeLength = attributeLength;
@@ -592,7 +592,7 @@ AttributeCollection* AttributeParser::readAttributes(ByteArray& byteArray, Const
 
 			attributes[currentAttrib] = attribute;
 		}
-		else if (strcmp(name, "RuntimeInvisibleAnnotations") == 0) {
+		else if (name == "RuntimeInvisibleAnnotations") {
 			RuntimeInvisibleAnnotationsAttribute* attribute = (RuntimeInvisibleAnnotationsAttribute*)memory->alloc(sizeof(RuntimeInvisibleAnnotationsAttribute));
 			attribute->type = RuntimeInvisibleAnnotations;
 			attribute->attributeLength = attributeLength;
@@ -614,7 +614,7 @@ AttributeCollection* AttributeParser::readAttributes(ByteArray& byteArray, Const
 
 			attributes[currentAttrib] = attribute;
 		}
-		else if (strcmp(name, "RuntimeVisibleParameterAnnotations") == 0) {
+		else if (name == "RuntimeVisibleParameterAnnotations") {
 			RuntimeVisibleParameterAnnotationsAttribute* attribute = (RuntimeVisibleParameterAnnotationsAttribute*)memory->alloc(sizeof(RuntimeVisibleParameterAnnotationsAttribute));
 			attribute->type = RuntimeVisibleParameterAnnotations;
 			attribute->attributeLength = attributeLength;
@@ -636,7 +636,7 @@ AttributeCollection* AttributeParser::readAttributes(ByteArray& byteArray, Const
 
 			attributes[currentAttrib] = attribute;
 		}
-		else if (strcmp(name, "RuntimeInvisibleParameterAnnotations") == 0) {
+		else if (name == "RuntimeInvisibleParameterAnnotations") {
 			RuntimeInvisibleParameterAnnotationsAttribute* attribute = (RuntimeInvisibleParameterAnnotationsAttribute*)memory->alloc(sizeof(RuntimeInvisibleParameterAnnotationsAttribute));
 			attribute->type = RuntimeVisibleParameterAnnotations;
 			attribute->attributeLength = attributeLength;
@@ -658,7 +658,7 @@ AttributeCollection* AttributeParser::readAttributes(ByteArray& byteArray, Const
 
 			attributes[currentAttrib] = attribute;
 		}
-		else if (strcmp(name, "RuntimeVisibleTypeAnnotations") == 0) {
+		else if (name == "RuntimeVisibleTypeAnnotations") {
 			RuntimeVisibleTypeAnnotationsAttribute* attribute = parseRuntimeTypeAnnotations(byteArray, constantPool, memory);
 			attribute->type = RuntimeVisibleTypeAnnotations;
 			attribute->attributeLength = attributeLength;
@@ -666,7 +666,7 @@ AttributeCollection* AttributeParser::readAttributes(ByteArray& byteArray, Const
 
 			attributes[currentAttrib] = attribute;
 		}
-		else if (strcmp(name, "RuntimeInvisibleTypeAnnotations") == 0) {
+		else if (name == "RuntimeInvisibleTypeAnnotations") {
 			RuntimeInvisibleTypeAnnotationsAttribute* attribute = (RuntimeInvisibleTypeAnnotationsAttribute*) parseRuntimeTypeAnnotations(byteArray, constantPool, memory);
 			attribute->type = RuntimeInvisibleTypeAnnotations;
 			attribute->attributeLength = attributeLength;
@@ -674,7 +674,7 @@ AttributeCollection* AttributeParser::readAttributes(ByteArray& byteArray, Const
 
 			attributes[currentAttrib] = attribute;
 		}
-		else if (strcmp(name, "Synthetic") == 0) {
+		else if (name == "Synthetic") {
 			SyntheticAttribute* attribute = (SyntheticAttribute*)memory->alloc(sizeof(SyntheticAttribute));
 			attribute->type = Synthetic;
 			attribute->attributeLength = attributeLength;
@@ -682,7 +682,7 @@ AttributeCollection* AttributeParser::readAttributes(ByteArray& byteArray, Const
 
 			attributes[currentAttrib] = attribute;
 		}
-		else if (strcmp(name, "Signature") == 0) {
+		else if (name == "Signature") {
 			SignatureAttribute* attribute = (SignatureAttribute*)memory->alloc(sizeof(SignatureAttribute));
 			attribute->type = Synthetic;
 			attribute->attributeLength = attributeLength;
@@ -691,7 +691,7 @@ AttributeCollection* AttributeParser::readAttributes(ByteArray& byteArray, Const
 
 			attributes[currentAttrib] = attribute;
 		}
-		else if (strcmp(name, "AnnotationDefault") == 0) {
+		else if (name == "AnnotationDefault") {
 			AnnotationDefaultAttribute* attribute = (AnnotationDefaultAttribute*)memory->alloc(sizeof(AnnotationDefaultAttribute));
 			attribute->type = AnnotationDefault;
 			attribute->attributeLength = attributeLength;
@@ -700,7 +700,7 @@ AttributeCollection* AttributeParser::readAttributes(ByteArray& byteArray, Const
 
 			attributes[currentAttrib] = attribute;
 		}
-		else if (strcmp(name, "EnclosingMethod") == 0) {
+		else if (name ==  "EnclosingMethod") {
 			EnclosingMethodAttribute* attribute = (EnclosingMethodAttribute*)memory->alloc(sizeof(EnclosingMethodAttribute));
 			attribute->type = EnclosingMethod;
 			attribute->attributeLength = attributeLength;
@@ -710,7 +710,7 @@ AttributeCollection* AttributeParser::readAttributes(ByteArray& byteArray, Const
 			
 			attributes[currentAttrib] = attribute;
 		}
-		else if (strcmp(name, "SourceDebugExtension") == 0) {
+		else if (name == "SourceDebugExtension") {
 			SourceDebugExtensionAttribute* attribute = (SourceDebugExtensionAttribute*)memory->alloc(sizeof(SourceDebugExtensionAttribute));
 			attribute->type = SourceDebugExtension;
 			attribute->attributeLength = attributeLength;
@@ -720,7 +720,7 @@ AttributeCollection* AttributeParser::readAttributes(ByteArray& byteArray, Const
 
 			attributes[currentAttrib] = attribute;
 		}
-		else if (strcmp(name, "MethodParameters") == 0) {
+		else if (name == "MethodParameters") {
 			MethodParametersAttribute* attribute = (MethodParametersAttribute*)memory->alloc(sizeof(MethodParametersAttribute));
 			attribute->type = SourceDebugExtension;
 			attribute->attributeLength = attributeLength;

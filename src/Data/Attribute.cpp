@@ -21,7 +21,7 @@ AttributeInfo* AttributeCollection::findAttributeWithName(ConstantPool* constant
 
 	for (int currentAttrib = 0; currentAttrib < attributesCount; ++currentAttrib) {
 		attrib = attributes[currentAttrib];
-		if (strcmp(constantPool->getString(attrib->attributeNameIndex), name) == 0) {
+		if (constantPool->getString(attrib->attributeNameIndex) == name) {
 			return attrib;
 		}
 	}

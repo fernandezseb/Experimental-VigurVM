@@ -3,6 +3,8 @@
 #include "Core.h"
 #include "Platform.h"
 
+#include <string_view>
+
 enum ConstantType : uint8_t {
 	CT_UTF8            = 1u,
 	CT_INTEGER         = 3u,
@@ -122,7 +124,7 @@ public:
 	ConstantPoolItem** constants;
 	uint16_t size;
 public:
-	[[nodiscard]] char* getString(uint16_t index) const;
+	[[nodiscard]] std::string_view getString(uint16_t index) const;
 	[[nodiscard]] CPClassInfo* getClassInfo(uint16_t index) const;
 	[[nodiscard]] CPMethodRef* getMethodRef(u2 index) const;
 	[[nodiscard]] CPNameAndTypeInfo* getNameAndTypeInfo(u2 index) const;

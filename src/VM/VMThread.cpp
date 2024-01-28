@@ -142,7 +142,7 @@ void VMThread::internalError(const std::string_view error) const
         {
             nativeText = " (native)";
         }
-        printf("    at %s.%s%s\n", frame.className, frame.methodName, nativeText);
+        printf("    at %s.%s%s\n", frame.className.data(), frame.methodName.data(), nativeText);
     }
     Platform::exitProgram(6);
 }

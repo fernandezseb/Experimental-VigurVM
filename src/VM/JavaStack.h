@@ -25,8 +25,8 @@ struct StackFrame {
     ClassInfo* previousClass{};
     const MethodInfo* previousMethod{};
 
-    const char* className{};
-    const char* methodName{};
+    std::string_view className{};
+    std::string_view methodName{};
     bool isNative = false;
 
     Variable popOperand()

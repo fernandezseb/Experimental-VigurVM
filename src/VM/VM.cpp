@@ -109,7 +109,7 @@ void VM::initStaticFields(ClassInfo* class_info, [[maybe_unused]] VMThread* thre
         FieldInfo* field = class_info->fields[currentField];
         if (field->isStatic())
         {
-            const u1 varCount = getDescriptorVarCategory(class_info->constantPool->getString(class_info->fields[currentField]->descriptorIndex));
+            const u1 varCount = getDescriptorVarCategory(class_info->constantPool->getString(class_info->fields[currentField]->descriptorIndex).data());
             staticFieldsCount += varCount;
         }
     }
@@ -124,7 +124,7 @@ void VM::initStaticFields(ClassInfo* class_info, [[maybe_unused]] VMThread* thre
         FieldInfo* field = class_info->fields[currentField];
         if (field->isStatic())
         {
-            std::vector<Variable> variables = createVariableForDescriptor(class_info->constantPool->getString(field->descriptorIndex));
+            std::vector<Variable> variables = createVariableForDescriptor(class_info->constantPool->getString(field->descriptorIndex).data());
             for (Variable variable : variables) {
                 class_info->staticFields[currentStaticField++] = variable;
             }
@@ -263,14 +263,14 @@ ClassInfo* VM::getClass(const char* className, VMThread* thread)
 
 void VM::executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* methodInfo, JavaHeap* heap, VMThread* thread)
 {
-    const char* className = targetClass->getName();
-    printf("Running native code of method: %s\n", className);
-    const char* description = targetClass->constantPool->getString(methodInfo->descriptorIndex);
-    const char* methodName = methodInfo->name;
-    std::string fullName = className;
+    const std::string_view className = targetClass->getName();
+    printf("Running native code of method: %s\n", className.data());
+    const std::string_view description = targetClass->constantPool->getString(methodInfo->descriptorIndex);
+    const std::string_view methodName = methodInfo->name;
+    std::string fullName = std::string{className};
     fullName += "/";
     fullName += methodName;
-    nativeImplementation impl = findNativeMethod(fullName.c_str(), description);
+    nativeImplementation impl = findNativeMethod(fullName.c_str(), description.data());
     if (impl != nullptr)
     {
         impl(heap, thread, this);

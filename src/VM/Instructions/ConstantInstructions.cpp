@@ -102,8 +102,8 @@ void loadConstant(VMThread* thread, const u4 index, JavaHeap* heap, VM* VM)
     else if (cpItem->getType() == CT_STRING)
     {
         const auto* stringInfo = static_cast<const CPStringInfo*>(cpItem);
-        const char* utf8String = thread->m_currentClass->constantPool->getString(stringInfo->stringIndex);
-        const uint32_t strObjectId = heap->createString(utf8String, VM);
+        const std::string_view utf8String = thread->m_currentClass->constantPool->getString(stringInfo->stringIndex);
+        const uint32_t strObjectId = heap->createString(utf8String.data(), VM);
         const Variable strVar{VariableType_REFERENCE, strObjectId};
         thread->m_currentFrame->operands.push_back(strVar);
     }

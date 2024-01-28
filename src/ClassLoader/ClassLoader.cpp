@@ -248,9 +248,9 @@ ClassInfo* ClassLoader::readClass(ByteArray& byteArray)
     classInfo->attributes = attributeInfo;
     AttributeSourceFile* sourceFile = (AttributeSourceFile*) attributeInfo->findAttributeWithName(classInfo->constantPool, "SourceFile");
 
-    if (sourceFile != NULL) {
-        const char* sourceFileString = classInfo->constantPool->getString(sourceFile->sourceFileIndex);
-        classInfo->sourceFile = (char*)sourceFileString;
+    if (sourceFile != nullptr) {
+        const std::string_view sourceFileString = classInfo->constantPool->getString(sourceFile->sourceFileIndex);
+        classInfo->sourceFile = sourceFileString;
     }
 
     return classInfo;
@@ -360,9 +360,9 @@ std::span<MethodInfo*> ClassLoader::readMethods(ByteArray& byteArray, ConstantPo
         if (!(isNative || isAbstract)) {
             info->code = (AttributeCode*) attributes->findAttributeWithName(constantPool, "Code");
         }
-        parseDescriptor(constantPool->getString(descriptorIndex), info);
+        parseDescriptor(constantPool->getString(descriptorIndex).data(), info);
 
-        const char* name = constantPool->getString(nameIndex);
+        const std::string_view name = constantPool->getString(nameIndex);
         info->name = name;
 
         methods[currentMethod] = info;
