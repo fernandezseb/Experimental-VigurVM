@@ -44,14 +44,13 @@ JCALL void lib_java_lang_Class_registerNatives(NATIVE_ARGS)
     registerNative("java/lang/Class/desiredAssertionStatus0", "(Ljava/lang/Class;)Z",
                    lib_java_lang_Class_desiredAssertionStatus0);
     registerNative("java/lang/Class/getName0", "()Ljava/lang/String;", lib_java_lang_Class_getName0);
+    registerNative("java/lang/Class/forName0", "(Ljava/lang/String;ZLjava/lang/ClassLoader;Ljava/lang/Class;)Ljava/lang/Class;", lib_java_lang_Class_forName0);
 }
 
 JCALL void lib_java_lang_Class_getPrimitiveClass(NATIVE_ARGS)
 {
     const Object* strObject = getThisObjectReference(thread, heap, VM);
-    const u4 arrayRefId = strObject->fields[0].data->data;
-    const Array* array = heap->getArray(arrayRefId);
-    const auto typeString = std::string_view{reinterpret_cast<char*>(array->data), array->length};
+    const std::string_view typeString = heap->getStringContent(strObject);
     u4 classRef = 0;
     if (typeString == "float")
     {
@@ -96,4 +95,32 @@ JCALL void lib_java_lang_Class_getName0(NATIVE_ARGS)
     const std::string_view name = classObject->name;
     const u4 stringObject = heap->createString(name.data(), VM);
     thread->returnVar(Variable{VariableType_REFERENCE, stringObject});
+}
+
+JCALL void lib_java_lang_Class_forName0(NATIVE_ARGS)
+{
+    const StackFrame* currentFrame = thread->m_currentFrame;
+    const Variable var = currentFrame->localVariables[0];
+    VM->checkType(var, VariableType_REFERENCE, thread);
+    const std::string_view className = heap->getStringContent(var.data);
+
+    // TODO: Check initialize bool
+    const Variable var2 = currentFrame->localVariables[1];
+    VM->checkType(var2, VariableType_INT, thread);
+    if (var2.data == 0u)
+    {
+        thread->internalError("Loading class without initialization is not implemente yet");
+    }
+
+    // TODO: Use custom classloader if defined
+    const Variable var3 = currentFrame->localVariables[2];
+    VM->checkType(var3, VariableType_REFERENCE, thread);
+    if (var3.data != 0u)
+    {
+        thread->internalError("Use of custom classloader not implemented yet");
+    }
+
+    ClassInfo* classInfo = VM->getClass(className.data(), thread);
+    const u4 classObjectRef = heap->createClassObject(classInfo, VM, className);
+    thread->returnVar(Variable{VariableType_REFERENCE, classObjectRef});
 }

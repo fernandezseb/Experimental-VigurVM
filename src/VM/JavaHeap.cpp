@@ -293,6 +293,25 @@ u4 JavaHeap::getString(const char* utf8String) const
     return 0;
 }
 
+std::string_view JavaHeap::getStringContent(const Object* stringObject) const
+{
+    if (stringObject->classInfo->getName() != "java/lang/String")
+    {
+        fprintf(stderr, "Getting string content from non-string object");
+        Platform::exitProgram(3);
+    }
+
+    const u4 arrayRefId = stringObject->fields[0].data->data;
+    const Array* array = getArray(arrayRefId);
+    return std::string_view{reinterpret_cast<char*>(array->data), array->length};
+}
+
+std::string_view JavaHeap::getStringContent(const u4 id) const
+{
+    const Object* stringObject = getObject(id);
+    return getStringContent(stringObject);
+}
+
 u4 JavaHeap::getClassObjectByName(std::string_view name) const
 {
     for (uint32_t currentObj = 1; currentObj < objects.size(); ++currentObj)
