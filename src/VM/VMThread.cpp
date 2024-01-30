@@ -121,7 +121,12 @@ void VMThread::pushStackFrameSpecial(ClassInfo* classInfo, const MethodInfo* met
         }
     }
 
-    pushStackFrameWithoutParams(classInfo, methodInfo);
+    if (methodInfo->isNative()) {
+        pushNativeStackFrame(classInfo, methodInfo, arguments.size());
+    } else {
+        pushStackFrameWithoutParams(classInfo, methodInfo);
+    }
+
     if (!arguments.empty())
     {
         for (int i = 0; i < arguments.size(); ++i)

@@ -261,20 +261,27 @@ void invokevirtual(INSTRUCTION_ARGS)
 void invokespecial(INSTRUCTION_ARGS)
 {
     StackFrame* topFrame = thread->m_currentFrame;
-    uint16_t index = readShort(thread);
-    CPMethodRef* methodRef = topFrame->constantPool->getMethodRef(index);
-    CPClassInfo* cpClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
-    CPNameAndTypeInfo* nameAndTypeInfo = topFrame->constantPool->getNameAndTypeInfo(methodRef->nameAndTypeIndex);
+    const uint16_t index = readShort(thread);
+    const CPMethodRef* methodRef = topFrame->constantPool->getMethodRef(index);
+    const CPClassInfo* cpClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
+    const CPNameAndTypeInfo* nameAndTypeInfo = topFrame->constantPool->getNameAndTypeInfo(methodRef->nameAndTypeIndex);
     const std::string_view methodName = topFrame->constantPool->getString(nameAndTypeInfo->nameIndex);
     const std::string_view methodDescriptor = topFrame->constantPool->getString(nameAndTypeInfo->descriptorIndex);
     const std::string_view className = topFrame->constantPool->getString(cpClassInfo->nameIndex);
     ClassInfo* targetClassInfo = VM->getClass(className.data(), thread);
-    MethodInfo* methodInfo = targetClassInfo->findMethodWithNameAndDescriptor(methodName.data(), methodDescriptor.data());
+    const MethodInfo* methodInfo = targetClassInfo->findMethodWithNameAndDescriptor(methodName.data(), methodDescriptor.data());
     // TODO: Implement argument passing (including subclass argument)
     // TODO: Check correct parsing of descriptors with subclasses
 
     // TODO: Check argument types
     thread->pushStackFrameSpecial(targetClassInfo, methodInfo, topFrame, heap);
+
+    if (methodInfo->isNative())
+    {
+        VM->executeNativeMethod(targetClassInfo, methodInfo, heap, thread);
+        thread->popFrame();
+    }
+
     printf("> Created new stack frame for method call %s on: %s\n", thread->m_currentFrame->methodName.data(), thread->m_currentFrame->className.data());
 }
 
