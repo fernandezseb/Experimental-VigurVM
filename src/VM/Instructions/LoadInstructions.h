@@ -7,6 +7,7 @@ class VMThread;
 class JavaHeap;
 
 void iload(INSTRUCTION_ARGS);
+void lload(INSTRUCTION_ARGS);
 void aload(INSTRUCTION_ARGS);
 void aload_i(INSTRUCTION_ARGS);
 void iload_i(INSTRUCTION_ARGS);

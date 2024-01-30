@@ -30,6 +30,19 @@ void iload(INSTRUCTION_ARGS)
     thread->m_currentFrame->operands.push_back(var);
 }
 
+void lload(INSTRUCTION_ARGS)
+{
+    const u1 index = args[0];
+    const Variable highBytes = thread->m_currentFrame->localVariables[index];
+    VM::checkType(highBytes, VariableType_LONG, thread);
+
+    const Variable lowBytes = thread->m_currentFrame->localVariables[index+1];
+    VM::checkType(lowBytes, VariableType_LONG, thread);
+
+    thread->m_currentFrame->operands.push_back(highBytes);
+    thread->m_currentFrame->operands.push_back(lowBytes);
+}
+
 void aload(INSTRUCTION_ARGS) {
     const u1 index = args[0];
     const Variable var = thread->m_currentFrame->localVariables[index];
