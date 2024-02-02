@@ -48,7 +48,7 @@ public:
     void executeLoop(VMThread* thread);
     static void checkType(Variable var, VariableType type, VMThread *thread);
 private:
-    inline static constexpr std::array<Instruction,107> m_instructions{{
+    inline static constexpr std::array<Instruction,108> m_instructions{{
         // Constants
         {i_nop, 0, "nop", 0, nop},
         {i_aconst_null, 0, "aconst_null", 0, aconst_null},
@@ -136,6 +136,7 @@ private:
         {i_ifle, 2, "ifle", 0, ifle},
         {i_if_icmpne, 2, "if_icmpne", 0, if_icmpne},
         {i_if_icmplt, 2, "if_icmplt", 0, if_icmplt},
+        {i_if_icmpge, 2, "if_icmpge", 0, if_icmpge},
         {i_if_icmpgt, 2, "if_icmpgt", 0, if_icmpgt},
         {i_if_icmple, 2, "if_icmple", 0, if_icmple},
         {i_if_acmpne, 2, "if_acmpne", 0, if_acmpne},
@@ -173,6 +174,8 @@ private:
     Configuration m_configuration;
     void initStaticFields(ClassInfo* class_info, VMThread* thread);
     void runStaticInitializer(ClassInfo* classInfo, VMThread* thread);
+    u4 createThreadObject(VMThread* thread, u4 threadGroupReference);
+    u4 createThreadGroupObject(VMThread* thread);
 };
 
 

@@ -16,6 +16,7 @@ void ifgt(INSTRUCTION_ARGS);
 void ifle(INSTRUCTION_ARGS);
 void if_icmpne(INSTRUCTION_ARGS);
 void if_icmplt(INSTRUCTION_ARGS);
+void if_icmpge(INSTRUCTION_ARGS);
 void if_icmpgt(INSTRUCTION_ARGS);
 void if_icmple(INSTRUCTION_ARGS);
 void if_acmpne(INSTRUCTION_ARGS);

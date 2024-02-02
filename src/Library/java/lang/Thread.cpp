@@ -22,10 +22,7 @@ JCALL void lib_java_lang_Thread_registerNatives(NATIVE_ARGS)
 
 JCALL void lib_java_lang_Thread_currentThread(NATIVE_ARGS)
 {
-    // TODO: Maybe check if an object was already created?
-    ClassInfo* threadClass = VM->getClass("java/lang/Thread", thread);
-    const u4 objectReference = heap->createObject(threadClass, VM);
     StackFrame* returnFrame = thread->getTopFrameNonNative();
-    returnFrame->pushObject(objectReference);
+    returnFrame->pushObject(thread->threadObject);
 }
 

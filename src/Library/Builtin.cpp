@@ -47,6 +47,7 @@ void registerBuiltinRegisterNatives()
     registerNative("sun/misc/VM/initialize", "()V", lib_sun_misc_VM_initialize);
     // Security API
     registerNative("java/security/AccessController/doPrivileged", "(Ljava/security/PrivilegedAction;)Ljava/lang/Object;", lib_java_security_AccessController_doPriviliged);
+    registerNative("java/security/AccessController/getStackAccessControlContext", "()Ljava/security/AccessControlContext;", lib_java_security_AccessController_getStackAccessControlContext);
     // Vigur/lang package
     // registerNative("Vigur/lang/System/registerNatives", "()V", lib_Vigur_lang_System_registerNatives);
     // Reflection API

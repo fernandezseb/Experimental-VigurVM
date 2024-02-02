@@ -41,6 +41,28 @@ void VM::start()
     getClass("java/lang/String", &m_mainThread);
     getClass("java/lang/System", &m_mainThread);
     getClass("java/lang/Thread", &m_mainThread);
+    getClass("java/lang/ThreadGroup", &m_mainThread);
+
+    const u4 threadGroupReference = createThreadGroupObject(&m_mainThread);
+    m_mainThread.threadObject = createThreadObject(&m_mainThread, threadGroupReference);
+}
+
+u4 VM::createThreadGroupObject(VMThread* thread)
+{
+    ClassInfo* threadGroupClass = getClass("java/lang/ThreadGroup", thread);
+    return m_heap.createObject(threadGroupClass, this);
+}
+
+u4 VM::createThreadObject(VMThread* thread, const u4 threadGroupReference)
+{
+    ClassInfo* threadClass = getClass("java/lang/Thread", thread);
+    const u4 objectReference = m_heap.createObject(threadClass, this);
+    const Object* threadObject = m_heap.getObject(objectReference);
+
+    FieldData* field = threadObject->getField("group", "Ljava/lang/ThreadGroup;", &m_heap);
+    field->data->data = threadGroupReference;
+
+    return objectReference;
 }
 
 std::vector<Variable> VM::createVariableForDescriptor(const char* descriptor)

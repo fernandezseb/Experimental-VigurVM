@@ -17,15 +17,19 @@
 
 void lib_java_security_AccessController_doPriviliged(NATIVE_ARGS)
 {
-    StackFrame* currentFrame = thread->m_currentFrame;
-    Variable objectVar = currentFrame->localVariables[0];
+    const StackFrame* currentFrame = thread->m_currentFrame;
+    const Variable objectVar = currentFrame->localVariables[0];
     const Object* method = heap->getObject(currentFrame->localVariables[0].data);
-    MethodInfo* methodInfo = method->classInfo->findMethodWithNameAndDescriptor("run", "()Ljava/lang/Object;");
+    const MethodInfo* methodInfo = method->classInfo->findMethodWithNameAndDescriptor("run", "()Ljava/lang/Object;");
     ClassInfo* classInfo = method->classInfo;
 
     thread->pushStackFrameWithoutParams(classInfo, methodInfo);
-
     thread->m_currentFrame->localVariables[0] = objectVar;
 
     VM->executeLoop(thread);
+}
+
+void lib_java_security_AccessController_getStackAccessControlContext(NATIVE_ARGS)
+{
+    thread->returnVar(Variable{VariableType_REFERENCE, 0});
 }

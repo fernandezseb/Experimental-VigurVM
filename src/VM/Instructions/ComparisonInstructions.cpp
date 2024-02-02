@@ -210,6 +210,22 @@ void if_icmplt(INSTRUCTION_ARGS)
     }
 }
 
+void if_icmpge(INSTRUCTION_ARGS)
+{
+    const u1 byte1 = args[0];
+    const u1 byte2 = args[1];
+
+    const i2 branchByte = (byte1 << 8) | byte2;
+
+    Variable var2 = thread->m_currentFrame->popOperand();
+    Variable var1 = thread->m_currentFrame->popOperand();
+
+    if (std::bit_cast<i4>(var1.data) >= std::bit_cast<i4>(var2.data))
+    {
+        thread->m_pc = thread->m_pc-3+branchByte;
+    }
+}
+
 void if_icmpgt(INSTRUCTION_ARGS)
 {
     const u1 byte1 = args[0];
