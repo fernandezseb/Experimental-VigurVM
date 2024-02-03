@@ -68,8 +68,7 @@ public:
 	uint16_t thisClass;
 	uint16_t superClass;
 
-	uint16_t* interfaces;
-	uint16_t interfacesCount;
+	std::span<uint16_t> interfaces;
 
 	FieldInfo** fields;
 	uint16_t fieldsCount;

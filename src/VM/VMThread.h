@@ -18,6 +18,7 @@ public:
     ClassInfo* m_currentClass{nullptr};
     std::string_view m_name;
     u4 threadObject{0};
+    i1 priority{5};
 
     explicit VMThread(const std::string_view name, const size_t frameSize) noexcept
         : m_stack(frameSize), m_name(name)

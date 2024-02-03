@@ -50,7 +50,14 @@ void VM::start()
 u4 VM::createThreadGroupObject(VMThread* thread)
 {
     ClassInfo* threadGroupClass = getClass("java/lang/ThreadGroup", thread);
-    return m_heap.createObject(threadGroupClass, this);
+    const u4 threadGroupReference = m_heap.createObject(threadGroupClass, this);
+    const Object* threadGroupObject = m_heap.getObject(threadGroupReference);
+
+    const FieldData* maxPrioField = threadGroupObject->getField("maxPriority", "I", &m_heap);
+    maxPrioField->data->data = 10;
+
+
+    return threadGroupReference;
 }
 
 u4 VM::createThreadObject(VMThread* thread, const u4 threadGroupReference)
@@ -59,8 +66,11 @@ u4 VM::createThreadObject(VMThread* thread, const u4 threadGroupReference)
     const u4 objectReference = m_heap.createObject(threadClass, this);
     const Object* threadObject = m_heap.getObject(objectReference);
 
-    FieldData* field = threadObject->getField("group", "Ljava/lang/ThreadGroup;", &m_heap);
-    field->data->data = threadGroupReference;
+    const FieldData* groupField = threadObject->getField("group", "Ljava/lang/ThreadGroup;", &m_heap);
+    groupField->data->data = threadGroupReference;
+
+    const FieldData* priorityField = threadObject->getField("priority", "I", &m_heap);
+    priorityField->data->data = thread->priority;
 
     return objectReference;
 }

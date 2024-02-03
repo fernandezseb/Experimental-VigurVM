@@ -14,8 +14,8 @@ public class InstanceofTest {
              throw new RuntimeException();
         if (oNull instanceof String)
              throw new RuntimeException();
-//         if (!(brol instanceof Serializable))
-//             throw new RuntimeException();
+        if (!(brol instanceof Serializable))
+            throw new RuntimeException();
 //         if (!(charArr instanceof char[]))
 //             throw new RuntimeException();
     }

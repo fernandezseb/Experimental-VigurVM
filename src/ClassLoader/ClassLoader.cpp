@@ -235,7 +235,6 @@ ClassInfo* ClassLoader::readClass(ByteArray& byteArray)
     
     uint16_t interfacesCount = byteArray.readUnsignedShort();
     classInfo->interfaces = readInterfaces(byteArray, interfacesCount);
-    classInfo->interfacesCount = interfacesCount;
 
     uint16_t fieldsCount = byteArray.readUnsignedShort();
     classInfo->fields = readFields(byteArray, classInfo->constantPool, fieldsCount);
@@ -298,7 +297,7 @@ ClassInfo* ClassLoader::readClass(const char* className, Memory* memory, [[maybe
     return classInfo;
 }
 
-uint16_t* ClassLoader::readInterfaces(ByteArray& byteArray, uint16_t interfacesCount)
+std::span<uint16_t> ClassLoader::readInterfaces(ByteArray& byteArray, uint16_t interfacesCount)
 {
     uint16_t* interfaces = (uint16_t*) m_memory->alloc(sizeof(uint16_t) * interfacesCount);
 
@@ -307,7 +306,7 @@ uint16_t* ClassLoader::readInterfaces(ByteArray& byteArray, uint16_t interfacesC
         interfaces[currentInterface] = interfaceIndex;
     }
 
-    return interfaces;
+    return {interfaces, interfacesCount};
 }
 
 FieldInfo** ClassLoader::readFields(ByteArray& byteArray, ConstantPool* constantPool, uint16_t fieldsCount)

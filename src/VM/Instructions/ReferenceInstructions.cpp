@@ -460,7 +460,17 @@ void instanceof(INSTRUCTION_ARGS)
             const ClassInfo* targetClassInfo = VM->getClass(name.data(), thread);
             if (targetClassInfo->isInterface())
             {
-                thread->internalError("Instanceof not implemented yet for interface implementation checking");
+                for (const uint16_t interfaceIndex : classInfo->interfaces)
+                {
+                    const CPClassInfo* interfaceInfo = classInfo->constantPool->getClassInfo(interfaceIndex);
+                    const std::string_view interfaceName = classInfo->constantPool->getString(interfaceInfo->nameIndex);
+                    if (interfaceName == name)
+                    {
+                        returnVal = 1;
+                        break;
+                    }
+                }
+                thread->m_currentFrame->pushInt(returnVal);
             } else
                 // Check if it is a subclass
             {
