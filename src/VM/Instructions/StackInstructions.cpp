@@ -37,3 +37,13 @@ void dup_x1(INSTRUCTION_ARGS) {
     thread->m_currentFrame->operands.push_back(value2);
     thread->m_currentFrame->operands.push_back(value1);
 }
+
+void dup2(INSTRUCTION_ARGS)
+{
+    const Variable value1 = thread->m_currentFrame->popOperand();
+    const Variable value2 = thread->m_currentFrame->popOperand();
+    thread->m_currentFrame->operands.push_back(value2);
+    thread->m_currentFrame->operands.push_back(value1);
+    thread->m_currentFrame->operands.push_back(value2);
+    thread->m_currentFrame->operands.push_back(value1);
+}

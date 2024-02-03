@@ -48,7 +48,7 @@ public:
     void executeLoop(VMThread* thread);
     static void checkType(Variable var, VariableType type, VMThread *thread);
 private:
-    inline static constexpr std::array<Instruction,108> m_instructions{{
+    inline static constexpr std::array<Instruction,109> m_instructions{{
         // Constants
         {i_nop, 0, "nop", 0, nop},
         {i_aconst_null, 0, "aconst_null", 0, aconst_null},
@@ -108,6 +108,7 @@ private:
         {i_pop, 0, "pop", 0, pop},
         {i_dup, 0, "dup", 0, dup},
         {i_dup_x1, 0, "dup_x1", 0, dup_x1},
+        {i_dup2, 0, "dup2", 0, dup2},
         // Math
         {i_iadd, 0, "iadd", 0, iadd},
         {i_ladd, 0, "ladd", 0, ladd},
