@@ -45,7 +45,16 @@ void ireturnInstruction(INSTRUCTION_ARGS)
     returnCat1Var(thread);
 }
 
-void dreturnInstruction(INSTRUCTION_ARGS) {
+void lreturnInstruction(INSTRUCTION_ARGS)
+{
+    const Variable lowByte = thread->m_currentFrame->popOperand();
+    const Variable highByte = thread->m_currentFrame->popOperand();
+    thread->popFrame();
+    thread->returnVar(highByte, lowByte);
+}
+
+void dreturnInstruction(INSTRUCTION_ARGS)
+{
     const Variable lowByte = thread->m_currentFrame->popOperand();
     const Variable highByte = thread->m_currentFrame->popOperand();
     thread->popFrame();

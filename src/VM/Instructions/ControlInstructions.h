@@ -9,6 +9,7 @@ class JavaHeap;
 void gotoInstruction(INSTRUCTION_ARGS);
 void freturnInstruction(INSTRUCTION_ARGS);
 void ireturnInstruction(INSTRUCTION_ARGS);
+void lreturnInstruction(INSTRUCTION_ARGS);
 void dreturnInstruction(INSTRUCTION_ARGS);
 void areturnInstruction(INSTRUCTION_ARGS);
 void returnInstruction(INSTRUCTION_ARGS);
