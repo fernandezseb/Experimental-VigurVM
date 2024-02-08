@@ -30,6 +30,7 @@ JCALL void lib_java_lang_Thread_registerNatives(NATIVE_ARGS)
 {
     registerNative("java/lang/Thread/currentThread", "()Ljava/lang/Thread;", lib_java_lang_Thread_currentThread);
     registerNative("java/lang/Thread/setPriority0", "(I)V", lib_java_lang_Thread_setPriority0);
+    registerNative("java/lang/Thread/isAlive", "()Z", lib_java_lang_Thread_isAlive);
 }
 
 JCALL void lib_java_lang_Thread_currentThread(NATIVE_ARGS)
@@ -41,13 +42,29 @@ JCALL void lib_java_lang_Thread_currentThread(NATIVE_ARGS)
 JCALL void lib_java_lang_Thread_setPriority0(NATIVE_ARGS)
 {
     const Object* threadObject = getThisObjectReference(thread, heap, VM);
-
-
     const StackFrame* currentFrame = thread->m_currentFrame;
     const Variable argument = currentFrame->localVariables[1];
     VM->checkType(argument, VariableType_INT, thread);
 
     FieldData* field = threadObject->getField("priority", "I", heap);
     field->data->data = argument.data;
+}
+
+JCALL void lib_java_lang_Thread_isAlive(NATIVE_ARGS)
+{
+    const StackFrame* currentFrame = thread->m_currentFrame;
+    const Variable var = currentFrame->localVariables[0];
+    VM->checkType(var, VariableType_REFERENCE, thread);
+    const u4 objectReference = var.data;
+    const VMThread* vmThread =  VM->getVMThreadByObjectRef(objectReference);
+
+    bool alive = false;
+    if (vmThread != nullptr)
+    {
+        alive = vmThread->alive;
+    }
+
+    StackFrame* returnFrame = thread->getTopFrameNonNative();
+    returnFrame->pushInt(alive? 1 : 0);
 }
 

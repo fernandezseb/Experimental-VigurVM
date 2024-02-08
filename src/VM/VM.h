@@ -47,6 +47,15 @@ public:
     void shutdown();
     void executeLoop(VMThread* thread);
     static void checkType(Variable var, VariableType type, VMThread *thread);
+    VMThread* getVMThreadByObjectRef(const u4 objectReference)
+    {
+        if (m_mainThread.threadObject == objectReference)
+        {
+            return &m_mainThread;
+        }
+
+        return nullptr;
+    }
 private:
     inline static constexpr std::array<Instruction,110> m_instructions{{
         // Constants
