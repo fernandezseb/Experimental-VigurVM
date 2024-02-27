@@ -31,6 +31,7 @@ JCALL void lib_java_lang_Thread_registerNatives(NATIVE_ARGS)
     registerNative("java/lang/Thread/currentThread", "()Ljava/lang/Thread;", lib_java_lang_Thread_currentThread);
     registerNative("java/lang/Thread/setPriority0", "(I)V", lib_java_lang_Thread_setPriority0);
     registerNative("java/lang/Thread/isAlive", "()Z", lib_java_lang_Thread_isAlive);
+    registerNative("java/lang/Thread/start0", "()V", lib_java_lang_Thread_start0);
 }
 
 JCALL void lib_java_lang_Thread_currentThread(NATIVE_ARGS)
@@ -66,5 +67,22 @@ JCALL void lib_java_lang_Thread_isAlive(NATIVE_ARGS)
 
     StackFrame* returnFrame = thread->getTopFrameNonNative();
     returnFrame->pushInt(alive? 1 : 0);
+}
+
+JCALL void lib_java_lang_Thread_start0(NATIVE_ARGS)
+{
+    const Object* threadObject = getThisObjectReference(thread, heap, VM);
+    const FieldData* runnableField = threadObject->getField("target", "Ljava/lang/Runnable;", heap);
+    if (runnableField->data->data != 0)
+    {
+        thread->internalError("Running of Runnables, not implemented yet");
+    } else
+    {
+        // TODO: Run the run method on a new thread
+        // MethodInfo* methodInfo = threadObject->classInfo->findMethodWithNameAndDescriptor("run", "()V");
+        // thread->pushStackFrameWithoutParams(threadObject->classInfo, methodInfo);
+        // thread->m_currentFrame->localVariables[0] = thread->m_currentFrame->localVariables[0];
+        // VM->executeLoop(thread);
+    }
 }
 

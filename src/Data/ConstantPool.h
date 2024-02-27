@@ -4,6 +4,7 @@
 #include "Platform.h"
 
 #include <string_view>
+#include <span>
 
 enum ConstantType : uint8_t {
 	CT_UTF8            = 1u,
@@ -121,8 +122,7 @@ class ConstantPool {
 private:
 	void checkIndex(uint16_t index) const;
 public:
-	ConstantPoolItem** constants;
-	uint16_t size;
+	std::span<ConstantPoolItem*> constants;
 public:
 	[[nodiscard]] std::string_view getString(uint16_t index) const;
 	[[nodiscard]] CPClassInfo* getClassInfo(uint16_t index) const;

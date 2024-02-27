@@ -45,6 +45,7 @@ JCALL void lib_java_lang_Class_registerNatives(NATIVE_ARGS)
                    lib_java_lang_Class_desiredAssertionStatus0);
     registerNative("java/lang/Class/getName0", "()Ljava/lang/String;", lib_java_lang_Class_getName0);
     registerNative("java/lang/Class/forName0", "(Ljava/lang/String;ZLjava/lang/ClassLoader;Ljava/lang/Class;)Ljava/lang/Class;", lib_java_lang_Class_forName0);
+    registerNative("java/lang/Class/getDeclaredFields0", "(Z)[Ljava/lang/reflect/Field;", lib_java_lang_Class_getDeclaredFields0);
 }
 
 JCALL void lib_java_lang_Class_getPrimitiveClass(NATIVE_ARGS)
@@ -123,4 +124,10 @@ JCALL void lib_java_lang_Class_forName0(NATIVE_ARGS)
     ClassInfo* classInfo = VM->getClass(className.data(), thread);
     const u4 classObjectRef = heap->createClassObject(classInfo, VM, className);
     thread->returnVar(Variable{VariableType_REFERENCE, classObjectRef});
+}
+
+JCALL void lib_java_lang_Class_getDeclaredFields0(NATIVE_ARGS)
+{
+    const ClassObject* classObject = getThisClassObjectReference(thread, heap, VM);
+    thread->internalError("Not implemented yet");
 }

@@ -19,7 +19,7 @@
 
 void ConstantPool::checkIndex(uint16_t index) const
 {
-	if (index > this->size) {
+	if (index > this->constants.size()) {
 		fprintf(stderr, "Error: Invalid index into constant pool: #%" PRIu16 "\n", index);
 		Platform::exitProgram(1);
 	}

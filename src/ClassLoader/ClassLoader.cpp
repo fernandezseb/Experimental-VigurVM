@@ -40,8 +40,8 @@ ConstantPool* ClassLoader::readConstantPool(ByteArray& byteArray)
 
     uint16_t arrCount = cpCount - 1;
 
-    constantPool->constants = (ConstantPoolItem**) m_memory->alloc(sizeof(ConstantPoolItem*) * arrCount);
-    constantPool->size = arrCount;
+    ConstantPoolItem** constants = (ConstantPoolItem**) m_memory->alloc(sizeof(ConstantPoolItem*) * arrCount);
+    constantPool->constants = {constants, arrCount};
 
     for (uint32_t currentConstantIndex = 0; currentConstantIndex < arrCount; currentConstantIndex++) {
         uint8_t tag = byteArray.readUnsignedByte();

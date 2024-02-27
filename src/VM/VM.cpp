@@ -296,7 +296,7 @@ ClassInfo* VM::getClass(const char* className, VMThread* thread)
 void VM::executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* methodInfo, JavaHeap* heap, VMThread* thread)
 {
     const std::string_view className = targetClass->getName();
-    printf("Running native code of method: %s\n", className.data());
+    printf("Running native code of method: %s.%s\n", className.data(), methodInfo->name.data());
     const std::string_view description = targetClass->constantPool->getString(methodInfo->descriptorIndex);
     const std::string_view methodName = methodInfo->name;
     std::string fullName = std::string{className};
