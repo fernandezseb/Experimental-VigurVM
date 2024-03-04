@@ -18,6 +18,7 @@
 #include "Configuration.h"
 #include "Memory.h"
 #include "Library/Builtin.h"
+#include "physfs.h"
 
 #include <stack>
 #include <string>
@@ -28,9 +29,11 @@ VM::VM(const Configuration configuration) noexcept
 {
 }
 
-void VM::start()
+void VM::start(const char* commandLineName)
 {
     Platform::initialize();
+    PHYSFS_init(commandLineName);
+    PHYSFS_permitSymbolicLinks(1);
 
     registerBuiltinRegisterNatives();
     getClass("java/lang/OutOfMemoryError", &m_mainThread);
@@ -357,6 +360,7 @@ void VM::runMain()
 
 void VM::shutdown()
 {
+    PHYSFS_deinit();
     Platform::cleanup();
 }
 

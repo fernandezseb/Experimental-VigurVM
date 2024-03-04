@@ -40,7 +40,7 @@ public:
     void updateVariableFromVariable(Variable* variable, const char* descriptor, Variable operand, Variable operand2, VMThread* thread);
     static std::vector<Variable> createVariableForDescriptor(const char* descriptor);
     [[nodiscard]] static u1 getDescriptorVarCategory(const char* descriptor) noexcept;
-    void start();
+    void start(const char* commandLineName);
     ClassInfo* getClass(const char* className, VMThread* thread);
     void executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* methodInfo, JavaHeap* heap, VMThread* thread);
     void runMain();
