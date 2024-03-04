@@ -125,16 +125,17 @@ u4 JavaHeap::createClassObject(ClassInfo* classInfo, VM* VM, std::string_view na
     void* objectMemory = Platform::allocateMemory(sizeof(ClassObject), 0);
     const auto object = new (objectMemory) ClassObject();
     u2 fieldsCount = 0;
-    for (u2 currentField = 0; currentField < classInfo->fieldsCount; ++currentField)
+    for (u2 currentField = 0; currentField < classClassInfo->fieldsCount; ++currentField)
     {
-        const FieldInfo* fieldInfo = classInfo->fields[currentField];
+        const FieldInfo* fieldInfo = classClassInfo->fields[currentField];
         if (!fieldInfo->isStatic())
         {
             ++fieldsCount;
         }
     }
 
-    object->classInfo = classInfo;
+    object->classInfo = classClassInfo;
+    object->classClassInfo = classInfo;
     object->type = CLASSOBJECT;
     if (fieldsCount > 0)
     {
@@ -146,15 +147,15 @@ u4 JavaHeap::createClassObject(ClassInfo* classInfo, VM* VM, std::string_view na
     object->name = name;
 
     fieldsCount = 0;
-    for (u2 currentField = 0; currentField < classInfo->fieldsCount; ++currentField)
+    for (u2 currentField = 0; currentField < classClassInfo->fieldsCount; ++currentField)
     {
-        const FieldInfo* fieldInfo = classInfo->fields[currentField];
+        const FieldInfo* fieldInfo = classClassInfo->fields[currentField];
         if (!fieldInfo->isStatic())
         {
             FieldData data = {};
             data.descriptorIndex = fieldInfo->descriptorIndex;
             data.nameIndex = fieldInfo->nameIndex;
-            const std::string_view descriptorText = classInfo->constantPool->getString(fieldInfo->descriptorIndex);
+            const std::string_view descriptorText = classClassInfo->constantPool->getString(fieldInfo->descriptorIndex);
             std::vector<Variable> vars = VM->createVariableForDescriptor(descriptorText.data());
             Variable* varsAllocated = (Variable*) Platform::allocateMemory(sizeof(Variable) * vars.size(), 0);
             for (u1 currentVar = 0; currentVar < vars.size(); ++currentVar)
@@ -168,9 +169,9 @@ u4 JavaHeap::createClassObject(ClassInfo* classInfo, VM* VM, std::string_view na
     }
 
     // Check if we are not in java/lang/Object, because that class doesn't have a superClas
-    if (classInfo->superClass != 0)
+    if (classClassInfo->superClass != 0)
     {
-        const std::string_view superClassName = classInfo->constantPool->getString(classInfo->constantPool->getClassInfo(classInfo->superClass)->nameIndex);
+        const std::string_view superClassName = classClassInfo->constantPool->getString(classClassInfo->constantPool->getClassInfo(classClassInfo->superClass)->nameIndex);
         if (superClassName != "java/lang/Object")
         {
             // TODO: Load the class if needed

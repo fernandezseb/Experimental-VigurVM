@@ -14,6 +14,8 @@ add_library(Library
         java/lang/Double.cpp
         java/lang/Thread.h
         java/lang/Thread.cpp
+        java/lang/String.h
+        java/lang/String.cpp
         java/io/FileOutputStream.h
         java/io/FileOutputStream.cpp
         java/io/FileDescriptor.h

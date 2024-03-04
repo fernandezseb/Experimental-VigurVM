@@ -129,5 +129,32 @@ JCALL void lib_java_lang_Class_forName0(NATIVE_ARGS)
 JCALL void lib_java_lang_Class_getDeclaredFields0(NATIVE_ARGS)
 {
     const ClassObject* classObject = getThisClassObjectReference(thread, heap, VM);
-    thread->internalError("Not implemented yet");
+    const StackFrame* currentFrame = thread->m_currentFrame;
+    // TODO: Use publicOnlyBooleanVar
+    [[maybe_unused]] const Variable publicOnlyBooleanVar  = currentFrame->localVariables[1];
+    const u4 arraySize = classObject->classClassInfo->fieldsCount;
+    const u4 arrayObject =  heap->createArray(AT_REFERENCE, arraySize);
+
+    const Array* fieldsArray = heap->getArray(arrayObject);
+
+    ClassInfo* fieldClass = VM->getClass("java/lang/reflect/Field", thread);
+
+    for (u4 currentField = 0; currentField < arraySize; ++currentField)
+    {
+        const u4 fieldObjectRef = heap->createObject(fieldClass, VM);
+        const Object* fieldObject = heap->getObject(fieldObjectRef);
+
+        FieldData* nameField = fieldObject->getField("name", "Ljava/lang/String;", heap);
+        std::string_view fieldName =  classObject->classClassInfo->constantPool->getString(classObject->classClassInfo->fields[currentField]->nameIndex);
+        const u4 fieldNameStringObjectRef = heap->createString(fieldName.data(), VM);
+        nameField->data->data = fieldNameStringObjectRef;
+
+        FieldData* slotField = fieldObject->getField("slot", "I", heap);
+        slotField->data->data = currentField;
+
+        u4* array = reinterpret_cast<u4*>(fieldsArray->data);
+        array[currentField] = fieldObjectRef;
+    }
+
+    thread->returnVar(Variable{VariableType_REFERENCE, arrayObject});
 }

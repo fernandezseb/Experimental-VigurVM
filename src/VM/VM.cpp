@@ -37,11 +37,18 @@ void VM::start()
     getClass("java/lang/VirtualMachineError", &m_mainThread);
     getClass("java/lang/Object", &m_mainThread);
     getClass("java/lang/Number", &m_mainThread);
-    getClass("java/lang/Class", &m_mainThread);
+    ClassInfo* classInfo = getClass("java/lang/Class", &m_mainThread);
     getClass("java/lang/String", &m_mainThread);
     getClass("java/lang/System", &m_mainThread);
     getClass("java/lang/Thread", &m_mainThread);
     getClass("java/lang/ThreadGroup", &m_mainThread);
+    getClass("java/lang/reflect/Field", &m_mainThread);
+    getClass("java/lang/reflect/AccessibleObject", &m_mainThread);
+    getClass("java/io/PrintStream", &m_mainThread);
+    getClass("java/io/FilterOutputStream", &m_mainThread);
+    getClass("java/io/OutputStream", &m_mainThread);
+
+    m_heap.setClassInfo(classInfo);
 
     const u4 threadGroupReference = createThreadGroupObject(&m_mainThread);
     m_mainThread.threadObject = createThreadObject(&m_mainThread, threadGroupReference);

@@ -23,6 +23,8 @@ JCALL void lib_sun_misc_Unsafe_registerNatives(NATIVE_ARGS)
     registerNative("sun/misc/Unsafe/arrayBaseOffset", "(Ljava/lang/Class;)I", lib_sun_misc_Unsafe_arrayBaseOffset);
     registerNative("sun/misc/Unsafe/arrayIndexScale", "(Ljava/lang/Class;)I", lib_sun_misc_Unsafe_arrayIndexScale);
     registerNative("sun/misc/Unsafe/addressSize", "()I", lib_sun_misc_Unsafe_addressSize);
+    registerNative("sun/misc/Unsafe/objectFieldOffset", "(Ljava/lang/reflect/Field;)J", lib_sun_misc_Unsafe_objectFieldOffset);
+    registerNative("sun/misc/Unsafe/compareAndSwapObject", "(Ljava/lang/Object;JLjava/lang/Object;Ljava/lang/Object;)Z", lib_sun_misc_Unsafe_compareAndSwapObject);
 }
 
 JCALL void lib_sun_misc_Unsafe_arrayBaseOffset(NATIVE_ARGS)
@@ -51,4 +53,34 @@ JCALL void lib_sun_misc_Unsafe_addressSize(NATIVE_ARGS)
 {
     constexpr Variable size{VariableType_INT, 64};
     thread->returnVar(size);
+}
+
+JCALL void lib_sun_misc_Unsafe_objectFieldOffset(NATIVE_ARGS)
+{
+    const Variable fieldObjectRef = thread->m_currentFrame->localVariables[1];
+    const Object* fieldObject = heap->getObject(fieldObjectRef.data);
+    const FieldData* slotField = fieldObject->getField("slot", "I", heap);
+    constexpr u4 baseOffset = offsetof(Object, fields);
+    const u4 fieldOffset = baseOffset + (slotField->data->data * sizeof(FieldData));
+    thread->returnVar(Variable{VariableType_LONG, 0}, Variable{VariableType_LONG, fieldOffset});
+}
+
+JCALL void lib_sun_misc_Unsafe_compareAndSwapObject(NATIVE_ARGS)
+{
+    const Variable oObjectRef = thread->m_currentFrame->localVariables[1];
+    const Object* oObject = heap->getObject(oObjectRef.data);
+    const Variable offsetVar = thread->m_currentFrame->localVariables[2];
+    const Variable expectedObjectRef = thread->m_currentFrame->localVariables[3];
+    const Variable xObjectRef = thread->m_currentFrame->localVariables[4];
+    constexpr u4 baseOffset = offsetof(Object, fields);
+    const u4 fieldIndex = (offsetVar.data-baseOffset)/sizeof(FieldData);
+    const FieldData* fieldData = &oObject->fields[fieldIndex];
+    if (fieldData->data->data == expectedObjectRef.data)
+    {
+        fieldData->data->data = xObjectRef.data;
+        thread->returnVar(Variable{VariableType_INT, 1u});
+    } else
+    {
+        thread->returnVar(Variable{VariableType_INT, 0u});
+    }
 }

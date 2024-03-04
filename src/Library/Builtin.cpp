@@ -21,6 +21,7 @@
 #include "java/lang/Double.h"
 #include "java/lang/Float.h"
 #include "java/lang/Object.h"
+#include "java/lang/String.h"
 #include "java/lang/System.h"
 #include "java/lang/Thread.h"
 #include "java/security/AccessController.h"
@@ -38,6 +39,7 @@ void registerBuiltinRegisterNatives()
     registerNative("java/lang/Double/doubleToRawLongBits", "(D)J", lib_java_lang_Double_doubleToRawLongBits);
     registerNative("java/lang/Double/longBitsToDouble", "(J)D", lib_java_lang_Double_longBitsToDouble);
     registerNative("java/lang/Thread/registerNatives", "()V", lib_java_lang_Thread_registerNatives);
+    registerNative("java/lang/String/intern", "()Ljava/lang/String;", lib_java_lang_String_intern);
     // java/io package
     registerNative("java/io/FileOutputStream/initIDs", "()V", lib_java_io_FileOutputStream_initIDs);
     registerNative("java/io/FileDescriptor/initIDs", "()V", lib_java_io_FileDescriptor_initIDs);

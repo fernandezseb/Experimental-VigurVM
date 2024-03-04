@@ -55,6 +55,7 @@ class Object : public Reference {
 public:
     std::span<FieldData> fields;
     uint16_t fieldsCount{0};
+    // In ClassObjects, this is the classInfo of java/lang/Class
     ClassInfo* classInfo{nullptr};
     u4 superClassObject{0};
     FieldData* getField(const char* name, const char* descriptor, JavaHeap* heap) const;
@@ -64,6 +65,8 @@ class ClassObject : public Object
 {
 public:
     std::string_view name;
+    // The ClassInfo of the class to which this "Class" object refers
+    ClassInfo* classClassInfo{nullptr};
 };
 
 class Array : public Reference {
@@ -85,8 +88,14 @@ private:
     // List of objects
     std::vector<Reference*> objects;
     MethodArea methodArea;
+    ClassInfo* classClassInfo{nullptr};
 public:
     JavaHeap();
+
+    void setClassInfo(ClassInfo* classInfo)
+    {
+        classClassInfo = classInfo;
+    }
 
     /*
      * Object operations

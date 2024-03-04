@@ -17,4 +17,35 @@
 
 JCALL void lib_java_lang_System_registerNatives(NATIVE_ARGS)
 {
+    registerNative("java/lang/System/arraycopy", "(Ljava/lang/Object;ILjava/lang/Object;II)V", lib_java_lang_System_arraycopy);
+}
+
+JCALL void lib_java_lang_System_arraycopy(NATIVE_ARGS)
+{
+    const StackFrame* currentFrame = thread->m_currentFrame;
+    const Variable srcObjectRef = currentFrame->localVariables[0];
+    const Variable srcPosVar = currentFrame->localVariables[1];
+    const Variable dstObjectRef = currentFrame->localVariables[2];
+    const Variable dstPosVar = currentFrame->localVariables[3];
+    const Variable lengthVar = currentFrame->localVariables[4];
+
+    const Array* srcArray = heap->getArray(srcObjectRef.data);
+    const Array* dstArray = heap->getArray(dstObjectRef.data);
+
+    // TODO: De-duplicate this code
+    u1 bytes = 4;
+    if (srcArray->arrayType == AT_CHAR)
+    {
+        bytes = 1;
+    }
+    else if (srcArray->arrayType == AT_LONG || srcArray->arrayType == AT_DOUBLE)
+    {
+        bytes = 8;
+    }
+
+    // TODO: Do checks before copying
+
+    memcpy(dstArray->data+(dstPosVar.data*bytes),
+        srcArray->data+(srcPosVar.data*bytes),
+        lengthVar.data * bytes);
 }
