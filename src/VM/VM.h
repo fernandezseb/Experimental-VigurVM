@@ -57,7 +57,7 @@ public:
         return nullptr;
     }
 private:
-    inline static constexpr std::array<Instruction,110> m_instructions{{
+    inline static constexpr std::array<Instruction,114> m_instructions{{
         // Constants
         {i_nop, 0, "nop", 0, nop},
         {i_aconst_null, 0, "aconst_null", 0, aconst_null},
@@ -88,6 +88,10 @@ private:
         {i_iload_1, 0, "iload_1", 1, iload_i},
         {i_iload_2, 0, "iload_2", 2, iload_i},
         {i_iload_3, 0, "iload_3", 3, iload_i},
+        {i_lload_0, 0, "lload_0", 0, lload_i},
+        {i_lload_1, 0, "lload_1", 1, lload_i},
+        {i_lload_2, 0, "lload_2", 2, lload_i},
+        {i_lload_3, 0, "lload_3", 3, lload_i},
         {i_fload_0, 0, "fload_0", 0, fload_i},
         {i_fload_1, 0, "fload_1", 1, fload_i},
         {i_fload_2, 0, "fload_2", 2, fload_i},
