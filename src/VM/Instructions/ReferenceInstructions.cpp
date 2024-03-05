@@ -72,6 +72,7 @@ void putstatic(INSTRUCTION_ARGS)
         thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex).data());
     const std::string_view descriptor = thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex);
     const u1 varCount = VM::getDescriptorVarCategory(descriptor.data());
+    // With cat 2 vars, var should be the LSB
     Variable var = thread->m_currentFrame->popOperand();
     Variable var2{VariableType_UNDEFINED};
     if (varCount == 2)
@@ -139,7 +140,7 @@ void putfield(INSTRUCTION_ARGS)
     Variable targetValue2{VariableType_UNDEFINED};
     if (targetValue.getCategory() == 2)
     {
-        targetValue2 = thread->m_currentFrame->popOperand();
+        targetValue2 = thread->m_currentFrame->popOperand(); // MSB
     }
     Variable referencePointer = thread->m_currentFrame->popOperand();
 
@@ -173,9 +174,11 @@ static void invokeVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread
             if (operand.getCategory() == 2)
             {
                 Variable highByte = topFrame->popOperand();
+                arguments.push_front(operand);
                 arguments.push_front(highByte);
+            } else {
+                arguments.push_front(operand);
             }
-            arguments.push_front(operand);
         }
 
         const Variable ref = arguments[0];
@@ -312,9 +315,12 @@ void invokestatic(INSTRUCTION_ARGS)
             if (operand.getCategory() == 2)
             {
                 Variable highByte = topFrame->popOperand();
+                arguments.push_front(operand);
                 arguments.push_front(highByte);
+            } else
+            {
+                arguments.push_front(operand);
             }
-            arguments.push_front(operand);
         }
         thread->pushNativeStackFrame(targetClass, methodInfo, arguments.size());
 

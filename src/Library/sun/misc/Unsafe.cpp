@@ -25,6 +25,7 @@ JCALL void lib_sun_misc_Unsafe_registerNatives(NATIVE_ARGS)
     registerNative("sun/misc/Unsafe/addressSize", "()I", lib_sun_misc_Unsafe_addressSize);
     registerNative("sun/misc/Unsafe/objectFieldOffset", "(Ljava/lang/reflect/Field;)J", lib_sun_misc_Unsafe_objectFieldOffset);
     registerNative("sun/misc/Unsafe/compareAndSwapObject", "(Ljava/lang/Object;JLjava/lang/Object;Ljava/lang/Object;)Z", lib_sun_misc_Unsafe_compareAndSwapObject);
+    registerNative("sun/misc/Unsafe/getIntVolatile", "(Ljava/lang/Object;J)I", lib_sun_misc_Unsafe_getIntVolatile);
 }
 
 JCALL void lib_sun_misc_Unsafe_arrayBaseOffset(NATIVE_ARGS)
@@ -60,8 +61,21 @@ JCALL void lib_sun_misc_Unsafe_objectFieldOffset(NATIVE_ARGS)
     const Variable fieldObjectRef = thread->m_currentFrame->localVariables[1];
     const Object* fieldObject = heap->getObject(fieldObjectRef.data);
     const FieldData* slotField = fieldObject->getField("slot", "I", heap);
+    const u4 slot = slotField->data->data;
+    const FieldData* classField = fieldObject->getField("clazz", "Ljava/lang/Class;", heap);
+    ClassObject* classObject = heap->getClassObject(classField->data->data);
+    u4 index = 0;
+    // Ignore static fields
+    for (u4 currentField = 0; currentField < slot; ++currentField)
+    {
+        FieldInfo* fieldInfo = classObject->classClassInfo->fields[currentField];
+        if (!fieldInfo->isStatic())
+        {
+            index++;
+        }
+    }
     constexpr u4 baseOffset = offsetof(Object, fields);
-    const u4 fieldOffset = baseOffset + (slotField->data->data * sizeof(FieldData));
+    const u4 fieldOffset = baseOffset + (index * sizeof(FieldData));
     thread->returnVar(Variable{VariableType_LONG, 0}, Variable{VariableType_LONG, fieldOffset});
 }
 
@@ -69,11 +83,15 @@ JCALL void lib_sun_misc_Unsafe_compareAndSwapObject(NATIVE_ARGS)
 {
     const Variable oObjectRef = thread->m_currentFrame->localVariables[1];
     const Object* oObject = heap->getObject(oObjectRef.data);
-    const Variable offsetVar = thread->m_currentFrame->localVariables[2];
-    const Variable expectedObjectRef = thread->m_currentFrame->localVariables[3];
-    const Variable xObjectRef = thread->m_currentFrame->localVariables[4];
+    const u8 offsetVar = ((static_cast<u8>(thread->m_currentFrame->localVariables[2].data) << 32) | static_cast<u8>(thread->m_currentFrame->localVariables[3].data));
+    const Variable expectedObjectRef = thread->m_currentFrame->localVariables[4];
+    const Variable xObjectRef = thread->m_currentFrame->localVariables[5];
     constexpr u4 baseOffset = offsetof(Object, fields);
-    const u4 fieldIndex = (offsetVar.data-baseOffset)/sizeof(FieldData);
+    const u4 fieldIndex = (offsetVar-baseOffset)/sizeof(FieldData);
+    if (fieldIndex >= oObject->fields.size())
+    {
+        thread->internalError("Too big offset");
+    }
     const FieldData* fieldData = &oObject->fields[fieldIndex];
     if (fieldData->data->data == expectedObjectRef.data)
     {
@@ -83,4 +101,16 @@ JCALL void lib_sun_misc_Unsafe_compareAndSwapObject(NATIVE_ARGS)
     {
         thread->returnVar(Variable{VariableType_INT, 0u});
     }
+}
+
+JCALL void lib_sun_misc_Unsafe_getIntVolatile(NATIVE_ARGS)
+{
+    constexpr u4 baseOffset = offsetof(Object, fields);
+    const Variable oObjectRef = thread->m_currentFrame->localVariables[1];
+    const Object* oObject = heap->getObject(oObjectRef.data);
+    const u8 offset = ((static_cast<u8>(thread->m_currentFrame->localVariables[2].data) << 32) | static_cast<u8>(thread->m_currentFrame->localVariables[3].data));
+    const u4 fieldOffset = (offset-baseOffset)/sizeof(FieldData);
+    const FieldData fieldData = oObject->fields[fieldOffset];
+
+    thread->returnVar(Variable{VariableType_INT, fieldData.data->data});
 }

@@ -109,9 +109,11 @@ void VMThread::pushStackFrameSpecial(ClassInfo* classInfo, const MethodInfo* met
             if (operand.getCategory() == 2)
             {
                 Variable highByte = previousFrame->popOperand();
+                arguments.push_front(operand);
                 arguments.push_front(highByte);
+            } else {
+                arguments.push_front(operand);
             }
-            arguments.push_front(operand);
         }
 
         const Variable ref = arguments[0];
