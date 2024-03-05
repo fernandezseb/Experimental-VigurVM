@@ -25,6 +25,7 @@ JCALL void lib_sun_misc_Unsafe_registerNatives(NATIVE_ARGS)
     registerNative("sun/misc/Unsafe/addressSize", "()I", lib_sun_misc_Unsafe_addressSize);
     registerNative("sun/misc/Unsafe/objectFieldOffset", "(Ljava/lang/reflect/Field;)J", lib_sun_misc_Unsafe_objectFieldOffset);
     registerNative("sun/misc/Unsafe/compareAndSwapObject", "(Ljava/lang/Object;JLjava/lang/Object;Ljava/lang/Object;)Z", lib_sun_misc_Unsafe_compareAndSwapObject);
+    registerNative("sun/misc/Unsafe/compareAndSwapInt", "(Ljava/lang/Object;JII)Z", lib_sun_misc_Unsafe_compareAndSwapInt);
     registerNative("sun/misc/Unsafe/getIntVolatile", "(Ljava/lang/Object;J)I", lib_sun_misc_Unsafe_getIntVolatile);
 }
 
@@ -96,6 +97,30 @@ JCALL void lib_sun_misc_Unsafe_compareAndSwapObject(NATIVE_ARGS)
     if (fieldData->data->data == expectedObjectRef.data)
     {
         fieldData->data->data = xObjectRef.data;
+        thread->returnVar(Variable{VariableType_INT, 1u});
+    } else
+    {
+        thread->returnVar(Variable{VariableType_INT, 0u});
+    }
+}
+
+JCALL void lib_sun_misc_Unsafe_compareAndSwapInt(NATIVE_ARGS)
+{
+    const Variable oObjectRef = thread->m_currentFrame->localVariables[1];
+    const Object* oObject = heap->getObject(oObjectRef.data);
+    const u8 offsetVar = ((static_cast<u8>(thread->m_currentFrame->localVariables[2].data) << 32) | static_cast<u8>(thread->m_currentFrame->localVariables[3].data));
+    const Variable expectedIntVar = thread->m_currentFrame->localVariables[4];
+    const Variable xIntVar = thread->m_currentFrame->localVariables[5];
+    constexpr u4 baseOffset = offsetof(Object, fields);
+    const u4 fieldIndex = (offsetVar-baseOffset)/sizeof(FieldData);
+    if (fieldIndex >= oObject->fields.size())
+    {
+        thread->internalError("Too big offset");
+    }
+    const FieldData* fieldData = &oObject->fields[fieldIndex];
+    if (fieldData->data->data == expectedIntVar.data)
+    {
+        fieldData->data->data = xIntVar.data;
         thread->returnVar(Variable{VariableType_INT, 1u});
     } else
     {
