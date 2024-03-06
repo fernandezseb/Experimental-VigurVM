@@ -57,6 +57,7 @@ public:
         return nullptr;
     }
 private:
+    void initSystemClass(ClassInfo* class_info, VMThread* vm_thread);
     inline static constexpr std::array<Instruction,114> m_instructions{{
         // Constants
         {i_nop, 0, "nop", 0, nop},

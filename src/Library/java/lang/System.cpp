@@ -18,6 +18,7 @@
 JCALL void lib_java_lang_System_registerNatives(NATIVE_ARGS)
 {
     registerNative("java/lang/System/arraycopy", "(Ljava/lang/Object;ILjava/lang/Object;II)V", lib_java_lang_System_arraycopy);
+    registerNative("java/lang/System/initProperties", "(Ljava/util/Properties;)Ljava/util/Properties;", lib_java_lang_System_initProperties);
 }
 
 JCALL void lib_java_lang_System_arraycopy(NATIVE_ARGS)
@@ -48,4 +49,9 @@ JCALL void lib_java_lang_System_arraycopy(NATIVE_ARGS)
     memcpy(dstArray->data+(dstPosVar.data*bytes),
         srcArray->data+(srcPosVar.data*bytes),
         lengthVar.data * bytes);
+}
+
+JCALL void lib_java_lang_System_initProperties(NATIVE_ARGS)
+{
+    thread->returnVar(thread->m_currentFrame->localVariables[0]);
 }

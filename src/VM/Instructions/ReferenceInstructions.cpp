@@ -223,7 +223,7 @@ static void invokeVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread
         }
     }
 
-    if (methodInfo->isNative()) {
+    if (targetMethod->isNative()) {
         thread->pushNativeStackFrame(targetClass, targetMethod, arguments.size());
     } else {
         thread->pushStackFrameWithoutParams(targetClass, targetMethod);
@@ -237,7 +237,7 @@ static void invokeVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread
         }
     }
 
-    if (methodInfo->isNative())
+    if (targetMethod->isNative())
     {
         VM->executeNativeMethod(targetClass, targetMethod, heap, thread);
         thread->popFrame();
@@ -255,9 +255,43 @@ void invokevirtual(INSTRUCTION_ARGS)
     const std::string_view methodDescriptor = topFrame->constantPool->getString(nameAndTypeInfo->descriptorIndex);
     const std::string_view className = topFrame->constantPool->getString(cpClassInfo->nameIndex);
     ClassInfo* targetClassInfo = VM->getClass(className.data(), thread);
-    MethodInfo* methodInfo = targetClassInfo->findMethodWithNameAndDescriptor(methodName.data(), methodDescriptor.data());
+    MethodInfo* foundMethod = targetClassInfo->findMethodWithNameAndDescriptor(methodName.data(), methodDescriptor.data());
 
-    invokeVirtual(targetClassInfo, methodInfo, thread, VM, heap);
+    MethodInfo* targetMethod = nullptr;
+
+    // BEGIN BROL
+    if (foundMethod != nullptr)
+    {
+        targetMethod = foundMethod;
+    } else
+    {
+
+        ClassInfo* currentClass = targetClassInfo;
+        while (currentClass->superClass != 0) {
+            CPClassInfo* ci = currentClass->constantPool->getClassInfo(currentClass->superClass);
+            [[maybe_unused]] const std::string_view superClass = currentClass->constantPool->getString(ci->nameIndex);
+            currentClass = VM->getClass(superClass.data(), thread);
+            if (currentClass != nullptr) {
+                foundMethod = currentClass->findMethodWithNameAndDescriptor(methodName.data(),
+            methodDescriptor.data());
+                if (foundMethod != nullptr) {
+                    targetClassInfo = currentClass;
+                    targetMethod = foundMethod;
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+
+        if (foundMethod == nullptr) {
+            thread->internalError("Failed to get the correct method on the object.\n"
+                            " Searching on superclass and generic search is not implemented yet.");
+        }
+    }
+    // END BROL
+
+    invokeVirtual(targetClassInfo, targetMethod, thread, VM, heap);
     printf("> Created new stack frame for virtual call on: %s.%s()\n", className.data(), methodName.data());
 }
 

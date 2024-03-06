@@ -42,7 +42,7 @@ void VM::start(const char* commandLineName)
     getClass("java/lang/Number", &m_mainThread);
     ClassInfo* classInfo = getClass("java/lang/Class", &m_mainThread);
     getClass("java/lang/String", &m_mainThread);
-    getClass("java/lang/System", &m_mainThread);
+    ClassInfo* systemClass = getClass("java/lang/System", &m_mainThread);
     getClass("java/lang/Thread", &m_mainThread);
     getClass("java/lang/ThreadGroup", &m_mainThread);
     getClass("java/lang/reflect/Field", &m_mainThread);
@@ -50,11 +50,14 @@ void VM::start(const char* commandLineName)
     getClass("java/io/PrintStream", &m_mainThread);
     getClass("java/io/FilterOutputStream", &m_mainThread);
     getClass("java/io/OutputStream", &m_mainThread);
+    getClass("java/util/Properties", &m_mainThread);
 
     m_heap.setClassInfo(classInfo);
 
     const u4 threadGroupReference = createThreadGroupObject(&m_mainThread);
     m_mainThread.threadObject = createThreadObject(&m_mainThread, threadGroupReference);
+
+    initSystemClass(systemClass, &m_mainThread);
 }
 
 u4 VM::createThreadGroupObject(VMThread* thread)
@@ -334,7 +337,6 @@ void VM::runMain()
         Platform::exitProgram(6);
     }
 
-    Memory memory(1000, KIB(5));
     ClassInfo* startupClass = getClass(m_configuration.mainClassName.data(), mainThread);
     MethodInfo* entryPoint = startupClass->findMethodWithNameAndDescriptor("main", "([Ljava/lang/String;)V");
 
@@ -358,6 +360,21 @@ void VM::runMain()
     printf("> Done executing\n");
 }
 
+void VM::initSystemClass(ClassInfo* systemClass, VMThread* thread)
+{
+    MethodInfo* initMethod = systemClass->findMethodWithNameAndDescriptor("initializeSystemClass", "()V");
+
+    thread->m_pc = 0;
+    thread->m_currentClass = systemClass;
+    thread->m_currentMethod = initMethod;
+
+    thread->pushStackFrameSpecial(systemClass, initMethod, nullptr, &m_heap);
+
+    printf("> Executing System init method...\n");
+    executeLoop(thread);
+    printf("> Done executing System init method\n");
+}
+
 void VM::shutdown()
 {
     PHYSFS_deinit();
@@ -371,3 +388,4 @@ void VM::checkType(const Variable var, const VariableType type, VMThread* thread
         thread->internalError("Error: TypeMismatch");
     }
 }
+
