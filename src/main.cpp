@@ -57,7 +57,7 @@ int main(const int argc, const char* argv[])
     const Configuration config = parseArguments(args);
 
     VM vm(config);
-    vm.start(argv[0]);
+    vm.start(std::string_view{args[0]});
     vm.runMain();
     vm.shutdown();
 

@@ -47,7 +47,7 @@ void getstatic(INSTRUCTION_ARGS)
     FieldInfo* targetField = targetClass->findField(thread->m_currentFrame->constantPool->getString(nameAndType->nameIndex).data(),
         thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex).data());
     const std::string_view descriptor = thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex);
-    const u1 varCount = VM::getDescriptorVarCategory(descriptor.data());
+    const u1 varCount = VM::getDescriptorVarCategory(descriptor);
     // TODO: Check type
     const Variable *vars = targetField->staticData;
     for (u1 currentVar = 0; currentVar < varCount; ++currentVar)
@@ -71,7 +71,7 @@ void putstatic(INSTRUCTION_ARGS)
     FieldInfo* targetField = targetClass->findField(thread->m_currentFrame->constantPool->getString(nameAndType->nameIndex).data(),
         thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex).data());
     const std::string_view descriptor = thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex);
-    const u1 varCount = VM::getDescriptorVarCategory(descriptor.data());
+    const u1 varCount = VM::getDescriptorVarCategory(descriptor);
     // With cat 2 vars, var should be the LSB
     Variable var = thread->m_currentFrame->popOperand();
     Variable var2{VariableType_UNDEFINED};

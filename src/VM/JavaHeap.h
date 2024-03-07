@@ -119,5 +119,5 @@ public:
      * Class Operations
      */
     void addClassInfo(ClassInfo* classInfo);
-    [[nodiscard]] ClassInfo* getClassByName(const char* className) const;
+    [[nodiscard]] ClassInfo* getClassByName(std::string_view className) const;
 };

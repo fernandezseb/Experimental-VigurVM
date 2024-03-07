@@ -29,10 +29,10 @@ VM::VM(const Configuration configuration) noexcept
 {
 }
 
-void VM::start(const char* commandLineName)
+void VM::start(std::string_view commandLineName)
 {
     Platform::initialize();
-    PHYSFS_init(commandLineName);
+    PHYSFS_init(commandLineName.data());
     PHYSFS_permitSymbolicLinks(1);
 
     registerBuiltinRegisterNatives();
@@ -88,28 +88,28 @@ u4 VM::createThreadObject(VMThread* thread, const u4 threadGroupReference)
     return objectReference;
 }
 
-std::vector<Variable> VM::createVariableForDescriptor(const char* descriptor)
+std::vector<Variable> VM::createVariableForDescriptor(std::string_view descriptor)
 {
     std::vector<Variable> variables;
-    if (strcmp(descriptor, "I") == 0)
+    if (descriptor == "I")
     {
         constexpr Variable variable{VariableType_INT};
         variables.push_back(variable);
-    } else if (strcmp(descriptor, "Z") == 0)
+    } else if (descriptor ==  "Z")
     {
         constexpr Variable variable{VariableType_INT};
         variables.push_back(variable);
-    } else if (strcmp(descriptor, "B") == 0)
+    } else if (descriptor == "B")
     {
         constexpr Variable variable{VariableType_INT};
         variables.push_back(variable);
-    } else if (strcmp(descriptor, "J") == 0)
+    } else if (descriptor == "J")
     {
         constexpr Variable variableLow{VariableType_LONG};
         constexpr Variable variableHigh{VariableType_LONG};
         variables.push_back(variableHigh);
         variables.push_back(variableLow);
-    } else if (strcmp(descriptor, "D") == 0)
+    } else if (descriptor ==  "D")
     {
         constexpr Variable variableLow{VariableType_DOUBLE};
         constexpr Variable variableHigh{VariableType_DOUBLE};
@@ -129,13 +129,13 @@ std::vector<Variable> VM::createVariableForDescriptor(const char* descriptor)
     }
     else
     {
-        fprintf(stderr, "Error: Couldn't construct data for descriptor type: %s\n", descriptor);
+        fprintf(stderr, "Error: Couldn't construct data for descriptor type: %s\n", descriptor.data());
         Platform::exitProgram(7);
     }
     return variables;
 }
 
-u1 VM::getDescriptorVarCategory(const char* descriptor) noexcept
+u1 VM::getDescriptorVarCategory(std::string_view descriptor) noexcept
 {
     // Longs and doubles use two
     if (descriptor[0] == 'J' || descriptor[0] == 'D')
@@ -154,7 +154,7 @@ void VM::initStaticFields(ClassInfo* class_info, [[maybe_unused]] VMThread* thre
         FieldInfo* field = class_info->fields[currentField];
         if (field->isStatic())
         {
-            const u1 varCount = getDescriptorVarCategory(class_info->constantPool->getString(class_info->fields[currentField]->descriptorIndex).data());
+            const u1 varCount = getDescriptorVarCategory(class_info->constantPool->getString(class_info->fields[currentField]->descriptorIndex));
             staticFieldsCount += varCount;
         }
     }
@@ -169,7 +169,7 @@ void VM::initStaticFields(ClassInfo* class_info, [[maybe_unused]] VMThread* thre
         FieldInfo* field = class_info->fields[currentField];
         if (field->isStatic())
         {
-            std::vector<Variable> variables = createVariableForDescriptor(class_info->constantPool->getString(field->descriptorIndex).data());
+            std::vector<Variable> variables = createVariableForDescriptor(class_info->constantPool->getString(field->descriptorIndex));
             for (Variable variable : variables) {
                 class_info->staticFields[currentStaticField++] = variable;
             }
@@ -179,15 +179,15 @@ void VM::initStaticFields(ClassInfo* class_info, [[maybe_unused]] VMThread* thre
     }
 }
 
-void VM::updateVariableFromVariable(Variable* variable, const char* descriptor, Variable operand, Variable operand2, VMThread* thread)
+void VM::updateVariableFromVariable(Variable* variable, std::string_view descriptor, Variable operand, Variable operand2, VMThread* thread)
 {
-    if (strcmp(descriptor, "I") == 0)
+    if (descriptor ==  "I")
     {
         checkType(*variable, VariableType_INT, thread);
         checkType(operand, VariableType_INT, thread);
 
         variable->data = operand.data;
-    } else if (strcmp(descriptor, "Z") == 0)
+    } else if (descriptor ==  "Z")
     {
         checkType(*variable, VariableType_INT, thread);
 
@@ -213,7 +213,7 @@ void VM::updateVariableFromVariable(Variable* variable, const char* descriptor, 
     } else
     {
         char buffer[200];
-        snprintf(buffer, 200, "Error: Setting of variable of type with descriptor: %s not implemented yet!\n", descriptor);
+        snprintf(buffer, 200, "Error: Setting of variable of type with descriptor: %s not implemented yet!\n", descriptor.data());
         thread->internalError(buffer);
     }
 }
@@ -247,7 +247,7 @@ void VM::executeLoop(VMThread* thread)
             if (((u1)instruction.opcode) == opcode)
             {
                 found = true;
-                printf("%s\n", instruction.name);
+                printf("%s\n", instruction.name.data());
                 uint8_t* args = 0;
                 if (instruction.args > 0) {
                     args = (uint8_t*)Platform::allocateMemory(instruction.args, 0);
@@ -291,13 +291,13 @@ void VM::runStaticInitializer(ClassInfo* classInfo, VMThread* thread)
     executeLoop(thread);
 }
 
-ClassInfo* VM::getClass(const char* className, VMThread* thread)
+ClassInfo* VM::getClass(std::string_view className, VMThread* thread)
 {
     ClassInfo* classInfo = m_heap.getClassByName(className);
     if (classInfo == nullptr) {
         Memory *memory = new Memory(MIB(1), MIB(30));
-        printf("Loading class %s...\n", className);
-        classInfo = m_bootstrapClassLoader.readClass(className, memory, m_configuration.classPath.data());
+        printf("Loading class %s...\n", className.data());
+        classInfo = m_bootstrapClassLoader.readClass(className.data(), memory, m_configuration.classPath.data());
         initStaticFields(classInfo, thread);
         m_heap.addClassInfo(classInfo);
         runStaticInitializer(classInfo, thread);

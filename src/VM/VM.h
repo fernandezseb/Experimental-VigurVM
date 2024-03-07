@@ -28,7 +28,7 @@ struct Instruction
 {
     Opcode opcode;
     u1 args;
-    const char* name;
+    std::string_view name;
     i1 arg;
     void(*instructionFunction)(INSTRUCTION_ARGS);
 };
@@ -37,11 +37,11 @@ struct Instruction
 class VM {
 public:
     explicit VM(Configuration configuration) noexcept;
-    void updateVariableFromVariable(Variable* variable, const char* descriptor, Variable operand, Variable operand2, VMThread* thread);
-    static std::vector<Variable> createVariableForDescriptor(const char* descriptor);
-    [[nodiscard]] static u1 getDescriptorVarCategory(const char* descriptor) noexcept;
-    void start(const char* commandLineName);
-    ClassInfo* getClass(const char* className, VMThread* thread);
+    void updateVariableFromVariable(Variable* variable, std::string_view descriptor, Variable operand, Variable operand2, VMThread* thread);
+    static std::vector<Variable> createVariableForDescriptor(std::string_view descriptor);
+    [[nodiscard]] static u1 getDescriptorVarCategory(std::string_view descriptor) noexcept;
+    void start(std::string_view commandLineName);
+    ClassInfo* getClass(std::string_view className, VMThread* thread);
     void executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* methodInfo, JavaHeap* heap, VMThread* thread);
     void runMain();
     void shutdown();
@@ -58,7 +58,7 @@ public:
     }
 private:
     void initSystemClass(ClassInfo* class_info, VMThread* vm_thread);
-    inline static constexpr std::array<Instruction,116> m_instructions{{
+    static constexpr std::array<Instruction,116> m_instructions{{
         // Constants
         {i_nop, 0, "nop", 0, nop},
         {i_aconst_null, 0, "aconst_null", 0, aconst_null},

@@ -88,7 +88,7 @@ u4 JavaHeap::createObject(ClassInfo* classInfo, VM* VM)
             data.descriptorIndex = fieldInfo->descriptorIndex;
             data.nameIndex = fieldInfo->nameIndex;
             const std::string_view descriptorText = classInfo->constantPool->getString(fieldInfo->descriptorIndex);
-            std::vector<Variable> vars = VM->createVariableForDescriptor(descriptorText.data());
+            std::vector<Variable> vars = VM->createVariableForDescriptor(descriptorText);
             Variable* varsAllocated = (Variable*) Platform::allocateMemory(sizeof(Variable) * vars.size(), 0);
             for (u1 currentVar = 0; currentVar < vars.size(); ++currentVar)
             {
@@ -156,7 +156,7 @@ u4 JavaHeap::createClassObject(ClassInfo* classInfo, VM* VM, std::string_view na
             data.descriptorIndex = fieldInfo->descriptorIndex;
             data.nameIndex = fieldInfo->nameIndex;
             const std::string_view descriptorText = classClassInfo->constantPool->getString(fieldInfo->descriptorIndex);
-            std::vector<Variable> vars = VM->createVariableForDescriptor(descriptorText.data());
+            std::vector<Variable> vars = VM->createVariableForDescriptor(descriptorText);
             Variable* varsAllocated = (Variable*) Platform::allocateMemory(sizeof(Variable) * vars.size(), 0);
             for (u1 currentVar = 0; currentVar < vars.size(); ++currentVar)
             {
@@ -342,7 +342,7 @@ void JavaHeap::addClassInfo(ClassInfo* classInfo)
     methodArea.classes.add(classInfo);
 }
 
-ClassInfo* JavaHeap::getClassByName(const char* className) const
+ClassInfo* JavaHeap::getClassByName(std::string_view className) const
 {
     for (size_t currentClass = 0; currentClass < methodArea.classes.getSize() ; currentClass++)
     {
