@@ -281,12 +281,21 @@ u4 JavaHeap::getString(const char* utf8String) const
         const Reference* ref = objects[currentObj];
         if (ref->type == ReferenceType::OBJECT) {
             const Object* obj = static_cast<const Object*>(ref);
-            if (obj->classInfo->getName() == std::string_view{"java/lang/String"}) {
+            if (obj->classInfo->getName() == std::string_view{"java/lang/String"})
+            {
                 Variable charArrRef =  obj->fields[0].data[0];
                 const Array* arr = getArray(charArrRef.data);
-                if (strncmp((const char*)arr->data, utf8String,
-                    (arr->length > strlen(utf8String) ? arr->length : strlen(utf8String))) == 0) {
-                    return currentObj;
+                if (arr->length == 0)
+                {
+                    if (strlen(utf8String) == 0)
+                    {
+                        return currentObj;
+                    }
+                } else {
+                    if (strncmp((const char*)arr->data, utf8String,
+                        (arr->length > strlen(utf8String) ? arr->length : strlen(utf8String))) == 0) {
+                        return currentObj;
+                    }
                 }
             }
         }

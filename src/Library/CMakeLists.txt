@@ -18,6 +18,8 @@ add_library(Library
         java/lang/String.cpp
         java/io/FileOutputStream.h
         java/io/FileOutputStream.cpp
+        java/io/FileInputStream.h
+        java/io/FileInputStream.cpp
         java/io/FileDescriptor.h
         java/io/FileDescriptor.cpp
         sun/misc/Unsafe.h

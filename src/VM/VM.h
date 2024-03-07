@@ -58,7 +58,7 @@ public:
     }
 private:
     void initSystemClass(ClassInfo* class_info, VMThread* vm_thread);
-    inline static constexpr std::array<Instruction,114> m_instructions{{
+    inline static constexpr std::array<Instruction,116> m_instructions{{
         // Constants
         {i_nop, 0, "nop", 0, nop},
         {i_aconst_null, 0, "aconst_null", 0, aconst_null},
@@ -129,11 +129,13 @@ private:
         {i_isub, 0, "isub", 0, isub},
         {i_imul, 0, "imul", 0, imul},
         {i_fmul, 0, "fmul", 0, fmul},
+        {i_irem, 0, "irem", 0, irem},
         {i_ishl, 0, "ishl", 0, ishl},
         {i_lshl, 0, "lshl", 0, lshl},
         {i_iushr, 0, "iushr", 0, iushr},
         {i_iand, 0, "iand", 0, iand},
         {i_land, 0, "land", 0, land},
+        {i_ior, 0, "lor", 0, ior},
         {i_ixor, 0, "ixor", 0, ixor},
         {i_iinc, 2, "iinc", 0, iinc},
         // Conversions

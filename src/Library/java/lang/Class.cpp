@@ -143,10 +143,11 @@ JCALL void lib_java_lang_Class_getDeclaredFields0(NATIVE_ARGS)
     {
         const u4 fieldObjectRef = heap->createObject(fieldClass, VM);
         const Object* fieldObject = heap->getObject(fieldObjectRef);
+        const FieldInfo* fieldInfo = classObject->classClassInfo->fields[currentField];
 
         // Set the name field
         FieldData* nameField = fieldObject->getField("name", "Ljava/lang/String;", heap);
-        std::string_view fieldName =  classObject->classClassInfo->constantPool->getString(classObject->classClassInfo->fields[currentField]->nameIndex);
+        std::string_view fieldName =  classObject->classClassInfo->constantPool->getString(fieldInfo->nameIndex);
         const u4 fieldNameStringObjectRef = heap->createString(fieldName.data(), VM);
         nameField->data->data = fieldNameStringObjectRef;
 
@@ -157,6 +158,10 @@ JCALL void lib_java_lang_Class_getDeclaredFields0(NATIVE_ARGS)
         // Set the class field
         FieldData* classField = fieldObject->getField("clazz", "Ljava/lang/Class;", heap);
         classField->data->data =  currentFrame->localVariables[0].data;
+
+        // Set the modifiers field
+        FieldData* modifiersField = fieldObject->getField("modifiers", "I", heap);
+        modifiersField->data->data = fieldInfo->accessFlags;
 
         u4* array = reinterpret_cast<u4*>(fieldsArray->data);
         array[currentField] = fieldObjectRef;

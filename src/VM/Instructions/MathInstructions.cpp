@@ -60,6 +60,15 @@ void fmul(INSTRUCTION_ARGS)
     thread->m_currentFrame->operands.push_back(added);
 }
 
+void irem(INSTRUCTION_ARGS)
+{
+    const i4 val2 = thread->m_currentFrame->popInt();
+    const i4 val1 = thread->m_currentFrame->popInt();
+    const i4 result = val1%val2;
+    // TODO: Fix for edge cases
+    thread->m_currentFrame->pushInt(result);
+}
+
 void lshl(INSTRUCTION_ARGS)
 {
     StackFrame* currentFrame = thread->m_currentFrame;
@@ -116,12 +125,24 @@ void land(INSTRUCTION_ARGS)
     thread->m_currentFrame->pushLong(conjunction);
 }
 
-void ixor(INSTRUCTION_ARGS)
+void ior(INSTRUCTION_ARGS)
 {
     const Variable value2 = thread->m_currentFrame->popOperand();
     const Variable value1 = thread->m_currentFrame->popOperand();
 
     const u4 resultVal = value1.data | value2.data;
+
+    const Variable result{VariableType_INT,
+        std::bit_cast<u4>(resultVal)};
+    thread->m_currentFrame->operands.push_back(result);
+}
+
+void ixor(INSTRUCTION_ARGS)
+{
+    const Variable value2 = thread->m_currentFrame->popOperand();
+    const Variable value1 = thread->m_currentFrame->popOperand();
+
+    const u4 resultVal = value1.data ^ value2.data;
 
     const Variable result{VariableType_INT,
         std::bit_cast<u4>(resultVal)};

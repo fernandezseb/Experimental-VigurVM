@@ -17,6 +17,7 @@
 
 #include "java/io/FileDescriptor.h"
 #include "java/io/FileOutputStream.h"
+#include "java/io/FileInputStream.h"
 #include "java/lang/Class.h"
 #include "java/lang/Double.h"
 #include "java/lang/Float.h"
@@ -42,6 +43,7 @@ void registerBuiltinRegisterNatives()
     registerNative("java/lang/String/intern", "()Ljava/lang/String;", lib_java_lang_String_intern);
     // java/io package
     registerNative("java/io/FileOutputStream/initIDs", "()V", lib_java_io_FileOutputStream_initIDs);
+    registerNative("java/io/FileInputStream/initIDs", "()V", lib_java_io_FileInputStream_initIDs);
     registerNative("java/io/FileDescriptor/initIDs", "()V", lib_java_io_FileDescriptor_initIDs);
     registerNative("java/io/FileDescriptor/set", "(I)J", lib_java_io_FileDescriptor_set);
     // sun/misc
@@ -49,9 +51,11 @@ void registerBuiltinRegisterNatives()
     registerNative("sun/misc/VM/initialize", "()V", lib_sun_misc_VM_initialize);
     // Security API
     registerNative("java/security/AccessController/doPrivileged", "(Ljava/security/PrivilegedAction;)Ljava/lang/Object;", lib_java_security_AccessController_doPriviliged);
+    registerNative("java/security/AccessController/doPrivileged", "(Ljava/security/PrivilegedExceptionAction;)Ljava/lang/Object;", lib_java_security_AccessController_doPriviliged_PriviligedExceptionAction);
     registerNative("java/security/AccessController/getStackAccessControlContext", "()Ljava/security/AccessControlContext;", lib_java_security_AccessController_getStackAccessControlContext);
     // Vigur/lang package
     // registerNative("Vigur/lang/System/registerNatives", "()V", lib_Vigur_lang_System_registerNatives);
     // Reflection API
     registerNative("sun/reflect/Reflection/getCallerClass", "()Ljava/lang/Class;", lib_sun_reflect_Reflection_getCallerClass);
+    registerNative("sun/reflect/Reflection/getClassAccessFlags", "(Ljava/lang/Class;)I", lib_sun_reflect_Reflection_getClassAccessFlags);
 }

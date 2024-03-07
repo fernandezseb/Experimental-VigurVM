@@ -13,17 +13,9 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "Reflection.h"
+#include "FileInputStream.h"
 
-JCALL void lib_sun_reflect_Reflection_getCallerClass(NATIVE_ARGS) {
-    ClassInfo* previousClass = thread->m_currentFrame->previousClass;
-    const u4 ref = heap->createClassObject(previousClass, VM, previousClass->getName());
-    const Variable classRef{VariableType_REFERENCE, ref};
-    thread->returnVar(classRef);
-}
-
-JCALL void lib_sun_reflect_Reflection_getClassAccessFlags(NATIVE_ARGS)
+JCALL void lib_java_io_FileInputStream_initIDs(NATIVE_ARGS)
 {
-    const ClassObject* classObject = heap->getClassObject(thread->m_currentFrame->localVariables[0].data);
-    thread->returnVar(Variable{VariableType_INT, classObject->classClassInfo->accessFlags});
+    printf("[Running initIDs from FileInputStream]\n");
 }
