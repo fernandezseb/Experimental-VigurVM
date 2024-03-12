@@ -58,7 +58,7 @@ public:
     }
 private:
     void initSystemClass(ClassInfo* class_info, VMThread* vm_thread);
-    static constexpr std::array<Instruction,116> m_instructions{{
+    static constexpr std::array<Instruction,120> m_instructions{{
         // Constants
         {i_nop, 0, "nop", 0, nop},
         {i_aconst_null, 0, "aconst_null", 0, aconst_null},
@@ -131,6 +131,7 @@ private:
         {i_fmul, 0, "fmul", 0, fmul},
         {i_irem, 0, "irem", 0, irem},
         {i_ishl, 0, "ishl", 0, ishl},
+        {i_ishr, 0, "ishr", 0, ishr},
         {i_lshl, 0, "lshl", 0, lshl},
         {i_iushr, 0, "iushr", 0, iushr},
         {i_iand, 0, "iand", 0, iand},
@@ -142,6 +143,7 @@ private:
         {i_i2l, 0, "i2l", 0, i2l},
         {i_i2f, 0, "i2f", 0, i2f},
         {i_f2i, 0, "f2i", 0, f2i},
+        {i_i2c, 0, "i2c", 0, i2c},
         // Comparisons
         {i_fcmpl, 0, "fcmpl", 0, fcmpl},
         {i_fcmpg, 0, "fcmpg", 0, fcmpg},
@@ -151,11 +153,13 @@ private:
         {i_ifge, 2, "ifge", 0, ifge},
         {i_ifgt, 2, "ifgt", 0, ifgt},
         {i_ifle, 2, "ifle", 0, ifle},
+        {i_if_icmpeq, 2, "if_icmpeq", 0, if_icmpeq},
         {i_if_icmpne, 2, "if_icmpne", 0, if_icmpne},
         {i_if_icmplt, 2, "if_icmplt", 0, if_icmplt},
         {i_if_icmpge, 2, "if_icmpge", 0, if_icmpge},
         {i_if_icmpgt, 2, "if_icmpgt", 0, if_icmpgt},
         {i_if_icmple, 2, "if_icmple", 0, if_icmple},
+        {i_if_acmpeq, 2, "if_acmpeq", 0, if_acmpeq},
         {i_if_acmpne, 2, "if_acmpne", 0, if_acmpne},
         // References
         {i_getstatic, 0, "getstatic", 0, getstatic},

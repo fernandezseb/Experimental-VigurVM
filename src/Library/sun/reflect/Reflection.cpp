@@ -16,7 +16,7 @@
 #include "Reflection.h"
 
 JCALL void lib_sun_reflect_Reflection_getCallerClass(NATIVE_ARGS) {
-    ClassInfo* previousClass = thread->m_currentFrame->previousClass;
+    ClassInfo* previousClass = thread->m_stack.frames[thread->m_stack.frames.size()-2].previousClass;
     const u4 ref = heap->createClassObject(previousClass, VM, previousClass->getName());
     const Variable classRef{VariableType_REFERENCE, ref};
     thread->returnVar(classRef);

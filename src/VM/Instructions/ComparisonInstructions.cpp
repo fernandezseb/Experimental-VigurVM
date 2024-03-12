@@ -178,6 +178,22 @@ void ifle(INSTRUCTION_ARGS)
     }
 }
 
+void if_icmpeq(INSTRUCTION_ARGS)
+{
+    const u1 byte1 = args[0];
+    const u1 byte2 = args[1];
+
+    const i2 branchByte = (byte1 << 8) | byte2;
+
+    const Variable var2 = thread->m_currentFrame->popOperand();
+    const Variable var1 = thread->m_currentFrame->popOperand();
+
+    if (std::bit_cast<i4>(var1.data) == std::bit_cast<i4>(var2.data))
+    {
+        thread->m_pc = thread->m_pc-3+branchByte;
+    }
+}
+
 void if_icmpne(INSTRUCTION_ARGS)
 {
     const u1 byte1 = args[0];
@@ -253,6 +269,22 @@ void if_icmple(INSTRUCTION_ARGS)
     Variable var1 = thread->m_currentFrame->popOperand();
 
     if (std::bit_cast<i4>(var1.data) <= std::bit_cast<i4>(var2.data))
+    {
+        thread->m_pc = thread->m_pc-3+branchByte;
+    }
+}
+
+void if_acmpeq(INSTRUCTION_ARGS)
+{
+    const u1 byte1 = args[0];
+    const u1 byte2 = args[1];
+
+    const i2 branchByte = (byte1 << 8) | byte2;
+
+    Variable var2 = thread->m_currentFrame->popOperand();
+    Variable var1 = thread->m_currentFrame->popOperand();
+
+    if (std::bit_cast<i4>(var1.data) == std::bit_cast<i4>(var2.data))
     {
         thread->m_pc = thread->m_pc-3+branchByte;
     }

@@ -19,6 +19,7 @@ JCALL void lib_java_lang_System_registerNatives(NATIVE_ARGS)
 {
     registerNative("java/lang/System/arraycopy", "(Ljava/lang/Object;ILjava/lang/Object;II)V", lib_java_lang_System_arraycopy);
     registerNative("java/lang/System/initProperties", "(Ljava/util/Properties;)Ljava/util/Properties;", lib_java_lang_System_initProperties);
+    registerNative("java/lang/System/setIn0", "(Ljava/io/InputStream;)V", lib_java_lang_System_setIn0);
 }
 
 JCALL void lib_java_lang_System_arraycopy(NATIVE_ARGS)
@@ -53,5 +54,22 @@ JCALL void lib_java_lang_System_arraycopy(NATIVE_ARGS)
 
 JCALL void lib_java_lang_System_initProperties(NATIVE_ARGS)
 {
-    thread->returnVar(thread->m_currentFrame->localVariables[0]);
+    const Variable propertiesObjectRef = thread->m_currentFrame->localVariables[0];
+    const Object* properties = heap->getObject(propertiesObjectRef.data);
+    const MethodInfo* entryPoint = properties->classInfo->findMethodWithNameAndDescriptor("setProperty", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Object;");
+
+    thread->pushStackFrameWithoutParams(properties->classInfo, entryPoint);
+    thread->m_currentFrame->localVariables[0] = propertiesObjectRef;
+    thread->m_currentFrame->localVariables[1] = Variable{VariableType_REFERENCE,heap->createString("file.encoding", VM)};
+    thread->m_currentFrame->localVariables[2] = Variable{VariableType_REFERENCE,heap->createString("UTF-8", VM)};
+    VM->executeLoop(thread);
+
+    thread->returnVar(propertiesObjectRef);
+}
+
+JCALL void lib_java_lang_System_setIn0(NATIVE_ARGS)
+{
+    const ClassInfo* classInfo = VM->getClass("java/lang/System", thread);
+    const FieldInfo* field = classInfo->findField("in", "Ljava/io/InputStream;");
+    field->staticData->data = thread->m_currentFrame->localVariables[0].data;
 }

@@ -91,6 +91,19 @@ void ishl(INSTRUCTION_ARGS)
     thread->m_currentFrame->operands.push_back(result);
 }
 
+void ishr(INSTRUCTION_ARGS)
+{
+    const Variable value2 = thread->m_currentFrame->popOperand();
+    const Variable value1 = thread->m_currentFrame->popOperand();
+
+    const i4 s = ((i4)value2.data) & 0x1f;
+    const i4 resultVal = value1.data >> s;
+    const Variable result{VariableType_INT,
+        std::bit_cast<u4>(resultVal)};
+
+    thread->m_currentFrame->operands.push_back(result);
+}
+
 void iushr(INSTRUCTION_ARGS)
 {
     Variable value2 = thread->m_currentFrame->popOperand();

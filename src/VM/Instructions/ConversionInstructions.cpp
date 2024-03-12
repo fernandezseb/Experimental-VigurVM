@@ -47,3 +47,10 @@ void f2i(INSTRUCTION_ARGS)
     const i4 intValue = static_cast<i4>(f);
     thread->m_currentFrame->pushInt(intValue);
 }
+
+void i2c(INSTRUCTION_ARGS)
+{
+    const i4 intValue = thread->m_currentFrame->popInt();
+    const i2 f = static_cast<i2>(intValue);
+    thread->m_currentFrame->pushInt(f);
+}

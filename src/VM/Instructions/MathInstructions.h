@@ -14,6 +14,7 @@ void fmul(INSTRUCTION_ARGS);
 void irem(INSTRUCTION_ARGS);
 void lshl(INSTRUCTION_ARGS);
 void ishl(INSTRUCTION_ARGS);
+void ishr(INSTRUCTION_ARGS);
 void iushr(INSTRUCTION_ARGS);
 void iand(INSTRUCTION_ARGS);
 void land(INSTRUCTION_ARGS);
