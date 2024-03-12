@@ -33,7 +33,7 @@ char* DescriptorParser::getReturnPart(char* descriptor, uint16_t* length)
 	return  closeBracket+1;
 }
 
-static inline uint16_t getDescriptorArgsCount(char* descriptorPart, uint16_t length)
+static uint16_t getDescriptorArgsCount(char* descriptorPart, uint16_t length)
 {
 	size_t i = 0;
 	uint16_t size = 0;
