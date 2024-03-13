@@ -17,6 +17,7 @@
 #include "Data/Descriptor.h"
 
 #include <algorithm>
+#include <string>
 
 [[nodiscard]] static const Object* getThisObjectReference(
     VMThread* thread,
