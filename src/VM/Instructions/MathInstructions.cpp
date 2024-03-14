@@ -20,94 +20,94 @@
 #include "VM/VM.h"
 #include "Data/Variable.h"
 
-void iadd(INSTRUCTION_ARGS)
+void iadd(const InstructionInput& input)
 {
-    const i4 val2 = thread->m_currentFrame->popInt();
-    const i4 val1 = thread->m_currentFrame->popInt();
-    thread->m_currentFrame->pushInt(val1+val2);
+    const i4 val2 = input.thread->m_currentFrame->popInt();
+    const i4 val1 = input.thread->m_currentFrame->popInt();
+    input.thread->m_currentFrame->pushInt(val1+val2);
 }
 
-void ladd(INSTRUCTION_ARGS)
+void ladd(const InstructionInput& input)
 {
-    StackFrame* currentFrame = thread->m_currentFrame;
+    StackFrame* currentFrame = input.thread->m_currentFrame;
     const i8 long2 = currentFrame->popLong();
     const i8 long1 = currentFrame->popLong();
     const i8 sum = long1 + long2;
-    thread->m_currentFrame->pushLong(sum);
+    input.thread->m_currentFrame->pushLong(sum);
 }
 
-void isub(INSTRUCTION_ARGS)
+void isub(const InstructionInput& input)
 {
-    const i4 val2 = thread->m_currentFrame->popInt();
-    const i4 val1 = thread->m_currentFrame->popInt();
-    thread->m_currentFrame->pushInt(val1-val2);
+    const i4 val2 = input.thread->m_currentFrame->popInt();
+    const i4 val1 = input.thread->m_currentFrame->popInt();
+    input.thread->m_currentFrame->pushInt(val1-val2);
 }
 
-void imul(INSTRUCTION_ARGS)
+void imul(const InstructionInput& input)
 {
-    const i4 val2 = thread->m_currentFrame->popInt();
-    const i4 val1 = thread->m_currentFrame->popInt();
-    thread->m_currentFrame->pushInt(val1*val2);
+    const i4 val2 = input.thread->m_currentFrame->popInt();
+    const i4 val1 = input.thread->m_currentFrame->popInt();
+    input.thread->m_currentFrame->pushInt(val1*val2);
 }
 
-void fmul(INSTRUCTION_ARGS)
+void fmul(const InstructionInput& input)
 {
-    const Variable var2 = thread->m_currentFrame->popOperand();
-    const Variable var1 = thread->m_currentFrame->popOperand();
+    const Variable var2 = input.thread->m_currentFrame->popOperand();
+    const Variable var1 = input.thread->m_currentFrame->popOperand();
     const Variable added{VariableType_FLOAT,
         std::bit_cast<u4>(std::bit_cast<float>(var1.data)
             * std::bit_cast<float>(var2.data))};
-    thread->m_currentFrame->operands.push_back(added);
+    input.thread->m_currentFrame->operands.push_back(added);
 }
 
-void irem(INSTRUCTION_ARGS)
+void irem(const InstructionInput& input)
 {
-    const i4 val2 = thread->m_currentFrame->popInt();
-    const i4 val1 = thread->m_currentFrame->popInt();
+    const i4 val2 = input.thread->m_currentFrame->popInt();
+    const i4 val1 = input.thread->m_currentFrame->popInt();
     const i4 result = val1%val2;
     // TODO: Fix for edge cases
-    thread->m_currentFrame->pushInt(result);
+    input.thread->m_currentFrame->pushInt(result);
 }
 
-void lshl(INSTRUCTION_ARGS)
+void lshl(const InstructionInput& input)
 {
-    StackFrame* currentFrame = thread->m_currentFrame;
+    StackFrame* currentFrame = input.thread->m_currentFrame;
     const i4 int2 = currentFrame->popInt();
     const i8 long1 = currentFrame->popLong();
     const i8 result = long1 << (int2 & 0x3f);
-    thread->m_currentFrame->pushLong(result);
+    input.thread->m_currentFrame->pushLong(result);
 }
 
-void ishl(INSTRUCTION_ARGS)
+void ishl(const InstructionInput& input)
 {
-    const Variable value2 = thread->m_currentFrame->popOperand();
-    const Variable value1 = thread->m_currentFrame->popOperand();
+    const Variable value2 = input.thread->m_currentFrame->popOperand();
+    const Variable value1 = input.thread->m_currentFrame->popOperand();
 
     const i4 s = ((i4)value2.data) & 0x1f;
     const i4 resultVal = value1.data << s;
     const Variable result{VariableType_INT,
         std::bit_cast<u4>(resultVal)};
 
-    thread->m_currentFrame->operands.push_back(result);
+    input.thread->m_currentFrame->operands.push_back(result);
 }
 
-void ishr(INSTRUCTION_ARGS)
+void ishr(const InstructionInput& input)
 {
-    const Variable value2 = thread->m_currentFrame->popOperand();
-    const Variable value1 = thread->m_currentFrame->popOperand();
+    const Variable value2 = input.thread->m_currentFrame->popOperand();
+    const Variable value1 = input.thread->m_currentFrame->popOperand();
 
     const i4 s = ((i4)value2.data) & 0x1f;
     const i4 resultVal = value1.data >> s;
     const Variable result{VariableType_INT,
         std::bit_cast<u4>(resultVal)};
 
-    thread->m_currentFrame->operands.push_back(result);
+    input.thread->m_currentFrame->operands.push_back(result);
 }
 
-void iushr(INSTRUCTION_ARGS)
+void iushr(const InstructionInput& input)
 {
-    Variable value2 = thread->m_currentFrame->popOperand();
-    Variable value1 = thread->m_currentFrame->popOperand();
+    Variable value2 = input.thread->m_currentFrame->popOperand();
+    Variable value1 = input.thread->m_currentFrame->popOperand();
 
     const i4 s = ((i4)value2.data) & 0x1f;
     i4 resultVal = ((i4)value1.data >> s);
@@ -119,54 +119,54 @@ void iushr(INSTRUCTION_ARGS)
 
     const Variable result{VariableType_INT,
         std::bit_cast<u4>(resultVal)};
-    thread->m_currentFrame->operands.push_back(result);
+    input.thread->m_currentFrame->operands.push_back(result);
 }
 
-void iand(INSTRUCTION_ARGS)
+void iand(const InstructionInput& input)
 {
-    const i4 val2 = thread->m_currentFrame->popInt();
-    const i4 val1 = thread->m_currentFrame->popInt();
-    thread->m_currentFrame->pushInt(val1&val2);
+    const i4 val2 = input.thread->m_currentFrame->popInt();
+    const i4 val1 = input.thread->m_currentFrame->popInt();
+    input.thread->m_currentFrame->pushInt(val1&val2);
 }
 
-void land(INSTRUCTION_ARGS)
+void land(const InstructionInput& input)
 {
-    StackFrame* currentFrame = thread->m_currentFrame;
+    StackFrame* currentFrame = input.thread->m_currentFrame;
     const i8 long2 = currentFrame->popLong();
     const i8 long1 = currentFrame->popLong();
     const i8 conjunction = long1 & long2;
-    thread->m_currentFrame->pushLong(conjunction);
+    input.thread->m_currentFrame->pushLong(conjunction);
 }
 
-void ior(INSTRUCTION_ARGS)
+void ior(const InstructionInput& input)
 {
-    const Variable value2 = thread->m_currentFrame->popOperand();
-    const Variable value1 = thread->m_currentFrame->popOperand();
+    const Variable value2 = input.thread->m_currentFrame->popOperand();
+    const Variable value1 = input.thread->m_currentFrame->popOperand();
 
     const u4 resultVal = value1.data | value2.data;
 
     const Variable result{VariableType_INT,
         std::bit_cast<u4>(resultVal)};
-    thread->m_currentFrame->operands.push_back(result);
+    input.thread->m_currentFrame->operands.push_back(result);
 }
 
-void ixor(INSTRUCTION_ARGS)
+void ixor(const InstructionInput& input)
 {
-    const Variable value2 = thread->m_currentFrame->popOperand();
-    const Variable value1 = thread->m_currentFrame->popOperand();
+    const Variable value2 = input.thread->m_currentFrame->popOperand();
+    const Variable value1 = input.thread->m_currentFrame->popOperand();
 
     const u4 resultVal = value1.data ^ value2.data;
 
     const Variable result{VariableType_INT,
         std::bit_cast<u4>(resultVal)};
-    thread->m_currentFrame->operands.push_back(result);
+    input.thread->m_currentFrame->operands.push_back(result);
 }
 
-void iinc(INSTRUCTION_ARGS)
+void iinc(const InstructionInput& input)
 {
-    const u1 index = args[0];
-    const i1* argsArr = ((i1*)args);
+    const u1 index = input.args[0];
+    const i1* argsArr = ((i1*)input.args);
     const i1 constData = argsArr[1];
-    Variable* var =  &thread->m_currentFrame->localVariables[index];
+    Variable* var =  &input.thread->m_currentFrame->localVariables[index];
     var->data += constData;
 }

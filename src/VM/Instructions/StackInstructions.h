@@ -1,12 +1,8 @@
 #pragma once
 
-#include "Core.h"
+#include "../Instruction.h"
 
-class VM;
-class VMThread;
-class JavaHeap;
-
-void pop(INSTRUCTION_ARGS);
-void dup(INSTRUCTION_ARGS);
-void dup_x1(INSTRUCTION_ARGS);
-void dup2(INSTRUCTION_ARGS);
+void pop(const InstructionInput& input);
+void dup(const InstructionInput& input);
+void dup_x1(const InstructionInput& input);
+void dup2(const InstructionInput& input);

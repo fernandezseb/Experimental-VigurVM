@@ -1,24 +1,20 @@
 #pragma once
 
-#include "Core.h"
+#include "../Instruction.h"
 
-class VM;
-class VMThread;
-class JavaHeap;
-
-void fcmpl(INSTRUCTION_ARGS);
-void fcmpg(INSTRUCTION_ARGS);
-void ifeq(INSTRUCTION_ARGS);
-void ifne(INSTRUCTION_ARGS);
-void iflt(INSTRUCTION_ARGS);
-void ifge(INSTRUCTION_ARGS);
-void ifgt(INSTRUCTION_ARGS);
-void ifle(INSTRUCTION_ARGS);
-void if_icmpeq(INSTRUCTION_ARGS);
-void if_icmpne(INSTRUCTION_ARGS);
-void if_icmplt(INSTRUCTION_ARGS);
-void if_icmpge(INSTRUCTION_ARGS);
-void if_icmpgt(INSTRUCTION_ARGS);
-void if_icmple(INSTRUCTION_ARGS);
-void if_acmpeq(INSTRUCTION_ARGS);
-void if_acmpne(INSTRUCTION_ARGS);
+void fcmpl(const InstructionInput& input);
+void fcmpg(const InstructionInput& input);
+void ifeq(const InstructionInput& input);
+void ifne(const InstructionInput& input);
+void iflt(const InstructionInput& input);
+void ifge(const InstructionInput& input);
+void ifgt(const InstructionInput& input);
+void ifle(const InstructionInput& input);
+void if_icmpeq(const InstructionInput& input);
+void if_icmpne(const InstructionInput& input);
+void if_icmplt(const InstructionInput& input);
+void if_icmpge(const InstructionInput& input);
+void if_icmpgt(const InstructionInput& input);
+void if_icmple(const InstructionInput& input);
+void if_acmpeq(const InstructionInput& input);
+void if_acmpne(const InstructionInput& input);

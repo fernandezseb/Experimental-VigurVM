@@ -257,8 +257,15 @@ void VM::executeLoop(VMThread* thread)
                         args[currentArg] = readByte(thread);
                     }
                 }
-                if (instruction.instructionFunction != NULL) {
-                    instruction.instructionFunction(args, instruction.args, instruction.arg, &m_heap, thread, this);
+                if (instruction.instructionFunction != nullptr) {
+                    InstructionInput input = {};
+                    input.args = args;
+                    input.argsCount = instruction.args;
+                    input.arg = instruction.arg;
+                    input.heap = &m_heap;
+                    input.thread = thread;
+                    input.VM = this;
+                    instruction.instructionFunction(input);
                 }
                 break;
             }

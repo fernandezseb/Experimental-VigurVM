@@ -22,42 +22,42 @@
 #include <bit>
 
 
-void nop(INSTRUCTION_ARGS)
+void nop(const InstructionInput& input)
 {
 }
 
-void aconst_null(INSTRUCTION_ARGS)
+void aconst_null(const InstructionInput& input)
 {
     constexpr Variable reference{VariableType_REFERENCE};
-    thread->m_currentFrame->operands.push_back(reference);
+    input.thread->m_currentFrame->operands.push_back(reference);
 }
 
-void iconst_i(INSTRUCTION_ARGS)
+void iconst_i(const InstructionInput& input)
 {
     const Variable variable{VariableType_INT,
-        std::bit_cast<u4>(static_cast<int32_t>(arg))};
-    thread->m_currentFrame->operands.push_back(variable);
+        std::bit_cast<u4>(static_cast<int32_t>(input.arg))};
+    input.thread->m_currentFrame->operands.push_back(variable);
 }
 
-void lconst_i(INSTRUCTION_ARGS)
+void lconst_i(const InstructionInput& input)
 {
     constexpr Variable variableHigh{VariableType_LONG};
     const Variable variableLow{VariableType_LONG,
-        std::bit_cast<u4>(static_cast<int32_t>(arg))};
-    thread->m_currentFrame->operands.push_back(variableHigh);
-    thread->m_currentFrame->operands.push_back(variableLow);
+        std::bit_cast<u4>(static_cast<int32_t>(input.arg))};
+    input.thread->m_currentFrame->operands.push_back(variableHigh);
+    input.thread->m_currentFrame->operands.push_back(variableLow);
 }
 
-void fconst_i(INSTRUCTION_ARGS)
+void fconst_i(const InstructionInput& input)
 {
-    const float f = arg;
+    const float f = input.arg;
     const Variable variable{VariableType_FLOAT, std::bit_cast<u4>(f)};
-    thread->m_currentFrame->operands.push_back(variable);
+    input.thread->m_currentFrame->operands.push_back(variable);
 }
 
-void dconst_i(INSTRUCTION_ARGS)
+void dconst_i(const InstructionInput& input)
 {
-    const double d = arg;
+    const double d = input.arg;
     const u4 lowBytes =  castToU4(*std::bit_cast<u8*>(&d));
     const u4 highBytes = (*(std::bit_cast<u8*>)(&(d)) >> 32);
 
@@ -65,23 +65,23 @@ void dconst_i(INSTRUCTION_ARGS)
     // The value is double back = *reinterpret_cast<double*> (&bytes);
     const Variable variableHigh{VariableType_LONG, highBytes};
     const Variable variableLow{VariableType_LONG, lowBytes};
-    thread->m_currentFrame->operands.push_back(variableHigh);
-    thread->m_currentFrame->operands.push_back(variableLow);
+    input.thread->m_currentFrame->operands.push_back(variableHigh);
+    input.thread->m_currentFrame->operands.push_back(variableLow);
 }
 
-void bipush(INSTRUCTION_ARGS)
+void bipush(const InstructionInput& input)
 {
-    const uint8_t byte = args[0];
+    const uint8_t byte = input.args[0];
     const Variable variable{VariableType_INT, byte};
-    thread->m_currentFrame->operands.push_back(variable);
+    input.thread->m_currentFrame->operands.push_back(variable);
 }
 
-void sipush(INSTRUCTION_ARGS)
+void sipush(const InstructionInput& input)
 {
-    const i2 shortValue = (args[0] << 8) | args[1];
+    const i2 shortValue = (input.args[0] << 8) | input.args[1];
     const i4 intValue = shortValue;
     const Variable variable{VariableType_INT, static_cast<uint32_t>(intValue)};
-    thread->m_currentFrame->operands.push_back(variable);
+    input.thread->m_currentFrame->operands.push_back(variable);
 }
 
 void loadConstant(VMThread* thread, const u4 index, JavaHeap* heap, VM* VM)
@@ -151,20 +151,20 @@ void loadConstant2(const VMThread* thread, const u4 index)
     }
 }
 
-void ldc(INSTRUCTION_ARGS)
+void ldc(const InstructionInput& input)
 {
-    const u1 index = args[0];
-    loadConstant(thread, index, heap, VM);
+    const u1 index = input.args[0];
+    loadConstant(input.thread, index, input.heap, input.VM);
 }
 
-void ldc_w(INSTRUCTION_ARGS)
+void ldc_w(const InstructionInput& input)
 {
-    const u2 index = (args[0] << 8) | args[1];
-    loadConstant(thread, index, heap, VM);
+    const u2 index = (input.args[0] << 8) | input.args[1];
+    loadConstant(input.thread, index, input.heap, input.VM);
 }
 
-void ldc2_w(INSTRUCTION_ARGS)
+void ldc2_w(const InstructionInput& input)
 {
-    const u2 index = (args[0] << 8) | args[1];
-    loadConstant2(thread, index);
+    const u2 index = (input.args[0] << 8) | input.args[1];
+    loadConstant2(input.thread, index);
 }

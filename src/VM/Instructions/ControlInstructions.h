@@ -1,15 +1,11 @@
 #pragma once
 
-#include "Core.h"
+#include "../Instruction.h"
 
-class VM;
-class VMThread;
-class JavaHeap;
-
-void gotoInstruction(INSTRUCTION_ARGS);
-void freturnInstruction(INSTRUCTION_ARGS);
-void ireturnInstruction(INSTRUCTION_ARGS);
-void lreturnInstruction(INSTRUCTION_ARGS);
-void dreturnInstruction(INSTRUCTION_ARGS);
-void areturnInstruction(INSTRUCTION_ARGS);
-void returnInstruction(INSTRUCTION_ARGS);
+void gotoInstruction(const InstructionInput& input);
+void freturnInstruction(const InstructionInput& input);
+void ireturnInstruction(const InstructionInput& input);
+void lreturnInstruction(const InstructionInput& input);
+void dreturnInstruction(const InstructionInput& input);
+void areturnInstruction(const InstructionInput& input);
+void returnInstruction(const InstructionInput& input);

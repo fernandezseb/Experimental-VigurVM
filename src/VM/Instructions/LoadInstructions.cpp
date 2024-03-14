@@ -21,109 +21,109 @@
 #include "Data/Variable.h"
 
 
-void iload(INSTRUCTION_ARGS)
+void iload(const InstructionInput& input)
 {
-    const u1 index = args[0];
-    const Variable var = thread->m_currentFrame->localVariables[index];
-    VM::checkType(var, VariableType_INT, thread);
+    const u1 index = input.args[0];
+    const Variable var = input.thread->m_currentFrame->localVariables[index];
+    VM::checkType(var, VariableType_INT, input.thread);
 
-    thread->m_currentFrame->operands.push_back(var);
+    input.thread->m_currentFrame->operands.push_back(var);
 }
 
-void lload(INSTRUCTION_ARGS)
+void lload(const InstructionInput& input)
 {
-    const u1 index = args[0];
-    const Variable highBytes = thread->m_currentFrame->localVariables[index];
-    VM::checkType(highBytes, VariableType_LONG, thread);
+    const u1 index = input.args[0];
+    const Variable highBytes = input.thread->m_currentFrame->localVariables[index];
+    VM::checkType(highBytes, VariableType_LONG, input.thread);
 
-    const Variable lowBytes = thread->m_currentFrame->localVariables[index+1];
-    VM::checkType(lowBytes, VariableType_LONG, thread);
+    const Variable lowBytes = input.thread->m_currentFrame->localVariables[index+1];
+    VM::checkType(lowBytes, VariableType_LONG, input.thread);
 
-    thread->m_currentFrame->operands.push_back(highBytes);
-    thread->m_currentFrame->operands.push_back(lowBytes);
+    input.thread->m_currentFrame->operands.push_back(highBytes);
+    input.thread->m_currentFrame->operands.push_back(lowBytes);
 }
 
-void aload(INSTRUCTION_ARGS) {
-    const u1 index = args[0];
-    const Variable var = thread->m_currentFrame->localVariables[index];
-    VM::checkType(var, VariableType_REFERENCE, thread);
-    thread->m_currentFrame->operands.push_back(var);
+void aload(const InstructionInput& input) {
+    const u1 index = input.args[0];
+    const Variable var = input.thread->m_currentFrame->localVariables[index];
+    VM::checkType(var, VariableType_REFERENCE, input.thread);
+    input.thread->m_currentFrame->operands.push_back(var);
 }
 
-void aload_i(INSTRUCTION_ARGS)
+void aload_i(const InstructionInput& input)
 {
-    const Variable var = thread->m_currentFrame->localVariables[arg];
-    VM::checkType(var, VariableType_REFERENCE, thread);
+    const Variable var = input.thread->m_currentFrame->localVariables[input.arg];
+    VM::checkType(var, VariableType_REFERENCE, input.thread);
 
-    thread->m_currentFrame->operands.push_back(var);
+    input.thread->m_currentFrame->operands.push_back(var);
 }
 
-void iload_i(INSTRUCTION_ARGS)
+void iload_i(const InstructionInput& input)
 {
-    const Variable var = thread->m_currentFrame->localVariables[arg];
-    VM::checkType(var, VariableType_INT, thread);
+    const Variable var = input.thread->m_currentFrame->localVariables[input.arg];
+    VM::checkType(var, VariableType_INT, input.thread);
 
-    thread->m_currentFrame->operands.push_back(var);
+    input.thread->m_currentFrame->operands.push_back(var);
 }
 
-void lload_i(INSTRUCTION_ARGS)
+void lload_i(const InstructionInput& input)
 {
-    const Variable highBytes = thread->m_currentFrame->localVariables[arg];
-    VM::checkType(highBytes, VariableType_LONG, thread);
+    const Variable highBytes = input.thread->m_currentFrame->localVariables[input.arg];
+    VM::checkType(highBytes, VariableType_LONG, input.thread);
 
-    const Variable lowBytes = thread->m_currentFrame->localVariables[arg+1];
-    VM::checkType(lowBytes, VariableType_LONG, thread);
+    const Variable lowBytes = input.thread->m_currentFrame->localVariables[input.arg+1];
+    VM::checkType(lowBytes, VariableType_LONG, input.thread);
 
-    thread->m_currentFrame->operands.push_back(highBytes);
-    thread->m_currentFrame->operands.push_back(lowBytes);
+    input.thread->m_currentFrame->operands.push_back(highBytes);
+    input.thread->m_currentFrame->operands.push_back(lowBytes);
 }
 
-void fload_i(INSTRUCTION_ARGS)
+void fload_i(const InstructionInput& input)
 {
-    const Variable var = thread->m_currentFrame->localVariables[arg];
-    VM::checkType(var, VariableType_FLOAT, thread);
+    const Variable var = input.thread->m_currentFrame->localVariables[input.arg];
+    VM::checkType(var, VariableType_FLOAT, input.thread);
 
-    thread->m_currentFrame->operands.push_back(var);
+    input.thread->m_currentFrame->operands.push_back(var);
 }
 
-void iaload(INSTRUCTION_ARGS)
+void iaload(const InstructionInput& input)
 {
-    const Variable index = thread->m_currentFrame->popOperand();
-    const Variable arrayRef = thread->m_currentFrame->popOperand();
+    const Variable index = input.thread->m_currentFrame->popOperand();
+    const Variable arrayRef = input.thread->m_currentFrame->popOperand();
 
-    const Array* array = heap->getArray(arrayRef.data);
+    const Array* array = input.heap->getArray(arrayRef.data);
     const i4* intArray = (i4*) array->data;
 
     const i4 data = intArray[index.data];
 
     const Variable dataVar{VariableType_INT, std::bit_cast<u4>(data)};
-    thread->m_currentFrame->operands.push_back(dataVar);
+    input.thread->m_currentFrame->operands.push_back(dataVar);
 }
 
-void aaload(INSTRUCTION_ARGS)
+void aaload(const InstructionInput& input)
 {
-    const Variable index = thread->m_currentFrame->popOperand();
-    const Variable arrayRef = thread->m_currentFrame->popOperand();
+    const Variable index = input.thread->m_currentFrame->popOperand();
+    const Variable arrayRef = input.thread->m_currentFrame->popOperand();
 
-    const Array* array = heap->getArray(arrayRef.data);
+    const Array* array = input.heap->getArray(arrayRef.data);
     const u4* referenceArray = (u4*) array->data;
 
     const u4 data = referenceArray[index.data];
 
     const Variable dataVar{VariableType_REFERENCE, std::bit_cast<u4>(data)};
-    thread->m_currentFrame->operands.push_back(dataVar);
+    input.thread->m_currentFrame->operands.push_back(dataVar);
 }
 
-void caload(INSTRUCTION_ARGS)
+void caload(const InstructionInput& input)
 {
-    const Variable index = thread->m_currentFrame->popOperand();
-    const Variable arrayRef = thread->m_currentFrame->popOperand();
+    const Variable index = input.thread->m_currentFrame->popOperand();
+    const Variable arrayRef = input.thread->m_currentFrame->popOperand();
 
-    const Array* array = heap->getArray(arrayRef.data);
+    const Array* array = input.heap->getArray(arrayRef.data);
     const i1* intArray = (i1*) array->data;
 
     const i1 data = intArray[index.data];
 
     const Variable dataVar{VariableType_INT, static_cast<uint32_t>(static_cast<int32_t>(data))};
-    thread->m_currentFrame->operands.push_back(dataVar);
+    input.thread->m_currentFrame->operands.push_back(dataVar);
 }

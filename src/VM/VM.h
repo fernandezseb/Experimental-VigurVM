@@ -30,7 +30,7 @@ struct Instruction
     u1 args;
     std::string_view name;
     i1 arg;
-    void(*instructionFunction)(INSTRUCTION_ARGS);
+    void(*instructionFunction)(const InstructionInput& input);
 };
 
 

@@ -21,36 +21,36 @@
 #include "Data/Variable.h"
 
 
-void i2l(INSTRUCTION_ARGS)
+void i2l(const InstructionInput& input)
 {
-    const Variable valueVar = thread->m_currentFrame->popOperand();
-    VM->checkType(valueVar, VariableType_INT, thread);
+    const Variable valueVar = input.thread->m_currentFrame->popOperand();
+    input.VM->checkType(valueVar, VariableType_INT, input.thread);
     const i4 intValue = std::bit_cast<i4>(valueVar.data);
     const i8 l = intValue;
     const u4* bytes = (u4*)(&l);
     const u4 highByte = bytes[1];
     const u4 lowByte = bytes[0];
-    thread->m_currentFrame->operands.emplace_back(Variable{VariableType_LONG, highByte});
-    thread->m_currentFrame->operands.emplace_back(Variable{VariableType_LONG, lowByte});
+    input.thread->m_currentFrame->operands.emplace_back(Variable{VariableType_LONG, highByte});
+    input.thread->m_currentFrame->operands.emplace_back(Variable{VariableType_LONG, lowByte});
 }
 
-void i2f(INSTRUCTION_ARGS)
+void i2f(const InstructionInput& input)
 {
-    const i4 intValue = thread->m_currentFrame->popInt();
+    const i4 intValue = input.thread->m_currentFrame->popInt();
     const float f = static_cast<float>(intValue);
-    thread->m_currentFrame->pushFloat(f);
+    input.thread->m_currentFrame->pushFloat(f);
 }
 
-void f2i(INSTRUCTION_ARGS)
+void f2i(const InstructionInput& input)
 {
-    const float f = thread->m_currentFrame->popFloat();
+    const float f = input.thread->m_currentFrame->popFloat();
     const i4 intValue = static_cast<i4>(f);
-    thread->m_currentFrame->pushInt(intValue);
+    input.thread->m_currentFrame->pushInt(intValue);
 }
 
-void i2c(INSTRUCTION_ARGS)
+void i2c(const InstructionInput& input)
 {
-    const i4 intValue = thread->m_currentFrame->popInt();
+    const i4 intValue = input.thread->m_currentFrame->popInt();
     const i2 f = static_cast<i2>(intValue);
-    thread->m_currentFrame->pushInt(f);
+    input.thread->m_currentFrame->pushInt(f);
 }

@@ -1,19 +1,15 @@
 #pragma once
 
-#include "Core.h"
+#include "../Instruction.h"
 
-class VMThread;
-class JavaHeap;
-class VM;
-
-void nop(INSTRUCTION_ARGS);
-void aconst_null(INSTRUCTION_ARGS);
-void iconst_i(INSTRUCTION_ARGS);
-void lconst_i(INSTRUCTION_ARGS);
-void fconst_i(INSTRUCTION_ARGS);
-void dconst_i(INSTRUCTION_ARGS);
-void bipush(INSTRUCTION_ARGS);
-void sipush(INSTRUCTION_ARGS);
-void ldc(INSTRUCTION_ARGS);
-void ldc_w(INSTRUCTION_ARGS);
-void ldc2_w(INSTRUCTION_ARGS);
+void nop(const InstructionInput& input);
+void aconst_null(const InstructionInput& input);
+void iconst_i(const InstructionInput& input);
+void lconst_i(const InstructionInput& input);
+void fconst_i(const InstructionInput& input);
+void dconst_i(const InstructionInput& input);
+void bipush(const InstructionInput& input);
+void sipush(const InstructionInput& input);
+void ldc(const InstructionInput& input);
+void ldc_w(const InstructionInput& input);
+void ldc2_w(const InstructionInput& input);

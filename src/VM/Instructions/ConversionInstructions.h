@@ -1,12 +1,8 @@
 #pragma once
 
-#include "Core.h"
+#include "../Instruction.h"
 
-class VM;
-class VMThread;
-class JavaHeap;
-
-void i2l(INSTRUCTION_ARGS);
-void i2f(INSTRUCTION_ARGS);
-void f2i(INSTRUCTION_ARGS);
-void i2c(INSTRUCTION_ARGS);
+void i2l(const InstructionInput& input);
+void i2f(const InstructionInput& input);
+void f2i(const InstructionInput& input);
+void i2c(const InstructionInput& input);

@@ -21,12 +21,12 @@
 #include "VM/VM.h"
 #include "Data/Variable.h"
 
-void fcmpl(INSTRUCTION_ARGS)
+void fcmpl(const InstructionInput& input)
 {
-    const Variable var2 = thread->m_currentFrame->popOperand();
-    const Variable var1 = thread->m_currentFrame->popOperand();
-    VM->checkType(var2, VariableType_FLOAT, thread);
-    VM->checkType(var1, VariableType_FLOAT, thread);
+    const Variable var2 = input.thread->m_currentFrame->popOperand();
+    const Variable var1 = input.thread->m_currentFrame->popOperand();
+    input.VM->checkType(var2, VariableType_FLOAT, input.thread);
+    input.VM->checkType(var1, VariableType_FLOAT, input.thread);
 
     const auto f2 = std::bit_cast<float>(var2.data);
     const auto f1 = std::bit_cast<float>(var1.data);
@@ -50,16 +50,16 @@ void fcmpl(INSTRUCTION_ARGS)
 
     const u4 resultUnsigned = std::bit_cast<u4>(result);
 
-    thread->m_currentFrame->operands.emplace_back(Variable{VariableType_INT, resultUnsigned});
+    input.thread->m_currentFrame->operands.emplace_back(Variable{VariableType_INT, resultUnsigned});
 
 }
 
-void fcmpg(INSTRUCTION_ARGS)
+void fcmpg(const InstructionInput& input)
 {
-    const Variable var2 = thread->m_currentFrame->popOperand();
-    const Variable var1 = thread->m_currentFrame->popOperand();
-    VM->checkType(var2, VariableType_FLOAT, thread);
-    VM->checkType(var1, VariableType_FLOAT, thread);
+    const Variable var2 = input.thread->m_currentFrame->popOperand();
+    const Variable var1 = input.thread->m_currentFrame->popOperand();
+    input.VM->checkType(var2, VariableType_FLOAT, input.thread);
+    input.VM->checkType(var1, VariableType_FLOAT, input.thread);
 
     const auto f2 = std::bit_cast<float>(var2.data);
     const auto f1 = std::bit_cast<float>(var1.data);
@@ -82,226 +82,226 @@ void fcmpg(INSTRUCTION_ARGS)
 
     const u4 resultUnsigned = std::bit_cast<u4>(result);
 
-    thread->m_currentFrame->operands.emplace_back(Variable{VariableType_INT, resultUnsigned});
+    input.thread->m_currentFrame->operands.emplace_back(Variable{VariableType_INT, resultUnsigned});
 }
 
-void ifeq(INSTRUCTION_ARGS)
+void ifeq(const InstructionInput& input)
 {
-    const u1 byte1 = args[0];
-    const u1 byte2 = args[1];
+    const u1 byte1 = input.args[0];
+    const u1 byte2 = input.args[1];
 
     const i2 branchByte = (byte1 << 8) | byte2;
 
-    const Variable intVar = thread->m_currentFrame->popOperand();
-    VM->checkType(intVar, VariableType_INT, thread);
+    const Variable intVar = input.thread->m_currentFrame->popOperand();
+    input.VM->checkType(intVar, VariableType_INT, input.thread);
     if (intVar.data == 0)
     {
-        thread->m_pc = thread->m_pc-3+branchByte;
+        input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
 }
 
-void ifne(INSTRUCTION_ARGS)
+void ifne(const InstructionInput& input)
 {
-    const u1 byte1 = args[0];
-    const u1 byte2 = args[1];
+    const u1 byte1 = input.args[0];
+    const u1 byte2 = input.args[1];
 
     const i2 branchByte = (byte1 << 8) | byte2;
 
-    const Variable intVar = thread->m_currentFrame->popOperand();
+    const Variable intVar = input.thread->m_currentFrame->popOperand();
     if (intVar.data != 0)
     {
-        thread->m_pc = thread->m_pc-3+branchByte;
+        input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
 }
 
-void iflt(INSTRUCTION_ARGS)
+void iflt(const InstructionInput& input)
 {
-    const u1 byte1 = args[0];
-    const u1 byte2 = args[1];
+    const u1 byte1 = input.args[0];
+    const u1 byte2 = input.args[1];
 
     const i2 branchByte = (byte1 << 8) | byte2;
 
-    const Variable intVar = thread->m_currentFrame->popOperand();
-    VM->checkType(intVar, VariableType_INT, thread);
+    const Variable intVar = input.thread->m_currentFrame->popOperand();
+    input.VM->checkType(intVar, VariableType_INT, input.thread);
 
     if (std::bit_cast<i4>(intVar.data) < 0)
     {
-        thread->m_pc = thread->m_pc-3+branchByte;
+        input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
 }
 
-void ifge(INSTRUCTION_ARGS)
+void ifge(const InstructionInput& input)
 {
-    const u1 byte1 = args[0];
-    const u1 byte2 = args[1];
+    const u1 byte1 = input.args[0];
+    const u1 byte2 = input.args[1];
 
     const i2 branchByte = (byte1 << 8) | byte2;
 
-    const Variable intVar = thread->m_currentFrame->popOperand();
-    VM->checkType(intVar, VariableType_INT, thread);
+    const Variable intVar = input.thread->m_currentFrame->popOperand();
+    input.VM->checkType(intVar, VariableType_INT, input.thread);
 
     if (std::bit_cast<i4>(intVar.data) >= 0)
     {
-        thread->m_pc = thread->m_pc-3+branchByte;
+        input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
 }
 
-void ifgt(INSTRUCTION_ARGS)
+void ifgt(const InstructionInput& input)
 {
-    const u1 byte1 = args[0];
-    const u1 byte2 = args[1];
+    const u1 byte1 = input.args[0];
+    const u1 byte2 = input.args[1];
 
     const i2 branchByte = (byte1 << 8) | byte2;
 
-    const Variable intVar = thread->m_currentFrame->popOperand();
-    VM->checkType(intVar, VariableType_INT, thread);
+    const Variable intVar = input.thread->m_currentFrame->popOperand();
+    input.VM->checkType(intVar, VariableType_INT, input.thread);
 
     if (std::bit_cast<i4>(intVar.data) > 0)
     {
-        thread->m_pc = thread->m_pc-3+branchByte;
+        input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
 }
 
-void ifle(INSTRUCTION_ARGS)
+void ifle(const InstructionInput& input)
 {
-    const u1 byte1 = args[0];
-    const u1 byte2 = args[1];
+    const u1 byte1 = input.args[0];
+    const u1 byte2 = input.args[1];
 
     const i2 branchByte = (byte1 << 8) | byte2;
 
-    const Variable intVar = thread->m_currentFrame->popOperand();
-    VM->checkType(intVar, VariableType_INT, thread);
+    const Variable intVar = input.thread->m_currentFrame->popOperand();
+    input.VM->checkType(intVar, VariableType_INT, input.thread);
 
     if (std::bit_cast<i4>(intVar.data) <= 0)
     {
-        thread->m_pc = thread->m_pc-3+branchByte;
+        input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
 }
 
-void if_icmpeq(INSTRUCTION_ARGS)
+void if_icmpeq(const InstructionInput& input)
 {
-    const u1 byte1 = args[0];
-    const u1 byte2 = args[1];
+    const u1 byte1 = input.args[0];
+    const u1 byte2 = input.args[1];
 
     const i2 branchByte = (byte1 << 8) | byte2;
 
-    const Variable var2 = thread->m_currentFrame->popOperand();
-    const Variable var1 = thread->m_currentFrame->popOperand();
+    const Variable var2 = input.thread->m_currentFrame->popOperand();
+    const Variable var1 = input.thread->m_currentFrame->popOperand();
 
     if (std::bit_cast<i4>(var1.data) == std::bit_cast<i4>(var2.data))
     {
-        thread->m_pc = thread->m_pc-3+branchByte;
+        input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
 }
 
-void if_icmpne(INSTRUCTION_ARGS)
+void if_icmpne(const InstructionInput& input)
 {
-    const u1 byte1 = args[0];
-    const u1 byte2 = args[1];
+    const u1 byte1 = input.args[0];
+    const u1 byte2 = input.args[1];
 
     const i2 branchByte = (byte1 << 8) | byte2;
 
-    const Variable var2 = thread->m_currentFrame->popOperand();
-    const Variable var1 = thread->m_currentFrame->popOperand();
+    const Variable var2 = input.thread->m_currentFrame->popOperand();
+    const Variable var1 = input.thread->m_currentFrame->popOperand();
 
     if (std::bit_cast<i4>(var1.data) != std::bit_cast<i4>(var2.data))
     {
-        thread->m_pc = thread->m_pc-3+branchByte;
+        input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
 }
 
-void if_icmplt(INSTRUCTION_ARGS)
+void if_icmplt(const InstructionInput& input)
 {
-    const u1 byte1 = args[0];
-    const u1 byte2 = args[1];
+    const u1 byte1 = input.args[0];
+    const u1 byte2 = input.args[1];
 
     const i2 branchByte = (byte1 << 8) | byte2;
 
-    const Variable var2 = thread->m_currentFrame->popOperand();
-    const Variable var1 = thread->m_currentFrame->popOperand();
+    const Variable var2 = input.thread->m_currentFrame->popOperand();
+    const Variable var1 = input.thread->m_currentFrame->popOperand();
 
     if (std::bit_cast<i4>(var1.data) < std::bit_cast<i4>(var2.data))
     {
-        thread->m_pc = thread->m_pc-3+branchByte;
+        input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
 }
 
-void if_icmpge(INSTRUCTION_ARGS)
+void if_icmpge(const InstructionInput& input)
 {
-    const u1 byte1 = args[0];
-    const u1 byte2 = args[1];
+    const u1 byte1 = input.args[0];
+    const u1 byte2 = input.args[1];
 
     const i2 branchByte = (byte1 << 8) | byte2;
 
-    Variable var2 = thread->m_currentFrame->popOperand();
-    Variable var1 = thread->m_currentFrame->popOperand();
+    Variable var2 = input.thread->m_currentFrame->popOperand();
+    Variable var1 = input.thread->m_currentFrame->popOperand();
 
     if (std::bit_cast<i4>(var1.data) >= std::bit_cast<i4>(var2.data))
     {
-        thread->m_pc = thread->m_pc-3+branchByte;
+        input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
 }
 
-void if_icmpgt(INSTRUCTION_ARGS)
+void if_icmpgt(const InstructionInput& input)
 {
-    const u1 byte1 = args[0];
-    const u1 byte2 = args[1];
+    const u1 byte1 = input.args[0];
+    const u1 byte2 = input.args[1];
 
     const i2 branchByte = (byte1 << 8) | byte2;
 
-    Variable var2 = thread->m_currentFrame->popOperand();
-    Variable var1 = thread->m_currentFrame->popOperand();
+    Variable var2 = input.thread->m_currentFrame->popOperand();
+    Variable var1 = input.thread->m_currentFrame->popOperand();
 
     if (std::bit_cast<i4>(var1.data) > std::bit_cast<i4>(var2.data))
     {
-        thread->m_pc = thread->m_pc-3+branchByte;
+        input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
 }
 
-void if_icmple(INSTRUCTION_ARGS)
+void if_icmple(const InstructionInput& input)
 {
-    const u1 byte1 = args[0];
-    const u1 byte2 = args[1];
+    const u1 byte1 = input.args[0];
+    const u1 byte2 = input.args[1];
 
     const i2 branchByte = (byte1 << 8) | byte2;
 
-    Variable var2 = thread->m_currentFrame->popOperand();
-    Variable var1 = thread->m_currentFrame->popOperand();
+    Variable var2 = input.thread->m_currentFrame->popOperand();
+    Variable var1 = input.thread->m_currentFrame->popOperand();
 
     if (std::bit_cast<i4>(var1.data) <= std::bit_cast<i4>(var2.data))
     {
-        thread->m_pc = thread->m_pc-3+branchByte;
+        input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
 }
 
-void if_acmpeq(INSTRUCTION_ARGS)
+void if_acmpeq(const InstructionInput& input)
 {
-    const u1 byte1 = args[0];
-    const u1 byte2 = args[1];
+    const u1 byte1 = input.args[0];
+    const u1 byte2 = input.args[1];
 
     const i2 branchByte = (byte1 << 8) | byte2;
 
-    Variable var2 = thread->m_currentFrame->popOperand();
-    Variable var1 = thread->m_currentFrame->popOperand();
+    Variable var2 = input.thread->m_currentFrame->popOperand();
+    Variable var1 = input.thread->m_currentFrame->popOperand();
 
     if (std::bit_cast<i4>(var1.data) == std::bit_cast<i4>(var2.data))
     {
-        thread->m_pc = thread->m_pc-3+branchByte;
+        input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
 }
 
-void if_acmpne(INSTRUCTION_ARGS)
+void if_acmpne(const InstructionInput& input)
 {
-    const u1 byte1 = args[0];
-    const u1 byte2 = args[1];
+    const u1 byte1 = input.args[0];
+    const u1 byte2 = input.args[1];
 
     const i2 branchByte = (byte1 << 8) | byte2;
 
-    Variable var2 = thread->m_currentFrame->popOperand();
-    Variable var1 = thread->m_currentFrame->popOperand();
+    Variable var2 = input.thread->m_currentFrame->popOperand();
+    Variable var1 = input.thread->m_currentFrame->popOperand();
 
     if (std::bit_cast<i4>(var1.data) != std::bit_cast<i4>(var2.data))
     {
-        thread->m_pc = thread->m_pc-3+branchByte;
+        input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
 }

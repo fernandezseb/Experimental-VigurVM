@@ -26,22 +26,22 @@ static u2 readShort(VMThread* thread)
     return shortCombined;
 }
 
-void ifnull(INSTRUCTION_ARGS)
+void ifnull(const InstructionInput& input)
 {
-    const u2 branchByte = readShort(thread);
+    const u2 branchByte = readShort(input.thread);
     // uint8_t byte = thread->currentMethod->code->code[thread->pc-3+branchByte];
-    const Variable ref = thread->m_currentFrame->popOperand();
+    const Variable ref = input.thread->m_currentFrame->popOperand();
     if (ref.data == 0) {
-        thread->m_pc = thread->m_pc-3+branchByte;
+        input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
 }
 
-void ifnonnull(INSTRUCTION_ARGS)
+void ifnonnull(const InstructionInput& input)
 {
-    const u2 branchByte = readShort(thread);
+    const u2 branchByte = readShort(input.thread);
     // uint8_t byte = thread->currentMethod->code->code[thread->pc-3+branchByte];
-    const Variable ref = thread->m_currentFrame->popOperand();
+    const Variable ref = input.thread->m_currentFrame->popOperand();
     if (ref.data != 0) {
-        thread->m_pc = thread->m_pc-3+branchByte;
+        input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
 }

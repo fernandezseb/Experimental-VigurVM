@@ -25,48 +25,48 @@ static void returnCat1Var(VMThread* thread)
     thread->returnVar(returnVal);
 }
 
-void gotoInstruction(INSTRUCTION_ARGS)
+void gotoInstruction(const InstructionInput& input)
 {
-    u1 byte1 = args[0];
-    u1 byte2 = args[1];
+    u1 byte1 = input.args[0];
+    u1 byte2 = input.args[1];
 
     i2 branchByte = (byte1 << 8) | byte2;
 
-    thread->m_pc = thread->m_pc-3+branchByte;
+    input.thread->m_pc = input.thread->m_pc-3+branchByte;
 }
 
-void freturnInstruction(INSTRUCTION_ARGS)
+void freturnInstruction(const InstructionInput& input)
 {
-    returnCat1Var(thread);
+    returnCat1Var(input.thread);
 }
 
-void ireturnInstruction(INSTRUCTION_ARGS)
+void ireturnInstruction(const InstructionInput& input)
 {
-    returnCat1Var(thread);
+    returnCat1Var(input.thread);
 }
 
-void lreturnInstruction(INSTRUCTION_ARGS)
+void lreturnInstruction(const InstructionInput& input)
 {
-    const Variable lowByte = thread->m_currentFrame->popOperand();
-    const Variable highByte = thread->m_currentFrame->popOperand();
-    thread->popFrame();
-    thread->returnVar(highByte, lowByte);
+    const Variable lowByte = input.thread->m_currentFrame->popOperand();
+    const Variable highByte = input.thread->m_currentFrame->popOperand();
+    input.thread->popFrame();
+    input.thread->returnVar(highByte, lowByte);
 }
 
-void dreturnInstruction(INSTRUCTION_ARGS)
+void dreturnInstruction(const InstructionInput& input)
 {
-    const Variable lowByte = thread->m_currentFrame->popOperand();
-    const Variable highByte = thread->m_currentFrame->popOperand();
-    thread->popFrame();
-    thread->returnVar(highByte, lowByte);
+    const Variable lowByte = input.thread->m_currentFrame->popOperand();
+    const Variable highByte = input.thread->m_currentFrame->popOperand();
+    input.thread->popFrame();
+    input.thread->returnVar(highByte, lowByte);
 }
 
-void areturnInstruction(INSTRUCTION_ARGS)
+void areturnInstruction(const InstructionInput& input)
 {
-    returnCat1Var(thread);
+    returnCat1Var(input.thread);
 }
 
-void returnInstruction(INSTRUCTION_ARGS)
+void returnInstruction(const InstructionInput& input)
 {
-    thread->popFrame();
+    input.thread->popFrame();
 }

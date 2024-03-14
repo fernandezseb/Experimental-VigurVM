@@ -1,23 +1,19 @@
 #pragma once
 
-#include "Core.h"
+#include "../Instruction.h"
 
-class VM;
-class VMThread;
-class JavaHeap;
-
-void iadd(INSTRUCTION_ARGS);
-void ladd(INSTRUCTION_ARGS);
-void isub(INSTRUCTION_ARGS);
-void imul(INSTRUCTION_ARGS);
-void fmul(INSTRUCTION_ARGS);
-void irem(INSTRUCTION_ARGS);
-void lshl(INSTRUCTION_ARGS);
-void ishl(INSTRUCTION_ARGS);
-void ishr(INSTRUCTION_ARGS);
-void iushr(INSTRUCTION_ARGS);
-void iand(INSTRUCTION_ARGS);
-void land(INSTRUCTION_ARGS);
-void ior(INSTRUCTION_ARGS);
-void ixor(INSTRUCTION_ARGS);
-void iinc(INSTRUCTION_ARGS);
+void iadd(const InstructionInput& input);
+void ladd(const InstructionInput& input);
+void isub(const InstructionInput& input);
+void imul(const InstructionInput& input);
+void fmul(const InstructionInput& input);
+void irem(const InstructionInput& input);
+void lshl(const InstructionInput& input);
+void ishl(const InstructionInput& input);
+void ishr(const InstructionInput& input);
+void iushr(const InstructionInput& input);
+void iand(const InstructionInput& input);
+void land(const InstructionInput& input);
+void ior(const InstructionInput& input);
+void ixor(const InstructionInput& input);
+void iinc(const InstructionInput& input);

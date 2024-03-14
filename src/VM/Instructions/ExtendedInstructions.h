@@ -1,10 +1,6 @@
 #pragma once
 
-#include "Core.h"
+#include "../Instruction.h"
 
-class VM;
-class VMThread;
-class JavaHeap;
-
-void ifnull(INSTRUCTION_ARGS);
-void ifnonnull(INSTRUCTION_ARGS);
+void ifnull(const InstructionInput& input);
+void ifnonnull(const InstructionInput& input);

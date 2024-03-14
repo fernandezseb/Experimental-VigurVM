@@ -1,18 +1,14 @@
 #pragma once
 
-#include "Core.h"
+#include "../Instruction.h"
 
-class VM;
-class VMThread;
-class JavaHeap;
-
-void iload(INSTRUCTION_ARGS);
-void lload(INSTRUCTION_ARGS);
-void aload(INSTRUCTION_ARGS);
-void aload_i(INSTRUCTION_ARGS);
-void iload_i(INSTRUCTION_ARGS);
-void lload_i(INSTRUCTION_ARGS);
-void fload_i(INSTRUCTION_ARGS);
-void iaload(INSTRUCTION_ARGS);
-void aaload(INSTRUCTION_ARGS);
-void caload(INSTRUCTION_ARGS);
+void iload(const InstructionInput& input);
+void lload(const InstructionInput& input);
+void aload(const InstructionInput& input);
+void aload_i(const InstructionInput& input);
+void iload_i(const InstructionInput& input);
+void lload_i(const InstructionInput& input);
+void fload_i(const InstructionInput& input);
+void iaload(const InstructionInput& input);
+void aaload(const InstructionInput& input);
+void caload(const InstructionInput& input);
