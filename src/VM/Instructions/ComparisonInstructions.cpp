@@ -25,8 +25,8 @@ void fcmpl(const InstructionInput& input)
 {
     const Variable var2 = input.thread->m_currentFrame->popOperand();
     const Variable var1 = input.thread->m_currentFrame->popOperand();
-    input.VM->checkType(var2, VariableType_FLOAT, input.thread);
-    input.VM->checkType(var1, VariableType_FLOAT, input.thread);
+    input.vm->checkType(var2, VariableType_FLOAT, input.thread);
+    input.vm->checkType(var1, VariableType_FLOAT, input.thread);
 
     const auto f2 = std::bit_cast<float>(var2.data);
     const auto f1 = std::bit_cast<float>(var1.data);
@@ -58,8 +58,8 @@ void fcmpg(const InstructionInput& input)
 {
     const Variable var2 = input.thread->m_currentFrame->popOperand();
     const Variable var1 = input.thread->m_currentFrame->popOperand();
-    input.VM->checkType(var2, VariableType_FLOAT, input.thread);
-    input.VM->checkType(var1, VariableType_FLOAT, input.thread);
+    input.vm->checkType(var2, VariableType_FLOAT, input.thread);
+    input.vm->checkType(var1, VariableType_FLOAT, input.thread);
 
     const auto f2 = std::bit_cast<float>(var2.data);
     const auto f1 = std::bit_cast<float>(var1.data);
@@ -93,7 +93,7 @@ void ifeq(const InstructionInput& input)
     const i2 branchByte = (byte1 << 8) | byte2;
 
     const Variable intVar = input.thread->m_currentFrame->popOperand();
-    input.VM->checkType(intVar, VariableType_INT, input.thread);
+    input.vm->checkType(intVar, VariableType_INT, input.thread);
     if (intVar.data == 0)
     {
         input.thread->m_pc = input.thread->m_pc-3+branchByte;
@@ -122,7 +122,7 @@ void iflt(const InstructionInput& input)
     const i2 branchByte = (byte1 << 8) | byte2;
 
     const Variable intVar = input.thread->m_currentFrame->popOperand();
-    input.VM->checkType(intVar, VariableType_INT, input.thread);
+    input.vm->checkType(intVar, VariableType_INT, input.thread);
 
     if (std::bit_cast<i4>(intVar.data) < 0)
     {
@@ -138,7 +138,7 @@ void ifge(const InstructionInput& input)
     const i2 branchByte = (byte1 << 8) | byte2;
 
     const Variable intVar = input.thread->m_currentFrame->popOperand();
-    input.VM->checkType(intVar, VariableType_INT, input.thread);
+    input.vm->checkType(intVar, VariableType_INT, input.thread);
 
     if (std::bit_cast<i4>(intVar.data) >= 0)
     {
@@ -154,7 +154,7 @@ void ifgt(const InstructionInput& input)
     const i2 branchByte = (byte1 << 8) | byte2;
 
     const Variable intVar = input.thread->m_currentFrame->popOperand();
-    input.VM->checkType(intVar, VariableType_INT, input.thread);
+    input.vm->checkType(intVar, VariableType_INT, input.thread);
 
     if (std::bit_cast<i4>(intVar.data) > 0)
     {
@@ -170,7 +170,7 @@ void ifle(const InstructionInput& input)
     const i2 branchByte = (byte1 << 8) | byte2;
 
     const Variable intVar = input.thread->m_currentFrame->popOperand();
-    input.VM->checkType(intVar, VariableType_INT, input.thread);
+    input.vm->checkType(intVar, VariableType_INT, input.thread);
 
     if (std::bit_cast<i4>(intVar.data) <= 0)
     {

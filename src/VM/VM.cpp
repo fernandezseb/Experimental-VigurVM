@@ -264,7 +264,7 @@ void VM::executeLoop(VMThread* thread)
                     input.arg = instruction.arg;
                     input.heap = &m_heap;
                     input.thread = thread;
-                    input.VM = this;
+                    input.vm = this;
                     instruction.instructionFunction(input);
                 }
                 break;

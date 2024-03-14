@@ -154,13 +154,13 @@ void loadConstant2(const VMThread* thread, const u4 index)
 void ldc(const InstructionInput& input)
 {
     const u1 index = input.args[0];
-    loadConstant(input.thread, index, input.heap, input.VM);
+    loadConstant(input.thread, index, input.heap, input.vm);
 }
 
 void ldc_w(const InstructionInput& input)
 {
     const u2 index = (input.args[0] << 8) | input.args[1];
-    loadConstant(input.thread, index, input.heap, input.VM);
+    loadConstant(input.thread, index, input.heap, input.vm);
 }
 
 void ldc2_w(const InstructionInput& input)
