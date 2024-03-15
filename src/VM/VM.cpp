@@ -74,6 +74,29 @@ u4 VM::createThreadGroupObject(VMThread* thread)
     return threadGroupReference;
 }
 
+bool VM::isSubclass(VMThread* thread, const ClassInfo* targetClass, ClassInfo* subClass)
+{
+    ClassInfo* currentClass = subClass;
+
+    while (currentClass != nullptr)
+    {
+        if (currentClass->getName() == targetClass->getName())
+        {
+            return true;
+        }
+
+        if (currentClass->superClass == 0)
+        {
+            return false;
+        }
+
+        CPClassInfo* classInfo = currentClass->constantPool->getClassInfo(currentClass->superClass);
+        currentClass = getClass(currentClass->constantPool->getString(classInfo->nameIndex), thread);
+    }
+
+    return false;
+}
+
 u4 VM::createThreadObject(VMThread* thread, const u4 threadGroupReference)
 {
     ClassInfo* threadClass = getClass("java/lang/Thread", thread);

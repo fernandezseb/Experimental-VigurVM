@@ -14,6 +14,7 @@ void newInstruction(const InstructionInput& input);
 void newarray(const InstructionInput& input);
 void anewarray(const InstructionInput& input);
 void arraylength(const InstructionInput& input);
+void athrow(const InstructionInput& input);
 void checkCast(const InstructionInput& input);
 void instanceof(const InstructionInput& input);
 void monitorenter(const InstructionInput& input);

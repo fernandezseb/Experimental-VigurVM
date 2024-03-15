@@ -62,8 +62,7 @@ struct AttributeCode : public AttributeInfo {
 	uint16_t maxLocals;
 	uint32_t codeLength;
 	uint8_t* code;
-	ExceptionTableEntry* exceptionTable;
-	uint16_t exceptionTableSize;
+	std::span<ExceptionTableEntry> exceptionTable;
 	AttributeCollection* attributes;
 };
 

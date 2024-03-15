@@ -25,10 +25,12 @@
 #include "java/lang/String.h"
 #include "java/lang/System.h"
 #include "java/lang/Thread.h"
+#include "java/lang/Throwable.h"
 #include "java/security/AccessController.h"
 #include "sun/misc/Unsafe.h"
 #include "sun/misc/VM.h"
 #include "sun/reflect/Reflection.h"
+#include "vigur/lang/System.h"
 
 void registerBuiltinRegisterNatives()
 {
@@ -41,6 +43,7 @@ void registerBuiltinRegisterNatives()
     registerNative("java/lang/Double/longBitsToDouble", "(J)D", lib_java_lang_Double_longBitsToDouble);
     registerNative("java/lang/Thread/registerNatives", "()V", lib_java_lang_Thread_registerNatives);
     registerNative("java/lang/String/intern", "()Ljava/lang/String;", lib_java_lang_String_intern);
+    registerNative("java/lang/Throwable/fillInStackTrace", "(I)Ljava/lang/Throwable;", lib_java_lang_Throwable_fillInStackTrace);
     // java/io package
     registerNative("java/io/FileOutputStream/initIDs", "()V", lib_java_io_FileOutputStream_initIDs);
     registerNative("java/io/FileInputStream/initIDs", "()V", lib_java_io_FileInputStream_initIDs);
@@ -54,7 +57,7 @@ void registerBuiltinRegisterNatives()
     registerNative("java/security/AccessController/doPrivileged", "(Ljava/security/PrivilegedExceptionAction;)Ljava/lang/Object;", lib_java_security_AccessController_doPriviliged_PriviligedExceptionAction);
     registerNative("java/security/AccessController/getStackAccessControlContext", "()Ljava/security/AccessControlContext;", lib_java_security_AccessController_getStackAccessControlContext);
     // Vigur/lang package
-    // registerNative("Vigur/lang/System/registerNatives", "()V", lib_Vigur_lang_System_registerNatives);
+    registerNative("vigur/lang/System/registerNatives", "()V", lib_vigur_lang_System_registerNatives);
     // Reflection API
     registerNative("sun/reflect/Reflection/getCallerClass", "()Ljava/lang/Class;", lib_sun_reflect_Reflection_getCallerClass);
     registerNative("sun/reflect/Reflection/getClassAccessFlags", "(Ljava/lang/Class;)I", lib_sun_reflect_Reflection_getClassAccessFlags);

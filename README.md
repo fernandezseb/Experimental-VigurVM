@@ -33,5 +33,4 @@ Alongside that, there are still some major things that need to be done:
 * Implement a proper garbage collector infrastructure and a simple garbage collector
 * Support [custom ClassLoaders](https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-5.html#jvms-5.3.2) (Now only the boostrapping classloader works)
 * Implement multithreading logic in VM
-* Implement [Exception handling](https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-2.html#jvms-2.10)
 * Implement full [Format Checking](https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.8)

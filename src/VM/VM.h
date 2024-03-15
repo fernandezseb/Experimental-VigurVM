@@ -56,9 +56,10 @@ public:
 
         return nullptr;
     }
+    bool isSubclass(VMThread* thread, const ClassInfo* targetClass, ClassInfo* subClass);
 private:
     void initSystemClass(ClassInfo* class_info, VMThread* vm_thread);
-    static constexpr std::array<Instruction,120> m_instructions{{
+    static constexpr std::array<Instruction,121> m_instructions{{
         // Constants
         {i_nop, 0, "nop", 0, nop},
         {i_aconst_null, 0, "aconst_null", 0, aconst_null},
@@ -174,6 +175,7 @@ private:
         {i_newarray, 1, "newarray", 0, newarray},
         {i_anewarray, 0, "anewarray", 0, anewarray},
         {i_arraylength, 0, "arraylength", 0, arraylength},
+        {i_athrow, 0, "athrow", 0, athrow},
         {i_checkcast, 2, "checkcast", 0, checkCast},
         {i_instanceof, 2, "instanceof", 0, instanceof},
         {i_monitorenter, 0, "monitorenter", 0, monitorenter},

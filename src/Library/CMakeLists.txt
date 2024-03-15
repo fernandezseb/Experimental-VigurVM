@@ -16,6 +16,8 @@ add_library(Library
         java/lang/Thread.cpp
         java/lang/String.h
         java/lang/String.cpp
+        java/lang/Throwable.h
+        java/lang/Throwable.cpp
         java/io/FileOutputStream.h
         java/io/FileOutputStream.cpp
         java/io/FileInputStream.h
@@ -30,5 +32,7 @@ add_library(Library
         sun/reflect/Reflection.cpp
         java/security/AccessController.h
         java/security/AccessController.cpp
+        vigur/lang/System.h
+        vigur/lang/System.cpp
 )
 target_include_directories(Library PRIVATE ${PROJECT_SOURCE_DIR}/src/)

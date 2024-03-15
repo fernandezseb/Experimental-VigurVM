@@ -22,6 +22,7 @@
 #include <bit>
 #include <deque>
 #include <string>
+#include <thread>
 
 static u2 readShort(VMThread* thread)
 {
@@ -420,9 +421,8 @@ void newInstruction(const InstructionInput& input)
 
 void newarray(const InstructionInput& input)
 {
-    u1 typeArg = input.args[0];
-
-    ArrayType type = (ArrayType) typeArg;
+    const u1 typeArg = input.args[0];
+    const ArrayType type = (ArrayType) typeArg;
 
     const Variable countVar = input.thread->m_currentFrame->popOperand();
     input.vm->checkType(countVar, VariableType_INT, input.thread);
@@ -440,15 +440,15 @@ void anewarray(const InstructionInput& input)
     CPClassInfo* cpclassInfo = topFrame->constantPool->getClassInfo(index);
     [[maybe_unused]] ClassInfo* classInfo = input.vm->getClass(topFrame->constantPool->getString(cpclassInfo->nameIndex).data(), input.thread);
 
-    int32_t size = std::bit_cast<i4>(topFrame->popOperand().data);
+    const int32_t size = std::bit_cast<i4>(topFrame->popOperand().data);
 
     if (size < 0)
     {
         input.thread->internalError("Error: Can't create an array with negative size");
     }
 
-    uint32_t reference = input.heap->createArray(AT_REFERENCE, size);
-    Variable variable{VariableType_REFERENCE, reference};
+    const uint32_t reference = input.heap->createArray(AT_REFERENCE, size);
+    const Variable variable{VariableType_REFERENCE, reference};
 
     topFrame->operands.push_back(variable);
 }
@@ -461,6 +461,43 @@ void arraylength(const InstructionInput& input)
 
     const Variable lengthVar{VariableType_INT, static_cast<uint32_t>(array->length)};
     input.thread->m_currentFrame->operands.push_back(lengthVar);
+}
+
+void athrow(const InstructionInput& input)
+{
+    const Variable throwableRef = input.thread->m_currentFrame->popOperand();
+    const Object* throwable = input.heap->getObject(throwableRef.data);
+
+    while(!input.thread->m_stack.frames.empty()) {
+        const std::span<ExceptionTableEntry> exceptionHandlers =  input.thread->m_currentMethod->code->exceptionTable;
+
+        for (const ExceptionTableEntry& handler : exceptionHandlers)
+        {
+            if (input.thread->m_pc >= handler.startPc && input.thread->m_pc <= handler.endPc)
+            {
+                const CPClassInfo* catchType = input.thread->m_currentClass->constantPool->getClassInfo(handler.catchType);
+                const std::string_view catchTypeName = input.thread->m_currentClass->constantPool->getString(catchType->nameIndex);
+                const ClassInfo* catchTypeClass = input.vm->getClass(catchTypeName, input.thread);
+                if (input.vm->isSubclass(input.thread, catchTypeClass, throwable->classInfo))
+                {
+                    input.thread->m_pc = handler.handlerPc;
+                    input.thread->m_currentFrame->operands.clear();
+                    input.thread->m_currentFrame->pushObject(throwableRef.data);
+                    return;
+                }
+            }
+        }
+
+        input.thread->popFrame();
+    }
+
+    // TODO: Notify other threads when program crashes
+
+    printf("Exception in thread \"%s\" %s\n",
+    input.thread->m_name.data(),
+    throwable->classInfo->getName().data());
+    Platform::exitProgram(1);
+    printf("");
 }
 
 void checkCast(const InstructionInput& input) {
@@ -543,7 +580,7 @@ void instanceof(const InstructionInput& input)
 void monitorenter(const InstructionInput& input)
 {
     // TODO: Implement when real threading is implemented
-    Variable ref = input.thread->m_currentFrame->popOperand();
+    const Variable ref = input.thread->m_currentFrame->popOperand();
     if (ref.type != VariableType_REFERENCE)
     {
         input.thread->internalError("Expected object reference on stack");
@@ -558,7 +595,7 @@ void monitorenter(const InstructionInput& input)
 void monitorexit(const InstructionInput& input)
 {
     // TODO: Implement when real threading is implemented
-    Variable ref = input.thread->m_currentFrame->popOperand();
+    const Variable ref = input.thread->m_currentFrame->popOperand();
     if (ref.type != VariableType_REFERENCE)
     {
         fprintf(stderr, "Error: Expected object reference on stack\n");

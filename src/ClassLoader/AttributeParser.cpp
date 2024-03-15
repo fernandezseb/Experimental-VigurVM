@@ -411,8 +411,7 @@ AttributeCollection* AttributeParser::readAttributes(ByteArray& byteArray, Const
 			att->maxLocals = maxLocals;
 			att->codeLength = codeLength;
 			att->code = code;
-			att->exceptionTable = exceptions;
-			att->exceptionTableSize = exceptionTableSize;
+			att->exceptionTable = {exceptions,exceptionTableSize};
 			att->attributes = attribs;
 			att->type = Code;
 
