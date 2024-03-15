@@ -200,6 +200,7 @@ private:
     void runStaticInitializer(ClassInfo* classInfo, VMThread* thread);
     u4 createThreadObject(VMThread* thread, u4 threadGroupReference);
     u4 createThreadGroupObject(VMThread* thread);
+    void createArgsArray(const VMThread* thread);
 };
 
 

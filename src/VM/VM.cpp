@@ -363,6 +363,21 @@ void VM::executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* met
     }
 }
 
+void VM::createArgsArray(const VMThread* thread)
+{
+    const u4 arrayRef =  m_heap.createArray(AT_REFERENCE, m_configuration.args.size());
+    const Array* array = m_heap.getArray(arrayRef);
+    u4* arrayData = reinterpret_cast<u4*>(array->data);
+    u4 currentArg = 0;
+    for (std::string_view arg : m_configuration.args)
+    {
+        const u4 stringRef = m_heap.createString(arg.data(), this);
+        arrayData[currentArg++] = stringRef;
+    }
+    thread->m_currentFrame->localVariables[0] = Variable{VariableType_REFERENCE, arrayRef};
+
+}
+
 void VM::runMain()
 {
     VMThread* mainThread = &m_mainThread;
@@ -387,7 +402,7 @@ void VM::runMain()
 
     mainThread->pushStackFrameStatic(startupClass, entryPoint, 0);
 
-    // TODO: Put string array in local variable with index 0
+    createArgsArray(mainThread);
 
     printf("> Executing main method...\n");
     executeLoop(mainThread);
