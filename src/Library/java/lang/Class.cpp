@@ -243,8 +243,8 @@ JCALL void lib_java_lang_Class_isAssignableFrom(NATIVE_ARGS)
     VM->checkType(var, VariableType_REFERENCE, thread);
     const ClassObject* clsClassObject =  heap->getClassObject(var.data);
 
-    // TODO: Add actual checking of assignable value
-    u4 result = 1;
+    // TODO: Add type conversion checking
+    const u4 result = VM->isSubclass(thread, thisClassObject->classClassInfo, clsClassObject->classClassInfo);
 
     thread->returnVar(Variable{VariableType_INT, result});
 }

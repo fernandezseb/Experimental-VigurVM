@@ -10,6 +10,7 @@ add_jar(e2e
 	SmokeTest.java
 	PrivilegedTest.java
 	InstanceofTest.java
+	LibraryTest.java
 )
 
 get_target_property(_classDir e2e CLASSDIR)
@@ -17,8 +18,10 @@ get_target_property(_classDir e2e CLASSDIR)
 add_test(NAME SmokeTest COMMAND VigurVM "-classpath" "${_classDir}" "SmokeTest" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 add_test(NAME PrivilegedTest COMMAND VigurVM "-classpath" "${_classDir}" "PrivilegedTest" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 add_test(NAME InstanceofTest COMMAND VigurVM "-classpath" "${_classDir}" "InstanceofTest" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+add_test(NAME LibraryTest COMMAND VigurVM "-classpath" "${_classDir}" "LibraryTest" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
 set (failRegex "^Error:")
 set_property(TEST SmokeTest PROPERTY FAIL_REGULAR_EXPRESSION "${failRegex}")
 set_property(TEST PrivilegedTest PROPERTY FAIL_REGULAR_EXPRESSION "${failRegex}")
 set_property(TEST InstanceofTest PROPERTY FAIL_REGULAR_EXPRESSION "${failRegex}")
+set_property(TEST LibraryTest PROPERTY FAIL_REGULAR_EXPRESSION "${failRegex}")
