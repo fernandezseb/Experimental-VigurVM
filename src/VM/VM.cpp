@@ -349,7 +349,11 @@ void VM::executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* met
     nativeImplementation impl = findNativeMethod(fullName.c_str(), description.data());
     if (impl != nullptr)
     {
-        impl(heap, thread, this);
+        NativeArgs nativeArgs{};
+        nativeArgs.heap = heap;
+        nativeArgs.thread = thread;
+        nativeArgs.vm = this;
+        impl(nativeArgs);
     }
     else
     {

@@ -15,9 +15,9 @@
 
 #include "Float.h"
 
-JCALL void lib_java_lang_Float_floatToRawIntBits(NATIVE_ARGS)
+JCALL void lib_java_lang_Float_floatToRawIntBits(const NativeArgs& args)
 {
-    const Variable floatVal = thread->m_currentFrame->localVariables[0];
-    VM->checkType(floatVal, VariableType_FLOAT, thread);
-    thread->returnVar(Variable{VariableType_INT, floatVal.data});
+    const Variable floatVal = args.thread->m_currentFrame->localVariables[0];
+    args.vm->checkType(floatVal, VariableType_FLOAT, args.thread);
+    args.thread->returnVar(Variable{VariableType_INT, floatVal.data});
 }

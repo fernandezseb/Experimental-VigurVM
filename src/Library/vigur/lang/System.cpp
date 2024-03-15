@@ -15,17 +15,17 @@
 
 #include "System.h"
 
-JCALL void lib_vigur_lang_System_registerNatives(NATIVE_ARGS)
+JCALL void lib_vigur_lang_System_registerNatives(const NativeArgs& args)
 {
     registerNative("vigur/lang/System/printLn", "(Ljava/lang/String;)V", lib_vigur_lang_System_printLnString);
 }
 
-JCALL void lib_vigur_lang_System_printLnString(NATIVE_ARGS)
+JCALL void lib_vigur_lang_System_printLnString(const NativeArgs& args)
 {
-    Variable strVar = thread->m_currentFrame->localVariables[0];
-    const Object* obj = heap->getObject(strVar.data);
-    const FieldData* charArrRef = obj->getField("value", "[C", heap);
-    const Array* charArr = heap->getArray(charArrRef->data[0].data);
+    Variable strVar = args.thread->m_currentFrame->localVariables[0];
+    const Object* obj = args.heap->getObject(strVar.data);
+    const FieldData* charArrRef = obj->getField("value", "[C", args.heap);
+    const Array* charArr = args.heap->getArray(charArrRef->data[0].data);
     Platform::print((const char*)charArr->data, charArr->length);
     Platform::print("\n", 1);
 }

@@ -15,24 +15,24 @@
 
 #include "System.h"
 
-JCALL void lib_java_lang_System_registerNatives(NATIVE_ARGS)
+JCALL void lib_java_lang_System_registerNatives(const NativeArgs& args)
 {
     registerNative("java/lang/System/arraycopy", "(Ljava/lang/Object;ILjava/lang/Object;II)V", lib_java_lang_System_arraycopy);
     registerNative("java/lang/System/initProperties", "(Ljava/util/Properties;)Ljava/util/Properties;", lib_java_lang_System_initProperties);
     registerNative("java/lang/System/setIn0", "(Ljava/io/InputStream;)V", lib_java_lang_System_setIn0);
 }
 
-JCALL void lib_java_lang_System_arraycopy(NATIVE_ARGS)
+JCALL void lib_java_lang_System_arraycopy(const NativeArgs& args)
 {
-    const StackFrame* currentFrame = thread->m_currentFrame;
+    const StackFrame* currentFrame = args.thread->m_currentFrame;
     const Variable srcObjectRef = currentFrame->localVariables[0];
     const Variable srcPosVar = currentFrame->localVariables[1];
     const Variable dstObjectRef = currentFrame->localVariables[2];
     const Variable dstPosVar = currentFrame->localVariables[3];
     const Variable lengthVar = currentFrame->localVariables[4];
 
-    const Array* srcArray = heap->getArray(srcObjectRef.data);
-    const Array* dstArray = heap->getArray(dstObjectRef.data);
+    const Array* srcArray = args.heap->getArray(srcObjectRef.data);
+    const Array* dstArray = args.heap->getArray(dstObjectRef.data);
 
     // TODO: De-duplicate this code
     u1 bytes = 4;
@@ -52,24 +52,24 @@ JCALL void lib_java_lang_System_arraycopy(NATIVE_ARGS)
         lengthVar.data * bytes);
 }
 
-JCALL void lib_java_lang_System_initProperties(NATIVE_ARGS)
+JCALL void lib_java_lang_System_initProperties(const NativeArgs& args)
 {
-    const Variable propertiesObjectRef = thread->m_currentFrame->localVariables[0];
-    const Object* properties = heap->getObject(propertiesObjectRef.data);
+    const Variable propertiesObjectRef = args.thread->m_currentFrame->localVariables[0];
+    const Object* properties = args.heap->getObject(propertiesObjectRef.data);
     const MethodInfo* entryPoint = properties->classInfo->findMethodWithNameAndDescriptor("setProperty", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Object;");
 
-    thread->pushStackFrameWithoutParams(properties->classInfo, entryPoint);
-    thread->m_currentFrame->localVariables[0] = propertiesObjectRef;
-    thread->m_currentFrame->localVariables[1] = Variable{VariableType_REFERENCE,heap->createString("file.encoding", VM)};
-    thread->m_currentFrame->localVariables[2] = Variable{VariableType_REFERENCE,heap->createString("UTF-8", VM)};
-    VM->executeLoop(thread);
+    args.thread->pushStackFrameWithoutParams(properties->classInfo, entryPoint);
+    args.thread->m_currentFrame->localVariables[0] = propertiesObjectRef;
+    args.thread->m_currentFrame->localVariables[1] = Variable{VariableType_REFERENCE,args.heap->createString("file.encoding", args.vm)};
+    args.thread->m_currentFrame->localVariables[2] = Variable{VariableType_REFERENCE,args.heap->createString("UTF-8", args.vm)};
+    args.vm->executeLoop(args.thread);
 
-    thread->returnVar(propertiesObjectRef);
+    args.thread->returnVar(propertiesObjectRef);
 }
 
-JCALL void lib_java_lang_System_setIn0(NATIVE_ARGS)
+JCALL void lib_java_lang_System_setIn0(const NativeArgs& args)
 {
-    const ClassInfo* classInfo = VM->getClass("java/lang/System", thread);
+    const ClassInfo* classInfo = args.vm->getClass("java/lang/System", args.thread);
     const FieldInfo* field = classInfo->findField("in", "Ljava/io/InputStream;");
-    field->staticData->data = thread->m_currentFrame->localVariables[0].data;
+    field->staticData->data = args.thread->m_currentFrame->localVariables[0].data;
 }

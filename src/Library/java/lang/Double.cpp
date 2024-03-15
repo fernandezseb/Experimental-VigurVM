@@ -16,26 +16,26 @@
 #include "Double.h"
 
 
-JCALL void lib_java_lang_Double_doubleToRawLongBits(NATIVE_ARGS)
+JCALL void lib_java_lang_Double_doubleToRawLongBits(const NativeArgs& args)
 {
-    const Variable highByte = thread->m_currentFrame->localVariables[1];
-    const Variable lowByte = thread->m_currentFrame->localVariables[0];
-    VM->checkType(highByte, VariableType_DOUBLE, thread);
-    VM->checkType(lowByte, VariableType_DOUBLE, thread);
+    const Variable highByte = args.thread->m_currentFrame->localVariables[1];
+    const Variable lowByte = args.thread->m_currentFrame->localVariables[0];
+    args.vm->checkType(highByte, VariableType_DOUBLE, args.thread);
+    args.vm->checkType(lowByte, VariableType_DOUBLE, args.thread);
 
-    thread->returnVar(
+    args.thread->returnVar(
         Variable{VariableType_LONG, highByte.data},
         Variable{VariableType_LONG, lowByte.data}
         );
 }
 
-JCALL void lib_java_lang_Double_longBitsToDouble(NATIVE_ARGS) {
-    const Variable highByte = thread->m_currentFrame->localVariables[1];
-    const Variable lowByte = thread->m_currentFrame->localVariables[0];
-    VM->checkType(highByte, VariableType_LONG, thread);
-    VM->checkType(lowByte, VariableType_LONG, thread);
+JCALL void lib_java_lang_Double_longBitsToDouble(const NativeArgs& args) {
+    const Variable highByte = args.thread->m_currentFrame->localVariables[1];
+    const Variable lowByte = args.thread->m_currentFrame->localVariables[0];
+    args.vm->checkType(highByte, VariableType_LONG, args.thread);
+    args.vm->checkType(lowByte, VariableType_LONG, args.thread);
 
-    thread->returnVar(
+    args.thread->returnVar(
         Variable{VariableType_DOUBLE, highByte.data},
         Variable{VariableType_DOUBLE, lowByte.data}
         );

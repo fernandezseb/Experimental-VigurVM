@@ -15,15 +15,15 @@
 
 #include "Reflection.h"
 
-JCALL void lib_sun_reflect_Reflection_getCallerClass(NATIVE_ARGS) {
-    ClassInfo* previousClass = thread->m_stack.frames[thread->m_stack.frames.size()-2].previousClass;
-    const u4 ref = heap->createClassObject(previousClass, VM, previousClass->getName());
+JCALL void lib_sun_reflect_Reflection_getCallerClass(const NativeArgs& args) {
+    ClassInfo* previousClass = args.thread->m_stack.frames[args.thread->m_stack.frames.size()-2].previousClass;
+    const u4 ref = args.heap->createClassObject(previousClass, args.vm, previousClass->getName());
     const Variable classRef{VariableType_REFERENCE, ref};
-    thread->returnVar(classRef);
+    args.thread->returnVar(classRef);
 }
 
-JCALL void lib_sun_reflect_Reflection_getClassAccessFlags(NATIVE_ARGS)
+JCALL void lib_sun_reflect_Reflection_getClassAccessFlags(const NativeArgs& args)
 {
-    const ClassObject* classObject = heap->getClassObject(thread->m_currentFrame->localVariables[0].data);
-    thread->returnVar(Variable{VariableType_INT, classObject->classClassInfo->accessFlags});
+    const ClassObject* classObject = args.heap->getClassObject(args.thread->m_currentFrame->localVariables[0].data);
+    args.thread->returnVar(Variable{VariableType_INT, classObject->classClassInfo->accessFlags});
 }

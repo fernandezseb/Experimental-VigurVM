@@ -15,23 +15,23 @@
 
 #include "Object.h"
 
-JCALL void lib_java_lang_Object_registerNatives(NATIVE_ARGS)
+JCALL void lib_java_lang_Object_registerNatives(const NativeArgs& args)
 {
     registerNative("java/lang/Object/hashCode", "()I", lib_java_lang_Object_hashCode);
     registerNative("java/lang/Object/getClass", "()Ljava/lang/Class;", lib_java_lang_Object_getClass);
 }
 
-JCALL void lib_java_lang_Object_hashCode(NATIVE_ARGS)
+JCALL void lib_java_lang_Object_hashCode(const NativeArgs& args)
 {
-    const StackFrame* currentFrame = thread->m_currentFrame;
+    const StackFrame* currentFrame = args.thread->m_currentFrame;
     const Variable var{VariableType_INT, currentFrame->localVariables[0].data};
-    thread->returnVar(var);
+    args.thread->returnVar(var);
 }
 
-JCALL void lib_java_lang_Object_getClass(NATIVE_ARGS)
+JCALL void lib_java_lang_Object_getClass(const NativeArgs& args)
 {
-    const StackFrame* currentFrame = thread->m_currentFrame;
-    const Object* object = heap->getObject(currentFrame->localVariables[0].data);
-    const u4 classObject = heap->createClassObject(object->classInfo, VM, object->classInfo->getName());
-    thread->returnVar(Variable{VariableType_REFERENCE, classObject});
+    const StackFrame* currentFrame = args.thread->m_currentFrame;
+    const Object* object = args.heap->getObject(currentFrame->localVariables[0].data);
+    const u4 classObject = args.heap->createClassObject(object->classInfo, args.vm, object->classInfo->getName());
+    args.thread->returnVar(Variable{VariableType_REFERENCE, classObject});
 }

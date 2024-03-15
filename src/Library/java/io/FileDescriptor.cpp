@@ -15,14 +15,14 @@
 
 #include "FileDescriptor.h"
 
-JCALL void lib_java_io_FileDescriptor_initIDs(NATIVE_ARGS)
+JCALL void lib_java_io_FileDescriptor_initIDs(const NativeArgs& args)
 {
     printf("[Running initIDs from FileDescriptor]\n");
 }
 
-JCALL void lib_java_io_FileDescriptor_set(NATIVE_ARGS)
+JCALL void lib_java_io_FileDescriptor_set(const NativeArgs& args)
 {
-    const StackFrame* currentFrame = thread->m_currentFrame;
+    const StackFrame* currentFrame = args.thread->m_currentFrame;
     const Variable var = currentFrame->localVariables[0];
 
     FILE* filePtr = nullptr;
@@ -38,12 +38,12 @@ JCALL void lib_java_io_FileDescriptor_set(NATIVE_ARGS)
         filePtr = stderr;
         break;
     default:
-        thread->internalError("Filedescriptor not found");
+        args.thread->internalError("Filedescriptor not found");
     }
 
     u8 handle = reinterpret_cast<u8>(filePtr);
 
     const auto parts = reinterpret_cast<u4*>(&handle);
-    thread->returnVar(Variable{VariableType_LONG, parts[1]});
-    thread->returnVar(Variable{VariableType_LONG, parts[0]});
+    args.thread->returnVar(Variable{VariableType_LONG, parts[1]});
+    args.thread->returnVar(Variable{VariableType_LONG, parts[0]});
 }

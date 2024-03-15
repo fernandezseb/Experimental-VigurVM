@@ -15,37 +15,37 @@
 
 #include "AccessController.h"
 
-void lib_java_security_AccessController_doPriviliged(NATIVE_ARGS)
+void lib_java_security_AccessController_doPriviliged(const NativeArgs& args)
 {
-    const StackFrame* currentFrame = thread->m_currentFrame;
+    const StackFrame* currentFrame = args.thread->m_currentFrame;
     const Variable objectVar = currentFrame->localVariables[0];
-    const Object* method = heap->getObject(currentFrame->localVariables[0].data);
+    const Object* method = args.heap->getObject(currentFrame->localVariables[0].data);
     const MethodInfo* methodInfo = method->classInfo->findMethodWithNameAndDescriptor("run", "()Ljava/lang/Object;");
     ClassInfo* classInfo = method->classInfo;
 
-    thread->pushStackFrameWithoutParams(classInfo, methodInfo);
-    thread->m_currentFrame->localVariables[0] = objectVar;
+    args.thread->pushStackFrameWithoutParams(classInfo, methodInfo);
+    args.thread->m_currentFrame->localVariables[0] = objectVar;
 
-    VM->executeLoop(thread);
+    args.vm->executeLoop(args.thread);
 }
 
-void lib_java_security_AccessController_doPriviliged_PriviligedExceptionAction(NATIVE_ARGS)
+void lib_java_security_AccessController_doPriviliged_PriviligedExceptionAction(const NativeArgs& args)
 {
     // TODO: Catch checked exceptions and throw a PrivilegedActionException
     // when exception handling is properly implemented
-    const StackFrame* currentFrame = thread->m_currentFrame;
+    const StackFrame* currentFrame = args.thread->m_currentFrame;
     const Variable objectVar = currentFrame->localVariables[0];
-    const Object* method = heap->getObject(currentFrame->localVariables[0].data);
+    const Object* method = args.heap->getObject(currentFrame->localVariables[0].data);
     const MethodInfo* methodInfo = method->classInfo->findMethodWithNameAndDescriptor("run", "()Ljava/lang/Object;");
     ClassInfo* classInfo = method->classInfo;
 
-    thread->pushStackFrameWithoutParams(classInfo, methodInfo);
-    thread->m_currentFrame->localVariables[0] = objectVar;
+    args.thread->pushStackFrameWithoutParams(classInfo, methodInfo);
+    args.thread->m_currentFrame->localVariables[0] = objectVar;
 
-    VM->executeLoop(thread);
+    args.vm->executeLoop(args.thread);
 }
 
-void lib_java_security_AccessController_getStackAccessControlContext(NATIVE_ARGS)
+void lib_java_security_AccessController_getStackAccessControlContext(const NativeArgs& args)
 {
-    thread->returnVar(Variable{VariableType_REFERENCE, 0});
+    args.thread->returnVar(Variable{VariableType_REFERENCE, 0});
 }

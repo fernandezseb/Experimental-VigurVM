@@ -15,7 +15,7 @@
 
 #include "VM.h"
 
-JCALL void lib_sun_misc_VM_initialize(NATIVE_ARGS)
+JCALL void lib_sun_misc_VM_initialize(const NativeArgs& args)
 {
     // Do nothing yet
 }

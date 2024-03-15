@@ -26,7 +26,7 @@
     return heap->getObject(var.data);
 }
 
-JCALL void lib_java_lang_Thread_registerNatives(NATIVE_ARGS)
+JCALL void lib_java_lang_Thread_registerNatives(const NativeArgs& args)
 {
     registerNative("java/lang/Thread/currentThread", "()Ljava/lang/Thread;", lib_java_lang_Thread_currentThread);
     registerNative("java/lang/Thread/setPriority0", "(I)V", lib_java_lang_Thread_setPriority0);
@@ -34,30 +34,30 @@ JCALL void lib_java_lang_Thread_registerNatives(NATIVE_ARGS)
     registerNative("java/lang/Thread/start0", "()V", lib_java_lang_Thread_start0);
 }
 
-JCALL void lib_java_lang_Thread_currentThread(NATIVE_ARGS)
+JCALL void lib_java_lang_Thread_currentThread(const NativeArgs& args)
 {
-    StackFrame* returnFrame = thread->getTopFrameNonNative();
-    returnFrame->pushObject(thread->threadObject);
+    StackFrame* returnFrame = args.thread->getTopFrameNonNative();
+    returnFrame->pushObject(args.thread->threadObject);
 }
 
-JCALL void lib_java_lang_Thread_setPriority0(NATIVE_ARGS)
+JCALL void lib_java_lang_Thread_setPriority0(const NativeArgs& args)
 {
-    const Object* threadObject = getThisObjectReference(thread, heap, VM);
-    const StackFrame* currentFrame = thread->m_currentFrame;
+    const Object* threadObject = getThisObjectReference(args.thread, args.heap, args.vm);
+    const StackFrame* currentFrame = args.thread->m_currentFrame;
     const Variable argument = currentFrame->localVariables[1];
-    VM->checkType(argument, VariableType_INT, thread);
+    args.vm->checkType(argument, VariableType_INT, args.thread);
 
-    FieldData* field = threadObject->getField("priority", "I", heap);
+    FieldData* field = threadObject->getField("priority", "I", args.heap);
     field->data->data = argument.data;
 }
 
-JCALL void lib_java_lang_Thread_isAlive(NATIVE_ARGS)
+JCALL void lib_java_lang_Thread_isAlive(const NativeArgs& args)
 {
-    const StackFrame* currentFrame = thread->m_currentFrame;
+    const StackFrame* currentFrame = args.thread->m_currentFrame;
     const Variable var = currentFrame->localVariables[0];
-    VM->checkType(var, VariableType_REFERENCE, thread);
+    args.vm->checkType(var, VariableType_REFERENCE, args.thread);
     const u4 objectReference = var.data;
-    const VMThread* vmThread =  VM->getVMThreadByObjectRef(objectReference);
+    const VMThread* vmThread =  args.vm->getVMThreadByObjectRef(objectReference);
 
     bool alive = false;
     if (vmThread != nullptr)
@@ -65,17 +65,17 @@ JCALL void lib_java_lang_Thread_isAlive(NATIVE_ARGS)
         alive = vmThread->alive;
     }
 
-    StackFrame* returnFrame = thread->getTopFrameNonNative();
+    StackFrame* returnFrame = args.thread->getTopFrameNonNative();
     returnFrame->pushInt(alive? 1 : 0);
 }
 
-JCALL void lib_java_lang_Thread_start0(NATIVE_ARGS)
+JCALL void lib_java_lang_Thread_start0(const NativeArgs& args)
 {
-    const Object* threadObject = getThisObjectReference(thread, heap, VM);
-    const FieldData* runnableField = threadObject->getField("target", "Ljava/lang/Runnable;", heap);
+    const Object* threadObject = getThisObjectReference(args.thread, args.heap,args.vm);
+    const FieldData* runnableField = threadObject->getField("target", "Ljava/lang/Runnable;", args.heap);
     if (runnableField->data->data != 0)
     {
-        thread->internalError("Running of Runnables, not implemented yet");
+        args.thread->internalError("Running of Runnables, not implemented yet");
     } else
     {
         // TODO: Run the run method on a new thread

@@ -5,7 +5,14 @@
 #include "JavaHeap.h"
 #include "VMThread.h"
 
-typedef void (*nativeImplementation)(JavaHeap* heap, VMThread* thread, VM* VM);
+struct NativeArgs
+{
+    JavaHeap* heap;
+    VMThread* thread;
+    VM* vm;
+};
+
+typedef void (*nativeImplementation)(const NativeArgs& args);
 
 struct NativeMethod
 {
@@ -25,7 +32,7 @@ public:
 
 CCALL void registerNative(const char* name,
                         const char* descriptor,
-                        void (*nativeImplementation)(JavaHeap* heap, VMThread* thread, VM* VM));
+                        void (*nativeImplementation)(const NativeArgs& args));
 
 CCALL nativeImplementation findNativeMethod(const char* name,
     const char* descriptor);

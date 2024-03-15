@@ -18,7 +18,7 @@
 Native native;
 
 CCALL void registerNative(const char* name, const char* descriptor,
-    void(* nativeImplementation)(JavaHeap* heap, VMThread* thread, VM* VM))
+    void(* nativeImplementation)(const NativeArgs& args))
 {
     const NativeMethod nativeMethod{name, descriptor, nativeImplementation};
     native.nativeMethods.add(nativeMethod);

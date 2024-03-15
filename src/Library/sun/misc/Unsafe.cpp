@@ -17,7 +17,7 @@
 
 #include <bit>
 
-JCALL void lib_sun_misc_Unsafe_registerNatives(NATIVE_ARGS)
+JCALL void lib_sun_misc_Unsafe_registerNatives([[maybe_unused]]const NativeArgs& args)
 {
     printf("[Running sun/misc/Unsafe/registerNatives()V]\n");
     registerNative("sun/misc/Unsafe/arrayBaseOffset", "(Ljava/lang/Class;)I", lib_sun_misc_Unsafe_arrayBaseOffset);
@@ -29,17 +29,17 @@ JCALL void lib_sun_misc_Unsafe_registerNatives(NATIVE_ARGS)
     registerNative("sun/misc/Unsafe/getIntVolatile", "(Ljava/lang/Object;J)I", lib_sun_misc_Unsafe_getIntVolatile);
 }
 
-JCALL void lib_sun_misc_Unsafe_arrayBaseOffset(NATIVE_ARGS)
+JCALL void lib_sun_misc_Unsafe_arrayBaseOffset(const NativeArgs& args)
 {
     constexpr u4 offset = offsetof(Array, data);
     constexpr u4 val = std::bit_cast<u4>(offset);
-    thread->returnVar(Variable{VariableType_INT,  val});
+    args.thread->returnVar(Variable{VariableType_INT,  val});
 }
 
-JCALL void lib_sun_misc_Unsafe_arrayIndexScale(NATIVE_ARGS)
+JCALL void lib_sun_misc_Unsafe_arrayIndexScale(const NativeArgs& args)
 {
-    const Variable classObjectRef = thread->m_currentFrame->localVariables[1];
-    const ClassObject* classObject = heap->getClassObject(classObjectRef.data);
+    const Variable classObjectRef = args.thread->m_currentFrame->localVariables[1];
+    const ClassObject* classObject = args.heap->getClassObject(classObjectRef.data);
     u4 length = 4;
     if (classObject->name[1] == 'C')
     {
@@ -48,23 +48,23 @@ JCALL void lib_sun_misc_Unsafe_arrayIndexScale(NATIVE_ARGS)
     {
         length = 8;
     }
-    thread->returnVar(Variable{VariableType_INT, length});
+    args.thread->returnVar(Variable{VariableType_INT, length});
 }
 
-JCALL void lib_sun_misc_Unsafe_addressSize(NATIVE_ARGS)
+JCALL void lib_sun_misc_Unsafe_addressSize(const NativeArgs& args)
 {
     constexpr Variable size{VariableType_INT, 64};
-    thread->returnVar(size);
+    args.thread->returnVar(size);
 }
 
-JCALL void lib_sun_misc_Unsafe_objectFieldOffset(NATIVE_ARGS)
+JCALL void lib_sun_misc_Unsafe_objectFieldOffset(const NativeArgs& args)
 {
-    const Variable fieldObjectRef = thread->m_currentFrame->localVariables[1];
-    const Object* fieldObject = heap->getObject(fieldObjectRef.data);
-    const FieldData* slotField = fieldObject->getField("slot", "I", heap);
+    const Variable fieldObjectRef = args.thread->m_currentFrame->localVariables[1];
+    const Object* fieldObject = args.heap->getObject(fieldObjectRef.data);
+    const FieldData* slotField = fieldObject->getField("slot", "I", args.heap);
     const u4 slot = slotField->data->data;
-    const FieldData* classField = fieldObject->getField("clazz", "Ljava/lang/Class;", heap);
-    ClassObject* classObject = heap->getClassObject(classField->data->data);
+    const FieldData* classField = fieldObject->getField("clazz", "Ljava/lang/Class;", args.heap);
+    ClassObject* classObject = args.heap->getClassObject(classField->data->data);
     u4 index = 0;
     // Ignore static fields
     for (u4 currentField = 0; currentField < slot; ++currentField)
@@ -77,65 +77,65 @@ JCALL void lib_sun_misc_Unsafe_objectFieldOffset(NATIVE_ARGS)
     }
     constexpr u4 baseOffset = offsetof(Object, fields);
     const u4 fieldOffset = baseOffset + (index * sizeof(FieldData));
-    thread->returnVar(Variable{VariableType_LONG, 0}, Variable{VariableType_LONG, fieldOffset});
+    args.thread->returnVar(Variable{VariableType_LONG, 0}, Variable{VariableType_LONG, fieldOffset});
 }
 
-JCALL void lib_sun_misc_Unsafe_compareAndSwapObject(NATIVE_ARGS)
+JCALL void lib_sun_misc_Unsafe_compareAndSwapObject(const NativeArgs& args)
 {
-    const Variable oObjectRef = thread->m_currentFrame->localVariables[1];
-    const Object* oObject = heap->getObject(oObjectRef.data);
-    const u8 offsetVar = ((static_cast<u8>(thread->m_currentFrame->localVariables[2].data) << 32) | static_cast<u8>(thread->m_currentFrame->localVariables[3].data));
-    const Variable expectedObjectRef = thread->m_currentFrame->localVariables[4];
-    const Variable xObjectRef = thread->m_currentFrame->localVariables[5];
+    const Variable oObjectRef = args.thread->m_currentFrame->localVariables[1];
+    const Object* oObject = args.heap->getObject(oObjectRef.data);
+    const u8 offsetVar = ((static_cast<u8>(args.thread->m_currentFrame->localVariables[2].data) << 32) | static_cast<u8>(args.thread->m_currentFrame->localVariables[3].data));
+    const Variable expectedObjectRef = args.thread->m_currentFrame->localVariables[4];
+    const Variable xObjectRef = args.thread->m_currentFrame->localVariables[5];
     constexpr u4 baseOffset = offsetof(Object, fields);
     const u4 fieldIndex = (offsetVar-baseOffset)/sizeof(FieldData);
     if (fieldIndex >= oObject->fields.size())
     {
-        thread->internalError("Too big offset");
+        args.thread->internalError("Too big offset");
     }
     const FieldData* fieldData = &oObject->fields[fieldIndex];
     if (fieldData->data->data == expectedObjectRef.data)
     {
         fieldData->data->data = xObjectRef.data;
-        thread->returnVar(Variable{VariableType_INT, 1u});
+        args.thread->returnVar(Variable{VariableType_INT, 1u});
     } else
     {
-        thread->returnVar(Variable{VariableType_INT, 0u});
+        args.thread->returnVar(Variable{VariableType_INT, 0u});
     }
 }
 
-JCALL void lib_sun_misc_Unsafe_compareAndSwapInt(NATIVE_ARGS)
+JCALL void lib_sun_misc_Unsafe_compareAndSwapInt(const NativeArgs& args)
 {
-    const Variable oObjectRef = thread->m_currentFrame->localVariables[1];
-    const Object* oObject = heap->getObject(oObjectRef.data);
-    const u8 offsetVar = ((static_cast<u8>(thread->m_currentFrame->localVariables[2].data) << 32) | static_cast<u8>(thread->m_currentFrame->localVariables[3].data));
-    const Variable expectedIntVar = thread->m_currentFrame->localVariables[4];
-    const Variable xIntVar = thread->m_currentFrame->localVariables[5];
+    const Variable oObjectRef = args.thread->m_currentFrame->localVariables[1];
+    const Object* oObject = args.heap->getObject(oObjectRef.data);
+    const u8 offsetVar = ((static_cast<u8>(args.thread->m_currentFrame->localVariables[2].data) << 32) | static_cast<u8>(args.thread->m_currentFrame->localVariables[3].data));
+    const Variable expectedIntVar = args.thread->m_currentFrame->localVariables[4];
+    const Variable xIntVar = args.thread->m_currentFrame->localVariables[5];
     constexpr u4 baseOffset = offsetof(Object, fields);
     const u4 fieldIndex = (offsetVar-baseOffset)/sizeof(FieldData);
     if (fieldIndex >= oObject->fields.size())
     {
-        thread->internalError("Too big offset");
+        args.thread->internalError("Too big offset");
     }
     const FieldData* fieldData = &oObject->fields[fieldIndex];
     if (fieldData->data->data == expectedIntVar.data)
     {
         fieldData->data->data = xIntVar.data;
-        thread->returnVar(Variable{VariableType_INT, 1u});
+        args.thread->returnVar(Variable{VariableType_INT, 1u});
     } else
     {
-        thread->returnVar(Variable{VariableType_INT, 0u});
+        args.thread->returnVar(Variable{VariableType_INT, 0u});
     }
 }
 
-JCALL void lib_sun_misc_Unsafe_getIntVolatile(NATIVE_ARGS)
+JCALL void lib_sun_misc_Unsafe_getIntVolatile(const NativeArgs& args)
 {
     constexpr u4 baseOffset = offsetof(Object, fields);
-    const Variable oObjectRef = thread->m_currentFrame->localVariables[1];
-    const Object* oObject = heap->getObject(oObjectRef.data);
-    const u8 offset = ((static_cast<u8>(thread->m_currentFrame->localVariables[2].data) << 32) | static_cast<u8>(thread->m_currentFrame->localVariables[3].data));
+    const Variable oObjectRef = args.thread->m_currentFrame->localVariables[1];
+    const Object* oObject = args.heap->getObject(oObjectRef.data);
+    const u8 offset = ((static_cast<u8>(args.thread->m_currentFrame->localVariables[2].data) << 32) | static_cast<u8>(args.thread->m_currentFrame->localVariables[3].data));
     const u4 fieldOffset = (offset-baseOffset)/sizeof(FieldData);
     const FieldData fieldData = oObject->fields[fieldOffset];
 
-    thread->returnVar(Variable{VariableType_INT, fieldData.data->data});
+    args.thread->returnVar(Variable{VariableType_INT, fieldData.data->data});
 }

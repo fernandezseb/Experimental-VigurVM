@@ -15,7 +15,7 @@
 
 #include "FileInputStream.h"
 
-JCALL void lib_java_io_FileInputStream_initIDs(NATIVE_ARGS)
+JCALL void lib_java_io_FileInputStream_initIDs(const NativeArgs& args)
 {
     printf("[Running initIDs from FileInputStream]\n");
 }

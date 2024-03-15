@@ -15,7 +15,7 @@
 
 #include "Throwable.h"
 
-JCALL void lib_java_lang_Throwable_fillInStackTrace(NATIVE_ARGS)
+JCALL void lib_java_lang_Throwable_fillInStackTrace(const NativeArgs& args)
 {
-    thread->returnVar(Variable{VariableType_REFERENCE, thread->m_currentFrame->localVariables[0].data});
+    args.thread->returnVar(Variable{VariableType_REFERENCE, args.thread->m_currentFrame->localVariables[0].data});
 }

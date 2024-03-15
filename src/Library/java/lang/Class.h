@@ -2,12 +2,12 @@
 
 #include "Library/NativeDefs.h"
 
-JCALL void lib_java_lang_Class_registerNatives(NATIVE_ARGS);
-JCALL void lib_java_lang_Class_getPrimitiveClass(NATIVE_ARGS);
-JCALL void lib_java_lang_Class_desiredAssertionStatus0(NATIVE_ARGS);
-JCALL void lib_java_lang_Class_getName0(NATIVE_ARGS);
-JCALL void lib_java_lang_Class_forName0(NATIVE_ARGS);
-JCALL void lib_java_lang_Class_getDeclaredFields0(NATIVE_ARGS);
-JCALL void lib_java_lang_Class_isPrimitive(NATIVE_ARGS);
-JCALL void lib_java_lang_Class_isAssignableFrom(NATIVE_ARGS);
-JCALL void lib_java_lang_Class_isInterface(NATIVE_ARGS);
+JCALL void lib_java_lang_Class_registerNatives(const NativeArgs& args);
+JCALL void lib_java_lang_Class_getPrimitiveClass(const NativeArgs& args);
+JCALL void lib_java_lang_Class_desiredAssertionStatus0(const NativeArgs& args);
+JCALL void lib_java_lang_Class_getName0(const NativeArgs& args);
+JCALL void lib_java_lang_Class_forName0(const NativeArgs& args);
+JCALL void lib_java_lang_Class_getDeclaredFields0(const NativeArgs& args);
+JCALL void lib_java_lang_Class_isPrimitive(const NativeArgs& args);
+JCALL void lib_java_lang_Class_isAssignableFrom(const NativeArgs& args);
+JCALL void lib_java_lang_Class_isInterface(const NativeArgs& args);
