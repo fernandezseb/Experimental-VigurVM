@@ -57,6 +57,7 @@ public:
         return nullptr;
     }
     bool isSubclass(VMThread* thread, const ClassInfo* targetClass, ClassInfo* subClass);
+    FieldInfo* findField(ClassInfo* classInfo, const char* name, const char* descriptor, VMThread* thread);
 private:
     void initSystemClass(ClassInfo* class_info, VMThread* vm_thread);
     static constexpr std::array<Instruction,121> m_instructions{{

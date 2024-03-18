@@ -39,14 +39,17 @@ static u2 readShort(VMThread* thread)
 
 void getstatic(const InstructionInput& input)
 {
-    uint16_t index = readShort(input.thread);
-    CPFieldRef* fieldRef =  input.thread->m_currentFrame->constantPool->getFieldRef(index);
-    CPClassInfo* classInfo =  input.thread->m_currentFrame->constantPool->getClassInfo(fieldRef->classIndex);
-    CPNameAndTypeInfo* nameAndType = input.thread->m_currentFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
+    const uint16_t index = readShort(input.thread);
+    const CPFieldRef* fieldRef =  input.thread->m_currentFrame->constantPool->getFieldRef(index);
+    const CPClassInfo* classInfo =  input.thread->m_currentFrame->constantPool->getClassInfo(fieldRef->classIndex);
+    const CPNameAndTypeInfo* nameAndType = input.thread->m_currentFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
     const std::string_view className = input.thread->m_currentFrame->constantPool->getString(classInfo->nameIndex);
     ClassInfo* targetClass = input.vm->getClass(className.data(), input.thread);
-    FieldInfo* targetField = targetClass->findField(input.thread->m_currentFrame->constantPool->getString(nameAndType->nameIndex).data(),
-        input.thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex).data());
+    const std::string_view fieldName = input.thread->m_currentFrame->constantPool->getString(nameAndType->nameIndex);
+    const FieldInfo* targetField = input.vm->findField(targetClass,
+        fieldName.data(),
+        input.thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex).data(),
+        input.thread);
     const std::string_view descriptor = input.thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex);
     const u1 varCount = VM::getDescriptorVarCategory(descriptor);
     // TODO: Check type
@@ -69,8 +72,10 @@ void putstatic(const InstructionInput& input)
     CPNameAndTypeInfo* nameAndType = input.thread->m_currentFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
     const std::string_view className = input.thread->m_currentFrame->constantPool->getString(classInfo->nameIndex);
     ClassInfo* targetClass = input.vm->getClass(className.data(), input.thread);
-    FieldInfo* targetField = targetClass->findField(input.thread->m_currentFrame->constantPool->getString(nameAndType->nameIndex).data(),
-        input.thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex).data());
+    FieldInfo* targetField = input.vm->findField(targetClass,
+        input.thread->m_currentFrame->constantPool->getString(nameAndType->nameIndex).data(),
+        input.thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex).data(),
+        input.thread);
     const std::string_view descriptor = input.thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex);
     const u1 varCount = VM::getDescriptorVarCategory(descriptor);
     // With cat 2 vars, var should be the LSB

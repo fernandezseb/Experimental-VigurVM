@@ -7,19 +7,19 @@ public class LibraryTest {
          * Class tests
          */
         if (!Number.class.isAssignableFrom(Integer.class)) {
-            throw new RuntimeException();
+            throw new TestValidationException();
         }
 
         if (Integer.class.isAssignableFrom(Number.class)) {
-            throw new RuntimeException();
+            throw new TestValidationException();
         }
 
         if (Integer.class.isInterface()) {
-            throw new RuntimeException();
+            throw new TestValidationException();
         }
 
         if (!Serializable.class.isInterface()) {
-            throw new RuntimeException();
+            throw new TestValidationException();
         }
 
 

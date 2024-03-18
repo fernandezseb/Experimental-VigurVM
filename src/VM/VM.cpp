@@ -378,6 +378,35 @@ void VM::createArgsArray(const VMThread* thread)
 
 }
 
+FieldInfo* VM::findField(ClassInfo* classInfo, const char* name, const char* descriptor, VMThread* thread)
+{
+    FieldInfo* targetField = classInfo->findField(name, descriptor);
+    if (targetField == nullptr)
+    {
+        ClassInfo* currentClass = classInfo;
+
+        while(currentClass != nullptr && currentClass->superClass != 0)
+        {
+            CPClassInfo* cpClassInfo = currentClass->constantPool->getClassInfo(currentClass->superClass);
+            std::string_view superClassName =  currentClass->constantPool->getString(cpClassInfo->nameIndex);
+            ClassInfo* superClass =  getClass(superClassName, thread);
+            targetField = superClass->findField(name, descriptor);
+            if (targetField != nullptr)
+            {
+                break;
+            }
+            currentClass = superClass;
+        }
+
+        if (targetField == nullptr)
+        {
+            thread->internalError("Static field not found");
+        }
+    }
+
+    return targetField;
+}
+
 void VM::runMain()
 {
     VMThread* mainThread = &m_mainThread;
