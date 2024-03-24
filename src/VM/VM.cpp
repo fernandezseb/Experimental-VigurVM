@@ -268,7 +268,7 @@ void VM::executeLoop(VMThread* thread)
     while(thread->m_stack.frames.size() > depth)
     {
         uint8_t opcode = readByte(thread);
-        printf("Running instruction with opcode: 0x%0x ", opcode);
+        // printf("Running instruction with opcode: 0x%0x ", opcode);
 
         bool found = false;
 
@@ -276,7 +276,7 @@ void VM::executeLoop(VMThread* thread)
             if (((u1)instruction.opcode) == opcode)
             {
                 found = true;
-                printf("%s\n", instruction.name.data());
+                // printf("%s\n", instruction.name.data());
                 uint8_t* args = 0;
                 if (instruction.args > 0) {
                     args = (uint8_t*)Platform::allocateMemory(instruction.args, 0);

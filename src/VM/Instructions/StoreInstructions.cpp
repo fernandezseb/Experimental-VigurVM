@@ -40,6 +40,14 @@ void istore_i(const InstructionInput& input)
     input.thread->m_currentFrame->localVariables[input.arg] = refVar;
 }
 
+void lstore_i(const InstructionInput& input)
+{
+    const i8 longVal = input.thread->m_currentFrame->popLong();
+    const auto parts = reinterpret_cast<const u4*>(&longVal);
+    input.thread->m_currentFrame->localVariables[input.arg] = Variable{VariableType_LONG, parts[1]};
+    input.thread->m_currentFrame->localVariables[input.arg+1] = Variable{VariableType_LONG, parts[0]};
+}
+
 void astore_i(const InstructionInput& input)
 {
     const Variable refVar = input.thread->m_currentFrame->popOperand();

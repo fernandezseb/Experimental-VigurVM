@@ -29,6 +29,8 @@ JCALL void lib_sun_misc_Unsafe_registerNatives([[maybe_unused]]const NativeArgs&
     registerNative("sun/misc/Unsafe/compareAndSwapInt", "(Ljava/lang/Object;JII)Z", lib_sun_misc_Unsafe_compareAndSwapInt);
     registerNative("sun/misc/Unsafe/getIntVolatile", "(Ljava/lang/Object;J)I", lib_sun_misc_Unsafe_getIntVolatile);
     registerNative("sun/misc/Unsafe/allocateMemory", "(J)J", lib_sun_misc_Unsafe_allocateMemory);
+    registerNative("sun/misc/Unsafe/putLong", "(JJ)V", lib_sun_misc_Unsafe_putLong);
+    registerNative("sun/misc/Unsafe/getByte", "(J)B", lib_sun_misc_Unsafe_getByte);
 }
 
 JCALL void lib_sun_misc_Unsafe_arrayBaseOffset(const NativeArgs& args)
@@ -149,4 +151,23 @@ JCALL void lib_sun_misc_Unsafe_allocateMemory(const NativeArgs& args)
     const auto parts = reinterpret_cast<const u4*>(&address);
     args.thread->returnVar(Variable{VariableType_LONG, parts[1]},
         Variable{VariableType_LONG, parts[0]});
+}
+
+JCALL void lib_sun_misc_Unsafe_putLong(const NativeArgs& args)
+{
+    const u8 addr = ((static_cast<u8>(args.thread->m_currentFrame->localVariables[1].data) << 32) | static_cast<u8>(args.thread->m_currentFrame->localVariables[2].data));
+    const u8 x = ((static_cast<u8>(args.thread->m_currentFrame->localVariables[3].data) << 32) | static_cast<u8>(args.thread->m_currentFrame->localVariables[4].data));
+
+    const auto memLocation = reinterpret_cast<u8*>(addr);
+    *memLocation = x;
+}
+
+JCALL void lib_sun_misc_Unsafe_getByte(const NativeArgs& args)
+{
+    const u8 addr = ((static_cast<u8>(args.thread->m_currentFrame->localVariables[1].data) << 32) | static_cast<u8>(args.thread->m_currentFrame->localVariables[2].data));
+    const auto memLocation = reinterpret_cast<i1*>(addr);
+
+    const i1 val = *memLocation;
+    const i4 valExtended = val;
+    args.thread->returnVar(Variable{VariableType_INT, std::bit_cast<u4>(valExtended)});
 }
