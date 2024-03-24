@@ -16,6 +16,7 @@
 #include "Unsafe.h"
 
 #include <bit>
+#include <cstdlib>
 
 JCALL void lib_sun_misc_Unsafe_registerNatives([[maybe_unused]]const NativeArgs& args)
 {
