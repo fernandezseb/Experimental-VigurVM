@@ -30,6 +30,8 @@ add_library(Library
         sun/misc/VM.cpp
         sun/reflect/Reflection.h
         sun/reflect/Reflection.cpp
+        sun/reflect/NativeConstructorAccessorImpl.h
+        sun/reflect/NativeConstructorAccessorImpl.cpp
         java/security/AccessController.h
         java/security/AccessController.cpp
         vigur/lang/System.h

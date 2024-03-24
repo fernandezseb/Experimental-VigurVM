@@ -47,6 +47,8 @@ void VM::start(std::string_view commandLineName)
     getClass("java/lang/ThreadGroup", &m_mainThread);
     getClass("java/lang/reflect/Field", &m_mainThread);
     getClass("java/lang/reflect/AccessibleObject", &m_mainThread);
+    getClass("java/lang/reflect/Executable", &m_mainThread);
+    getClass("java/lang/reflect/Constructor", &m_mainThread);
     getClass("java/io/PrintStream", &m_mainThread);
     getClass("java/io/FilterOutputStream", &m_mainThread);
     getClass("java/io/OutputStream", &m_mainThread);
@@ -150,6 +152,10 @@ std::vector<Variable> VM::createVariableForDescriptor(std::string_view descripto
     } else if (descriptor[0] == 'F') {
         constexpr Variable variable{VariableType_FLOAT};
         variables.push_back(variable);
+    } else if (descriptor[0] == 'C')
+    {
+        constexpr Variable variable{VariableType_CHAR};
+        variables.push_back(variable);
     }
     else
     {
@@ -171,7 +177,6 @@ u1 VM::getDescriptorVarCategory(std::string_view descriptor) noexcept
 
 void VM::initStaticFields(ClassInfo* class_info, [[maybe_unused]] VMThread* thread)
 {
-    // TODO: Do it for superclasses as well?
     u2 staticFieldsCount = 0;
     for (u2 currentField = 0; currentField < class_info->fieldsCount; ++currentField)
     {
@@ -324,6 +329,10 @@ void VM::runStaticInitializer(ClassInfo* classInfo, VMThread* thread)
 
 ClassInfo* VM::getClass(std::string_view className, VMThread* thread)
 {
+    if (className.starts_with("["))
+    {
+        return nullptr;
+    }
     ClassInfo* classInfo = m_heap.getClassByName(className);
     if (classInfo == nullptr) {
         Memory *memory = new Memory(MIB(1), MIB(30));

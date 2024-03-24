@@ -8,4 +8,5 @@ void istore_i(const InstructionInput& input);
 void astore_i(const InstructionInput& input);
 void iastore(const InstructionInput& input);
 void aastore(const InstructionInput& input);
+void bastore(const InstructionInput& input);
 void castore(const InstructionInput& input);

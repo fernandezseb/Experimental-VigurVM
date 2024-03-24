@@ -114,6 +114,20 @@ void aaload(const InstructionInput& input)
     input.thread->m_currentFrame->operands.push_back(dataVar);
 }
 
+void baload(const InstructionInput& input)
+{
+    const Variable index = input.thread->m_currentFrame->popOperand();
+    const Variable arrayRef = input.thread->m_currentFrame->popOperand();
+
+    const Array* array = input.heap->getArray(arrayRef.data);
+    const i4* intArray = (i4*) array->data;
+
+    const i4 data = intArray[index.data];
+
+    const Variable dataVar{VariableType_INT, std::bit_cast<u4>(data)};
+    input.thread->m_currentFrame->operands.push_back(dataVar);
+}
+
 void caload(const InstructionInput& input)
 {
     const Variable index = input.thread->m_currentFrame->popOperand();

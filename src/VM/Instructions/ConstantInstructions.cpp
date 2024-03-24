@@ -112,11 +112,7 @@ void loadConstant(VMThread* thread, const u4 index, JavaHeap* heap, VM* VM)
         const auto* classInfo = static_cast<const CPClassInfo*>(cpItem);
         std::string_view className = thread->m_currentClass->constantPool->getString(classInfo->nameIndex);
         ClassInfo* classInfoPtr{nullptr};
-        // TODO: Improve Array class support
-        if (!className.starts_with("["))
-        {
-            classInfoPtr = VM->getClass(className.data(), thread);
-        }
+        classInfoPtr = VM->getClass(className.data(), thread);
         const u4 classObjectRef =  heap->createClassObject(classInfoPtr, VM, className);
         const Variable classObjectVar{VariableType_REFERENCE, classObjectRef};
         thread->m_currentFrame->operands.push_back(classObjectVar);

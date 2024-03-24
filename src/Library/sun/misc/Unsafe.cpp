@@ -27,6 +27,7 @@ JCALL void lib_sun_misc_Unsafe_registerNatives([[maybe_unused]]const NativeArgs&
     registerNative("sun/misc/Unsafe/compareAndSwapObject", "(Ljava/lang/Object;JLjava/lang/Object;Ljava/lang/Object;)Z", lib_sun_misc_Unsafe_compareAndSwapObject);
     registerNative("sun/misc/Unsafe/compareAndSwapInt", "(Ljava/lang/Object;JII)Z", lib_sun_misc_Unsafe_compareAndSwapInt);
     registerNative("sun/misc/Unsafe/getIntVolatile", "(Ljava/lang/Object;J)I", lib_sun_misc_Unsafe_getIntVolatile);
+    registerNative("sun/misc/Unsafe/allocateMemory", "(J)J", lib_sun_misc_Unsafe_allocateMemory);
 }
 
 JCALL void lib_sun_misc_Unsafe_arrayBaseOffset(const NativeArgs& args)
@@ -138,4 +139,13 @@ JCALL void lib_sun_misc_Unsafe_getIntVolatile(const NativeArgs& args)
     const FieldData fieldData = oObject->fields[fieldOffset];
 
     args.thread->returnVar(Variable{VariableType_INT, fieldData.data->data});
+}
+
+JCALL void lib_sun_misc_Unsafe_allocateMemory(const NativeArgs& args)
+{
+    const u8 size = ((static_cast<u8>(args.thread->m_currentFrame->localVariables[1].data) << 32) | static_cast<u8>(args.thread->m_currentFrame->localVariables[2].data));
+    const u8 address = reinterpret_cast<const u8> (malloc(size));
+    const auto parts = reinterpret_cast<const u4*>(&address);
+    args.thread->returnVar(Variable{VariableType_LONG, parts[1]},
+        Variable{VariableType_LONG, parts[0]});
 }

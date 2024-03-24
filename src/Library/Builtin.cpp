@@ -30,6 +30,7 @@
 #include "sun/misc/Unsafe.h"
 #include "sun/misc/VM.h"
 #include "sun/reflect/Reflection.h"
+#include "sun/reflect/NativeConstructorAccessorImpl.h"
 #include "vigur/lang/System.h"
 
 void registerBuiltinRegisterNatives()
@@ -61,4 +62,5 @@ void registerBuiltinRegisterNatives()
     // Reflection API
     registerNative("sun/reflect/Reflection/getCallerClass", "()Ljava/lang/Class;", lib_sun_reflect_Reflection_getCallerClass);
     registerNative("sun/reflect/Reflection/getClassAccessFlags", "(Ljava/lang/Class;)I", lib_sun_reflect_Reflection_getClassAccessFlags);
+    registerNative("sun/reflect/NativeConstructorAccessorImpl/newInstance0", "(Ljava/lang/reflect/Constructor;[Ljava/lang/Object;)Ljava/lang/Object;", lib_sun_reflect_NativeConstructorAccessorImpl_newInstance0);
 }

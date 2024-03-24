@@ -19,6 +19,7 @@ JCALL void lib_java_lang_Object_registerNatives(const NativeArgs& args)
 {
     registerNative("java/lang/Object/hashCode", "()I", lib_java_lang_Object_hashCode);
     registerNative("java/lang/Object/getClass", "()Ljava/lang/Class;", lib_java_lang_Object_getClass);
+    registerNative("java/lang/Object/clone", "()Ljava/lang/Object;", lib_java_lang_Object_clone);
 }
 
 JCALL void lib_java_lang_Object_hashCode(const NativeArgs& args)
@@ -34,4 +35,20 @@ JCALL void lib_java_lang_Object_getClass(const NativeArgs& args)
     const Object* object = args.heap->getObject(currentFrame->localVariables[0].data);
     const u4 classObject = args.heap->createClassObject(object->classInfo, args.vm, object->classInfo->getName());
     args.thread->returnVar(Variable{VariableType_REFERENCE, classObject});
+}
+
+JCALL void lib_java_lang_Object_clone(const NativeArgs& args)
+{
+    const Reference* reference = args.heap->getReference(args.thread->m_currentFrame->localVariables[0].data);
+    if (reference->type == ARRAY)
+    {
+        const Array* array = reference->getArray();
+        const u4 cloneRef = args.heap->createArray(array->arrayType, array->length);
+        const Array* clone = args.heap->getArray(cloneRef);
+        // TODO: Do the copy of the data
+        args.thread->returnVar(Variable{VariableType_REFERENCE, cloneRef});
+        printf("");
+    } else if (reference->type == CLASSOBJECT || reference->type == OBJECT) {
+        args.thread->internalError("Not implemented yet");
+    }
 }

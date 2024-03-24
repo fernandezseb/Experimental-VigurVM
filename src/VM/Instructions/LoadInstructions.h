@@ -11,4 +11,5 @@ void lload_i(const InstructionInput& input);
 void fload_i(const InstructionInput& input);
 void iaload(const InstructionInput& input);
 void aaload(const InstructionInput& input);
+void baload(const InstructionInput& input);
 void caload(const InstructionInput& input);

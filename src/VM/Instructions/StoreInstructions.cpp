@@ -79,6 +79,17 @@ void aastore(const InstructionInput& input)
     arrData[index.data] = value.data;
 }
 
+void bastore(const InstructionInput& input)
+{
+    Variable value = input.thread->m_currentFrame->popOperand();
+    const Variable index = input.thread->m_currentFrame->popOperand();
+    const Variable arrayref = input.thread->m_currentFrame->popOperand();
+
+    const Array* array = input.heap->getArray(arrayref.data);
+    i4* intArray = reinterpret_cast<i4*>(array->data);
+    intArray[index.data] = *reinterpret_cast<i4*>(&value.data);
+}
+
 void castore(const InstructionInput& input)
 {
     StackFrame* currentFrame = input.thread->m_currentFrame;

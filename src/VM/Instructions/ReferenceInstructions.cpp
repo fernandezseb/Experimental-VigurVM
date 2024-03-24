@@ -194,38 +194,47 @@ static void invokeVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread
         }
 
         // Look for method based on the object
-        const Object* object = heap->getObject(ref.data);
-        targetClass = object->classInfo;
-        MethodInfo* foundMethod = targetClass->findMethodWithNameAndDescriptor(methodInfo->name.data(),
-            classInfo->constantPool->getString(methodInfo->descriptorIndex).data());
-        if (foundMethod != nullptr)
-        {
-            targetMethod = foundMethod;
-        } else
-        {
-
-            ClassInfo* currentClass = targetClass;
-            while (currentClass->superClass != 0) {
-                CPClassInfo* ci = currentClass->constantPool->getClassInfo(currentClass->superClass);
-                [[maybe_unused]] const std::string_view superClass = currentClass->constantPool->getString(ci->nameIndex);
-                currentClass = VM->getClass(superClass.data(), thread);
-                if (currentClass != nullptr) {
-                    foundMethod = currentClass->findMethodWithNameAndDescriptor(methodInfo->name.data(),
+        const Reference* reference = heap->getReference(ref.data);
+        if (reference->type == OBJECT || reference->type == CLASSOBJECT) {
+            const Object* object = reference->getObject();
+            targetClass = object->classInfo;
+            MethodInfo* foundMethod = targetClass->findMethodWithNameAndDescriptor(methodInfo->name.data(),
                 classInfo->constantPool->getString(methodInfo->descriptorIndex).data());
-                    if (foundMethod != nullptr) {
-                        targetClass = currentClass;
-                        targetMethod = foundMethod;
+            if (foundMethod != nullptr)
+            {
+                targetMethod = foundMethod;
+            } else
+            {
+
+                ClassInfo* currentClass = targetClass;
+                while (currentClass->superClass != 0) {
+                    CPClassInfo* ci = currentClass->constantPool->getClassInfo(currentClass->superClass);
+                    [[maybe_unused]] const std::string_view superClass = currentClass->constantPool->getString(ci->nameIndex);
+                    currentClass = VM->getClass(superClass.data(), thread);
+                    if (currentClass != nullptr) {
+                        foundMethod = currentClass->findMethodWithNameAndDescriptor(methodInfo->name.data(),
+                    classInfo->constantPool->getString(methodInfo->descriptorIndex).data());
+                        if (foundMethod != nullptr) {
+                            targetClass = currentClass;
+                            targetMethod = foundMethod;
+                            break;
+                        }
+                    } else {
                         break;
                     }
-                } else {
-                    break;
+                }
+
+                if (foundMethod == nullptr) {
+                    thread->internalError("Failed to get the correct method on the object.\n"
+                                    " Searching on superclass and generic search is not implemented yet.");
                 }
             }
-
-            if (foundMethod == nullptr) {
-                thread->internalError("Failed to get the correct method on the object.\n"
-                                " Searching on superclass and generic search is not implemented yet.");
-            }
+        } else
+        {
+            // Execute java.lang.Object method on array
+            targetClass = classInfo;
+            targetMethod = methodInfo;
+            printf("");
         }
     }
 
@@ -260,10 +269,24 @@ void invokevirtual(const InstructionInput& input)
     const std::string_view methodName = topFrame->constantPool->getString(nameAndTypeInfo->nameIndex);
     const std::string_view methodDescriptor = topFrame->constantPool->getString(nameAndTypeInfo->descriptorIndex);
     const std::string_view className = topFrame->constantPool->getString(cpClassInfo->nameIndex);
-    ClassInfo* targetClassInfo = input.vm->getClass(className.data(), input.thread);
+    ClassInfo* targetClassInfo = nullptr;
+    if (className.starts_with("["))
+    {
+        targetClassInfo = input.vm->getClass("java/lang/Object", input.thread);
+
+    } else {
+        targetClassInfo = input.vm->getClass(className.data(), input.thread);
+    }
+    if (targetClassInfo == nullptr)
+    {
+        printf("Class not found");
+    }
     MethodInfo* foundMethod = targetClassInfo->findMethodWithNameAndDescriptor(methodName.data(), methodDescriptor.data());
 
     MethodInfo* targetMethod = nullptr;
+
+
+
 
     // BEGIN BROL
     if (foundMethod != nullptr)

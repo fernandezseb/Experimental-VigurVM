@@ -60,7 +60,7 @@ public:
     FieldInfo* findField(ClassInfo* classInfo, const char* name, const char* descriptor, VMThread* thread);
 private:
     void initSystemClass(ClassInfo* class_info, VMThread* vm_thread);
-    static constexpr std::array<Instruction,121> m_instructions{{
+    static constexpr std::array<Instruction,123> m_instructions{{
         // Constants
         {i_nop, 0, "nop", 0, nop},
         {i_aconst_null, 0, "aconst_null", 0, aconst_null},
@@ -105,6 +105,7 @@ private:
         {i_aload_3, 0, "aload_3", 3, aload_i},
         {i_iaload, 0, "iaload", 0, iaload},
         {i_aaload, 0, "aaload", 0, aaload},
+        {i_baload, 0, "baload", 0, baload},
         {i_caload, 0, "caload", 0, caload},
         // Stores
         {i_istore, 1, "istore", 0, istore},
@@ -119,6 +120,7 @@ private:
         {i_astore_3, 0, "astore_3", 3, astore_i},
         {i_iastore, 0, "iastore", 0, iastore},
         {i_aastore, 0, "aastore", 0, aastore},
+        {i_bastore, 0, "bastore", 0, bastore},
         {i_castore, 0, "castore", 0, castore},
         // Stack
         {i_pop, 0, "pop", 0, pop},
