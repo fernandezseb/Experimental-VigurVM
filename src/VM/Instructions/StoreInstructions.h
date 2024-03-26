@@ -3,6 +3,7 @@
 #include "../Instruction.h"
 
 void istore(const InstructionInput& input);
+void fstore(const InstructionInput& input);
 void astore(const InstructionInput& input);
 void istore_i(const InstructionInput& input);
 void lstore_i(const InstructionInput& input);

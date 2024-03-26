@@ -27,6 +27,7 @@
 #include "java/lang/Thread.h"
 #include "java/lang/Throwable.h"
 #include "java/security/AccessController.h"
+#include "java/util/concurrent/atomic/AtomicLong.h"
 #include "sun/misc/Unsafe.h"
 #include "sun/misc/VM.h"
 #include "sun/reflect/Reflection.h"
@@ -45,6 +46,7 @@ void registerBuiltinRegisterNatives()
     registerNative("java/lang/Thread/registerNatives", "()V", lib_java_lang_Thread_registerNatives);
     registerNative("java/lang/String/intern", "()Ljava/lang/String;", lib_java_lang_String_intern);
     registerNative("java/lang/Throwable/fillInStackTrace", "(I)Ljava/lang/Throwable;", lib_java_lang_Throwable_fillInStackTrace);
+    registerNative("java/util/concurrent/atomic/AtomicLong/VMSupportsCS8", "()Z", lib_java_util_concurrent_atomic_AtomicLong_VMSupportsCS8);
     // java/io package
     registerNative("java/io/FileOutputStream/initIDs", "()V", lib_java_io_FileOutputStream_initIDs);
     registerNative("java/io/FileInputStream/initIDs", "()V", lib_java_io_FileInputStream_initIDs);

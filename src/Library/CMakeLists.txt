@@ -24,6 +24,8 @@ add_library(Library
         java/io/FileInputStream.cpp
         java/io/FileDescriptor.h
         java/io/FileDescriptor.cpp
+        java/util/concurrent/atomic/AtomicLong.h
+        java/util/concurrent/atomic/AtomicLong.cpp
         sun/misc/Unsafe.h
         sun/misc/Unsafe.cpp
         sun/misc/VM.h

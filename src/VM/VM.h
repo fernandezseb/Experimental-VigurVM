@@ -60,7 +60,7 @@ public:
     FieldInfo* findField(ClassInfo* classInfo, const char* name, const char* descriptor, VMThread* thread);
 private:
     void initSystemClass(ClassInfo* class_info, VMThread* vm_thread);
-    static constexpr std::array<Instruction,128> m_instructions{{
+    static constexpr std::array<Instruction,131> m_instructions{{
         // Constants
         {i_nop, 0, "nop", 0, nop},
         {i_aconst_null, 0, "aconst_null", 0, aconst_null},
@@ -86,6 +86,7 @@ private:
         // Loads
         {i_iload, 1, "iload", 0, iload},
         {i_lload, 1, "lload", 0, lload},
+        {i_fload, 1, "fload", 0, fload},
         {i_aload, 1, "aload", 0, aload},
         {i_iload_0, 0, "iload_0", 0, iload_i},
         {i_iload_1, 0, "iload_1", 1, iload_i},
@@ -109,6 +110,7 @@ private:
         {i_caload, 0, "caload", 0, caload},
         // Stores
         {i_istore, 1, "istore", 0, istore},
+        {i_fstore, 1, "fstore", 0, fstore},
         {i_astore, 1, "astore", 0, astore},
         {i_istore_0, 0, "astore_0", 0, istore_i},
         {i_istore_1, 0, "astore_1", 1, istore_i},
@@ -137,6 +139,7 @@ private:
         {i_isub, 0, "isub", 0, isub},
         {i_imul, 0, "imul", 0, imul},
         {i_fmul, 0, "fmul", 0, fmul},
+        {i_fdiv, 0, "fdiv", 0, fdiv},
         {i_irem, 0, "irem", 0, irem},
         {i_ishl, 0, "ishl", 0, ishl},
         {i_ishr, 0, "ishr", 0, ishr},

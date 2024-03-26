@@ -60,6 +60,16 @@ void fmul(const InstructionInput& input)
     input.thread->m_currentFrame->operands.push_back(added);
 }
 
+void fdiv(const InstructionInput& input)
+{
+    const Variable var2 = input.thread->m_currentFrame->popOperand();
+    const Variable var1 = input.thread->m_currentFrame->popOperand();
+    const Variable added{VariableType_FLOAT,
+        std::bit_cast<u4>(std::bit_cast<float>(var1.data)
+            / std::bit_cast<float>(var2.data))};
+    input.thread->m_currentFrame->operands.push_back(added);
+}
+
 void irem(const InstructionInput& input)
 {
     const i4 val2 = input.thread->m_currentFrame->popInt();

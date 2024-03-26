@@ -4,6 +4,7 @@
 
 void iload(const InstructionInput& input);
 void lload(const InstructionInput& input);
+void fload(const InstructionInput& input);
 void aload(const InstructionInput& input);
 void aload_i(const InstructionInput& input);
 void iload_i(const InstructionInput& input);

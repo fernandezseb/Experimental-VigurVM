@@ -7,6 +7,7 @@ void ladd(const InstructionInput& input);
 void isub(const InstructionInput& input);
 void imul(const InstructionInput& input);
 void fmul(const InstructionInput& input);
+void fdiv(const InstructionInput& input);
 void irem(const InstructionInput& input);
 void lshl(const InstructionInput& input);
 void ishl(const InstructionInput& input);

@@ -26,6 +26,13 @@ void istore(const InstructionInput& input)
     input.thread->m_currentFrame->localVariables[index] = refVar;
 }
 
+void fstore(const InstructionInput& input)
+{
+    const Variable refVar = input.thread->m_currentFrame->popOperand();
+    const u1 index = input.args[0];
+    input.thread->m_currentFrame->localVariables[index] = refVar;
+}
+
 void astore(const InstructionInput& input)
 {
     const Variable refVar = input.thread->m_currentFrame->popOperand();

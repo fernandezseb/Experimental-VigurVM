@@ -43,6 +43,15 @@ void lload(const InstructionInput& input)
     input.thread->m_currentFrame->operands.push_back(lowBytes);
 }
 
+void fload(const InstructionInput& input)
+{
+    const u1 index = input.args[0];
+    const Variable var = input.thread->m_currentFrame->localVariables[index];
+    VM::checkType(var, VariableType_FLOAT, input.thread);
+
+    input.thread->m_currentFrame->operands.push_back(var);
+}
+
 void aload(const InstructionInput& input) {
     const u1 index = input.args[0];
     const Variable var = input.thread->m_currentFrame->localVariables[index];

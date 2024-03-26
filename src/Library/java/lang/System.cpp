@@ -20,6 +20,8 @@ JCALL void lib_java_lang_System_registerNatives(const NativeArgs& args)
     registerNative("java/lang/System/arraycopy", "(Ljava/lang/Object;ILjava/lang/Object;II)V", lib_java_lang_System_arraycopy);
     registerNative("java/lang/System/initProperties", "(Ljava/util/Properties;)Ljava/util/Properties;", lib_java_lang_System_initProperties);
     registerNative("java/lang/System/setIn0", "(Ljava/io/InputStream;)V", lib_java_lang_System_setIn0);
+    registerNative("java/lang/System/setOut0", "(Ljava/io/PrintStream;)V", lib_java_lang_System_setOut0);
+    registerNative("java/lang/System/setErr0", "(Ljava/io/PrintStream;)V", lib_java_lang_System_setErr0);
 }
 
 JCALL void lib_java_lang_System_arraycopy(const NativeArgs& args)
@@ -71,5 +73,19 @@ JCALL void lib_java_lang_System_setIn0(const NativeArgs& args)
 {
     const ClassInfo* classInfo = args.vm->getClass("java/lang/System", args.thread);
     const FieldInfo* field = classInfo->findField("in", "Ljava/io/InputStream;");
+    field->staticData->data = args.thread->m_currentFrame->localVariables[0].data;
+}
+
+JCALL void lib_java_lang_System_setOut0(const NativeArgs& args)
+{
+    const ClassInfo* classInfo = args.vm->getClass("java/lang/System", args.thread);
+    const FieldInfo* field = classInfo->findField("out", "Ljava/io/PrintStream;");
+    field->staticData->data = args.thread->m_currentFrame->localVariables[0].data;
+}
+
+JCALL void lib_java_lang_System_setErr0(const NativeArgs& args)
+{
+    const ClassInfo* classInfo = args.vm->getClass("java/lang/System", args.thread);
+    const FieldInfo* field = classInfo->findField("err", "Ljava/io/PrintStream;");
     field->staticData->data = args.thread->m_currentFrame->localVariables[0].data;
 }
