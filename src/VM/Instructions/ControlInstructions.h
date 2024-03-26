@@ -3,6 +3,7 @@
 #include "../Instruction.h"
 
 void gotoInstruction(const InstructionInput& input);
+void lookupswitch(const InstructionInput& input);
 void freturnInstruction(const InstructionInput& input);
 void ireturnInstruction(const InstructionInput& input);
 void lreturnInstruction(const InstructionInput& input);

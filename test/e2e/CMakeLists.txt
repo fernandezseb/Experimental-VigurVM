@@ -14,6 +14,7 @@ add_jar(e2e
 	LibraryTest.java
 	ArgsTest.java
 	StaticTest.java
+	LookupSwitchTest.java
 )
 
 get_target_property(_classDir e2e CLASSDIR)
@@ -24,6 +25,7 @@ add_test(NAME InstanceofTest COMMAND VigurVM "-classpath" "${_classDir}" "Instan
 add_test(NAME LibraryTest COMMAND VigurVM "-classpath" "${_classDir}" "LibraryTest" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 add_test(NAME ArgsTest COMMAND VigurVM "-classpath" "${_classDir}" "ArgsTest" "arg1" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 add_test(NAME StaticTest COMMAND VigurVM "-classpath" "${_classDir}" "StaticTest" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+add_test(NAME LookupSwitchTest COMMAND VigurVM "-classpath" "${_classDir}" "LookupSwitchTest" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
 set (failRegex "^Error:")
 set_property(TEST SmokeTest PROPERTY FAIL_REGULAR_EXPRESSION "${failRegex}")
@@ -32,3 +34,4 @@ set_property(TEST InstanceofTest PROPERTY FAIL_REGULAR_EXPRESSION "${failRegex}"
 set_property(TEST LibraryTest PROPERTY FAIL_REGULAR_EXPRESSION "${failRegex}")
 set_property(TEST ArgsTest PROPERTY FAIL_REGULAR_EXPRESSION "${failRegex}")
 set_property(TEST StaticTest PROPERTY FAIL_REGULAR_EXPRESSION "${failRegex}")
+set_property(TEST LookupSwitchTest PROPERTY FAIL_REGULAR_EXPRESSION "${failRegex}")

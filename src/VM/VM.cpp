@@ -247,27 +247,13 @@ void VM::updateVariableFromVariable(Variable* variable, std::string_view descrip
     }
 }
 
-static u1 readByte(VMThread* thread)
-{
-    return thread->m_currentMethod->code->code[thread->m_pc++];
-}
-
-[[maybe_unused]]
-static u2 readShort(VMThread* thread)
-{
-    uint8_t indexByte1 = thread->m_currentMethod->code->code[thread->m_pc++];
-    uint8_t indexByte2 = thread->m_currentMethod->code->code[thread->m_pc++];
-    uint16_t shortCombined = (indexByte1 << 8) | indexByte2;
-    return shortCombined;
-}
-
 void VM::executeLoop(VMThread* thread)
 {
     const std::size_t stackSize = thread->m_stack.frames.size();
     const std::size_t depth = stackSize == 0 ? 0 : stackSize-1;
-    while(thread->m_stack.frames.size() > depth)
+    while (thread->m_stack.frames.size() > depth)
     {
-        uint8_t opcode = readByte(thread);
+        uint8_t opcode = thread->readUnsignedByte();
         // printf("Running instruction with opcode: 0x%0x ", opcode);
 
         bool found = false;
@@ -282,7 +268,7 @@ void VM::executeLoop(VMThread* thread)
                     args = (uint8_t*)Platform::allocateMemory(instruction.args, 0);
                     for (u2 currentArg = 0; currentArg < instruction.args; ++currentArg)
                     {
-                        args[currentArg] = readByte(thread);
+                        args[currentArg] = thread->readUnsignedByte();
                     }
                 }
                 if (instruction.instructionFunction != nullptr) {

@@ -60,7 +60,7 @@ public:
     FieldInfo* findField(ClassInfo* classInfo, const char* name, const char* descriptor, VMThread* thread);
 private:
     void initSystemClass(ClassInfo* class_info, VMThread* vm_thread);
-    static constexpr std::array<Instruction,127> m_instructions{{
+    static constexpr std::array<Instruction,128> m_instructions{{
         // Constants
         {i_nop, 0, "nop", 0, nop},
         {i_aconst_null, 0, "aconst_null", 0, aconst_null},
@@ -189,6 +189,7 @@ private:
         {i_monitorexit, 0, "monitorexit", 0, monitorexit},
         // Control
         {i_goto, 2, "goto", 0, gotoInstruction},
+        {i_lookupswitch, 0, "lookupswitch", 0, lookupswitch},
         {i_ireturn, 0, "ireturn", 0, ireturnInstruction},
         {i_lreturn, 0, "lreturn", 0, lreturnInstruction},
         {i_freturn, 0, "freturn", 0, freturnInstruction},

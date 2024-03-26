@@ -154,6 +154,31 @@ void VMThread::internalError(const std::string_view error) const
     Platform::exitProgram(6);
 }
 
+u1 VMThread::readUnsignedByte()
+{
+    return m_currentMethod->code->code[m_pc++];
+}
+
+u2 VMThread::readUnsignedShort()
+{
+    const u1* code = m_currentMethod->code->code;
+    const uint8_t indexByte1 = code[m_pc++];
+    const uint8_t indexByte2 = code[m_pc++];
+    const uint16_t shortCombined = (indexByte1 << 8) | indexByte2;
+    return shortCombined;
+}
+
+i4 VMThread::readSignedInt()
+{
+    const u1* code = m_currentMethod->code->code;
+    const uint8_t buffer[4] = {code[m_pc++], code[m_pc++], code[m_pc++], code[m_pc++]};
+    const int32_t value = static_cast<int32_t>(buffer[3])
+                          | static_cast<int32_t>(buffer[2]) << 8
+                          | static_cast<int32_t>(buffer[1]) << 16
+                          | static_cast<int32_t>(buffer[0]) << 24;
+    return value;
+}
+
 StackFrame* VMThread::getTopFrameNonNative()
 {
     for (i8 currentFrame = m_stack.frames.size()-1; currentFrame>=0; --currentFrame)

@@ -27,12 +27,43 @@ static void returnCat1Var(VMThread* thread)
 
 void gotoInstruction(const InstructionInput& input)
 {
-    u1 byte1 = input.args[0];
-    u1 byte2 = input.args[1];
+    const u1 byte1 = input.args[0];
+    const u1 byte2 = input.args[1];
 
-    i2 branchByte = (byte1 << 8) | byte2;
+    const i2 branchByte = (byte1 << 8) | byte2;
 
     input.thread->m_pc = input.thread->m_pc-3+branchByte;
+}
+
+void lookupswitch(const InstructionInput& input)
+{
+    const i4 intValue = input.thread->m_currentFrame->popInt();
+    const u4 instructionIndex = input.thread->m_pc-1;
+
+    while ((input.thread->m_pc % 4) != 0) {
+        input.thread->readUnsignedByte();
+    }
+
+    const i4 defaultOffset = input.thread->readSignedInt();
+    const i4 defaultAddress = instructionIndex + defaultOffset;
+    const i4 nPairs = input.thread->readSignedInt();
+
+    for (i4 currentPair = 0; currentPair < nPairs; currentPair++) {
+        const i4 matchKey = input.thread->readSignedInt();
+        const i4 offset = input.thread->readSignedInt();
+
+        // printf("%24" PRIi32, matchKey);
+        //
+        // printf(": %" PRIi32, (instructionIndex + offset));
+        // printf("\n");
+
+        if (intValue == matchKey)
+        {
+            input.thread->m_pc = instructionIndex + offset;
+            return;
+        }
+    }
+    input.thread->m_pc = defaultAddress;
 }
 
 void freturnInstruction(const InstructionInput& input)

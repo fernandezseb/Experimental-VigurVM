@@ -42,6 +42,7 @@ void Platform::initialize()
 void Platform::print(const char* string, uint64_t length)
 {
 	WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), string, (DWORD)length, NULL, NULL);
+	printf(""); // TODO: Rework printing code
 }
 
 void* Platform::allocateMemory(size_t size, size_t baseAddress)
