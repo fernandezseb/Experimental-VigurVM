@@ -261,7 +261,6 @@ ClassInfo* ClassLoader::readClass(const char* className, Memory* memory, [[maybe
     char name[300] = {0};
     snprintf(name, 300, "%s.class", className);
 
-    PHYSFS_addToSearchPath(".", 1);
     PHYSFS_addToSearchPath("extern/classpath/rt.jar/rt.jar", 1);
     if (classPath != nullptr && strlen(classPath) > 0) {
         PHYSFS_addToSearchPath(classPath, 1);

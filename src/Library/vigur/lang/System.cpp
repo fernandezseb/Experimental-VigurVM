@@ -22,10 +22,10 @@ JCALL void lib_vigur_lang_System_registerNatives(const NativeArgs& args)
 
 JCALL void lib_vigur_lang_System_printLnString(const NativeArgs& args)
 {
-    Variable strVar = args.thread->m_currentFrame->localVariables[0];
+    const Variable strVar = args.thread->m_currentFrame->localVariables[0];
     const Object* obj = args.heap->getObject(strVar.data);
     const FieldData* charArrRef = obj->getField("value", "[C", args.heap);
     const Array* charArr = args.heap->getArray(charArrRef->data[0].data);
-    Platform::print((const char*)charArr->data, charArr->length);
+    Platform::print(reinterpret_cast<const char*>(charArr->data), charArr->length);
     Platform::print("\n", 1);
 }

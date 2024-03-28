@@ -33,7 +33,12 @@ void VM::start(std::string_view commandLineName)
 {
     Platform::initialize();
     PHYSFS_init(commandLineName.data());
-    PHYSFS_permitSymbolicLinks(1);
+    PHYSFS_permitSymbolicLinks(0);
+
+    const size_t backSlash = commandLineName.find_last_of('\\');
+    const size_t forwardSlash = commandLineName.find_last_of('/');
+    userDir = commandLineName.substr(0, backSlash < forwardSlash ? backSlash : forwardSlash);
+    PHYSFS_addToSearchPath(userDir.c_str(), 1);
 
     registerBuiltinRegisterNatives();
     getClass("java/lang/OutOfMemoryError", &m_mainThread);

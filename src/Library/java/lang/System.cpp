@@ -54,17 +54,24 @@ JCALL void lib_java_lang_System_arraycopy(const NativeArgs& args)
         lengthVar.data * bytes);
 }
 
+static void setProperty(const NativeArgs& args, Variable propertiesObjectRef, ClassInfo* classInfo, const MethodInfo* methodInfo, const char* key, const char* value)
+{
+    args.thread->pushStackFrameWithoutParams(classInfo, methodInfo);
+    args.thread->m_currentFrame->localVariables[0] = propertiesObjectRef;
+    args.thread->m_currentFrame->localVariables[1] = Variable{VariableType_REFERENCE,args.heap->createString(key, args.vm)};
+    args.thread->m_currentFrame->localVariables[2] = Variable{VariableType_REFERENCE,args.heap->createString(value, args.vm)};
+    args.vm->executeLoop(args.thread);
+}
+
 JCALL void lib_java_lang_System_initProperties(const NativeArgs& args)
 {
     const Variable propertiesObjectRef = args.thread->m_currentFrame->localVariables[0];
     const Object* properties = args.heap->getObject(propertiesObjectRef.data);
     const MethodInfo* entryPoint = properties->classInfo->findMethodWithNameAndDescriptor("setProperty", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Object;");
 
-    args.thread->pushStackFrameWithoutParams(properties->classInfo, entryPoint);
-    args.thread->m_currentFrame->localVariables[0] = propertiesObjectRef;
-    args.thread->m_currentFrame->localVariables[1] = Variable{VariableType_REFERENCE,args.heap->createString("file.encoding", args.vm)};
-    args.thread->m_currentFrame->localVariables[2] = Variable{VariableType_REFERENCE,args.heap->createString("UTF-8", args.vm)};
-    args.vm->executeLoop(args.thread);
+    setProperty(args, propertiesObjectRef, properties->classInfo, entryPoint, "file.encoding", "UTF-8");
+    setProperty(args, propertiesObjectRef, properties->classInfo, entryPoint, "user.dir", args.vm->userDir.c_str());
+    setProperty(args, propertiesObjectRef, properties->classInfo, entryPoint, "sun.jnu.encoding", "Cp1252");
 
     args.thread->returnVar(propertiesObjectRef);
 }
