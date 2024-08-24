@@ -107,6 +107,7 @@ void bastore(const InstructionInput& input)
 
 void castore(const InstructionInput& input)
 {
+    // TODO: Fix for utf-16
     StackFrame* currentFrame = input.thread->m_currentFrame;
     const Variable value = currentFrame->popOperand();
     const Variable index = currentFrame->popOperand();

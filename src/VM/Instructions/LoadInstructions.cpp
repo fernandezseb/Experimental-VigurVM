@@ -139,6 +139,7 @@ void baload(const InstructionInput& input)
 
 void caload(const InstructionInput& input)
 {
+    // TODO: Fix for utf-16
     const Variable index = input.thread->m_currentFrame->popOperand();
     const Variable arrayRef = input.thread->m_currentFrame->popOperand();
 

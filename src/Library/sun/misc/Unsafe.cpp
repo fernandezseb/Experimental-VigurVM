@@ -48,7 +48,7 @@ JCALL void lib_sun_misc_Unsafe_arrayIndexScale(const NativeArgs& args)
     u4 length = 4;
     if (classObject->name[1] == 'C')
     {
-        length = 1;
+        length = 2;
     } else if (classObject->name[1] == 'D' || classObject->name[1] == 'J')
     {
         length = 8;

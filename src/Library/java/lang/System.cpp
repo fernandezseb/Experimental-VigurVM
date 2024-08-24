@@ -40,7 +40,7 @@ JCALL void lib_java_lang_System_arraycopy(const NativeArgs& args)
     u1 bytes = 4;
     if (srcArray->arrayType == AT_CHAR)
     {
-        bytes = 1;
+        bytes = 2;
     }
     else if (srcArray->arrayType == AT_LONG || srcArray->arrayType == AT_DOUBLE)
     {

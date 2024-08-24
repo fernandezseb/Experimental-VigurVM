@@ -37,7 +37,7 @@ u4 JavaHeap::createArray(ArrayType type, uint64_t size)
         u1 bytes = 4;
         if (type == AT_CHAR)
         {
-            bytes = 1;
+            bytes = 2;
         }
         else if (type == AT_LONG || type == AT_DOUBLE)
         {
@@ -197,7 +197,10 @@ u4 JavaHeap::createString(const char* utf8String, VM* VM) {
 
     const u4 arrId = createArray(AT_CHAR, strlen(utf8String));
     const Array* charArray = getArray(arrId);
-    memcpy((char*)charArray->data, utf8String, strlen(utf8String));
+    // TODO: Correctly convert utf-8 modified to utf16
+    for (u4 currentIndex = 0; currentIndex < strlen(utf8String); currentIndex++) {
+        ((u2*)(charArray->data))[currentIndex] = utf8String[currentIndex];
+    }
 
     const Variable var{VariableType_REFERENCE, arrId};
     strObject->fields[0].data[0] = var;
