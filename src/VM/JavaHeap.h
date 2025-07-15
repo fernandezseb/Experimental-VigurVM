@@ -120,4 +120,5 @@ public:
      */
     void addClassInfo(ClassInfo* classInfo);
     [[nodiscard]] ClassInfo* getClassByName(std::string_view className) const;
+    void printStringPool();
 };

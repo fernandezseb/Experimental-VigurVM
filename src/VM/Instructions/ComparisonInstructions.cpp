@@ -21,6 +21,25 @@
 #include "VM/VM.h"
 #include "Data/Variable.h"
 
+void lcmp(const InstructionInput& input)
+{
+    i8 var2 = input.thread->m_currentFrame->popLong();
+    i8 var1 = input.thread->m_currentFrame->popLong();
+    i4 result = 0;
+    if (var1 > var2)
+    {
+        result = 1;
+    } else if (var1 == var2)
+    {
+        result = 0;
+    } else
+    {
+        result = -1;
+    }
+    const u4 resultUnsigned = std::bit_cast<u4>(result);
+    input.thread->m_currentFrame->operands.emplace_back(Variable{VariableType_INT, resultUnsigned});
+}
+
 void fcmpl(const InstructionInput& input)
 {
     const Variable var2 = input.thread->m_currentFrame->popOperand();

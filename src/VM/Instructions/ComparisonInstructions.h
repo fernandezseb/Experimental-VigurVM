@@ -2,6 +2,8 @@
 
 #include "../Instruction.h"
 
+
+void lcmp(const InstructionInput& input);
 void fcmpl(const InstructionInput& input);
 void fcmpg(const InstructionInput& input);
 void ifeq(const InstructionInput& input);

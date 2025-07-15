@@ -496,8 +496,26 @@ void athrow(const InstructionInput& input)
     const Variable throwableRef = input.thread->m_currentFrame->popOperand();
     const Object* throwable = input.heap->getObject(throwableRef.data);
 
+    // remove ==
+
+    printf("String pool:\n");
+
+    input.heap->printStringPool();
+
+    input.thread->internalError("Unhandled exception");
+
+    // ==
+
     while(!input.thread->m_stack.frames.empty()) {
-        const std::span<ExceptionTableEntry> exceptionHandlers =  input.thread->m_currentMethod->code->exceptionTable;
+        const AttributeCode* codeAttribute = input.thread->m_currentMethod->code;
+        if (codeAttribute == nullptr)
+        {
+            // This happens when we have a native code stackframe.
+            // In this case we have to skip the frame because it can't and won't contain exception handlers.
+            input.thread->popFrame();
+            continue;
+        }
+        const std::span<ExceptionTableEntry> exceptionHandlers =  codeAttribute->exceptionTable;
 
         for (const ExceptionTableEntry& handler : exceptionHandlers)
         {

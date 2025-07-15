@@ -31,6 +31,7 @@ JCALL void lib_java_lang_Object_hashCode(const NativeArgs& args)
 
 JCALL void lib_java_lang_Object_getClass(const NativeArgs& args)
 {
+    // TODO: Implement getClass for arrays as well
     const StackFrame* currentFrame = args.thread->m_currentFrame;
     const Object* object = args.heap->getObject(currentFrame->localVariables[0].data);
     const u4 classObject = args.heap->createClassObject(object->classInfo, args.vm, object->classInfo->getName());
