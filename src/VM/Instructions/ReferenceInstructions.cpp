@@ -455,7 +455,8 @@ void newarray(const InstructionInput& input)
     const Variable countVar = input.thread->m_currentFrame->popOperand();
     input.vm->checkType(countVar, VariableType_INT, input.thread);
 
-    const uint32_t reference = input.heap->createArray(type, countVar.data);
+    // TODO: Fix by putting the correct descriptor based on the type
+    const uint32_t reference = input.heap->createArray(type, countVar.data, "");
     const Variable variable{VariableType_REFERENCE, reference};
 
     input.thread->m_currentFrame->operands.push_back(variable);
@@ -466,7 +467,9 @@ void anewarray(const InstructionInput& input)
     StackFrame* topFrame = input.thread->m_currentFrame;
     uint16_t index = readShort(input.thread);
     CPClassInfo* cpclassInfo = topFrame->constantPool->getClassInfo(index);
-    [[maybe_unused]] ClassInfo* classInfo = input.vm->getClass(topFrame->constantPool->getString(cpclassInfo->nameIndex).data(), input.thread);
+    const char* className = topFrame->constantPool->getString(cpclassInfo->nameIndex).data();
+    // TODO: Is this needed? This loads the class eagerly
+    [[maybe_unused]] ClassInfo* classInfo = input.vm->getClass(className, input.thread);
 
     const int32_t size = std::bit_cast<i4>(topFrame->popOperand().data);
 
@@ -475,7 +478,10 @@ void anewarray(const InstructionInput& input)
         input.thread->internalError("Error: Can't create an array with negative size");
     }
 
-    const uint32_t reference = input.heap->createArray(AT_REFERENCE, size);
+    std::string *str = new std::string(className);
+    str->insert(0, "L");
+    str->push_back(';');
+    const uint32_t reference = input.heap->createArray(AT_REFERENCE, size, *str);
     const Variable variable{VariableType_REFERENCE, reference};
 
     topFrame->operands.push_back(variable);

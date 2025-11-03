@@ -14,3 +14,4 @@ JCALL void lib_java_lang_Class_isInterface(const NativeArgs& args);
 JCALL void lib_java_lang_Class_getDeclaredConstructors0(const NativeArgs& args);
 JCALL void lib_java_lang_Class_getModifiers(const NativeArgs& args);
 JCALL void lib_java_lang_Class_getSuperClass(const NativeArgs& args);
+JCALL void lib_java_lang_Class_getInterfaces0(const NativeArgs& args);

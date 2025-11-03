@@ -365,7 +365,7 @@ void VM::executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* met
 
 void VM::createArgsArray(const VMThread* thread)
 {
-    const u4 arrayRef =  m_heap.createArray(AT_REFERENCE, m_configuration.args.size());
+    const u4 arrayRef =  m_heap.createArray(AT_REFERENCE, m_configuration.args.size(), "Ljava/lang/String;");
     const Array* array = m_heap.getArray(arrayRef);
     u4* arrayData = reinterpret_cast<u4*>(array->data);
     u4 currentArg = 0;

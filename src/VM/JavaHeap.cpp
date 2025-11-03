@@ -25,13 +25,14 @@ JavaHeap::JavaHeap()
     objects.push_back(0);
 }
 
-u4 JavaHeap::createArray(ArrayType type, uint64_t size)
+u4 JavaHeap::createArray(ArrayType type, uint64_t size, std::string_view descriptor)
 {
     Array* array = static_cast<Array*>(Platform::allocateMemory(sizeof(Array), 0));
     array->length = size;
     array->type = ARRAY;
     array->arrayType = type;
     array->data = 0;
+    array->descriptor = descriptor;
     if (size > 0 )
     {
         u1 bytes = 4;
@@ -195,7 +196,7 @@ u4 JavaHeap::createString(const char* utf8String, VM* VM) {
     const u4 strObjectId = createObject(getClassByName("java/lang/String"), VM);
     const Object* strObject = getObject(strObjectId);
 
-    const u4 arrId = createArray(AT_CHAR, strlen(utf8String));
+    const u4 arrId = createArray(AT_CHAR, strlen(utf8String), "C"); // TODO: C?
     const Array* charArray = getArray(arrId);
     // TODO: Correctly convert utf-8 modified to utf16
     for (u4 currentIndex = 0; currentIndex < strlen(utf8String); currentIndex++) {
