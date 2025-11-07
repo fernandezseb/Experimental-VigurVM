@@ -18,6 +18,8 @@ add_library(Library
         java/lang/String.cpp
         java/lang/Throwable.h
         java/lang/Throwable.cpp
+        java/lang/ClassLoader.h
+        java/lang/ClassLoader.cpp
         java/io/FileOutputStream.h
         java/io/FileOutputStream.cpp
         java/io/FileInputStream.h

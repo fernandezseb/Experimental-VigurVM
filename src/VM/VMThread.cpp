@@ -156,6 +156,11 @@ void VMThread::internalError(const std::string_view error) const
 
 u1 VMThread::readUnsignedByte()
 {
+    if (m_pc >= m_currentMethod->code->codeLength)
+    {
+        printf("Trying to access code at location: %d, whereas code has length: %d\n", m_pc, m_currentMethod->code->codeLength);
+        internalError("Trying to access code at invalid location");
+    }
     return m_currentMethod->code->code[m_pc++];
 }
 

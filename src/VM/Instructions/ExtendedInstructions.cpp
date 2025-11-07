@@ -18,17 +18,18 @@
 #include "VM/VM.h"
 #include "Data/Variable.h"
 
-static u2 readShort(VMThread* thread)
+// TODO: Move to VM
+static i2 readShort(VMThread* thread)
 {
-    uint8_t indexByte1 = thread->m_currentMethod->code->code[thread->m_pc++];
-    uint8_t indexByte2 = thread->m_currentMethod->code->code[thread->m_pc++];
-    uint16_t shortCombined = (indexByte1 << 8) | indexByte2;
-    return shortCombined;
+    const u1* code = thread->m_currentMethod->code->code;
+    const u1 buffer[2] = {code[thread->m_pc++], code[thread->m_pc++]};
+    const i2 value = static_cast<i2>(buffer[1]) | static_cast<i2>(buffer[0]) << 8;
+    return value;
 }
 
 void ifnull(const InstructionInput& input)
 {
-    const u2 branchByte = readShort(input.thread);
+    const i2 branchByte = readShort(input.thread);
     // uint8_t byte = thread->currentMethod->code->code[thread->pc-3+branchByte];
     const Variable ref = input.thread->m_currentFrame->popOperand();
     if (ref.data == 0) {
@@ -38,7 +39,7 @@ void ifnull(const InstructionInput& input)
 
 void ifnonnull(const InstructionInput& input)
 {
-    const u2 branchByte = readShort(input.thread);
+    const i2 branchByte = readShort(input.thread);
     // uint8_t byte = thread->currentMethod->code->code[thread->pc-3+branchByte];
     const Variable ref = input.thread->m_currentFrame->popOperand();
     if (ref.data != 0) {

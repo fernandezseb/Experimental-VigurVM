@@ -259,7 +259,7 @@ void VM::executeLoop(VMThread* thread)
     while (thread->m_stack.frames.size() > depth)
     {
         uint8_t opcode = thread->readUnsignedByte();
-        // printf("Running instruction with opcode: 0x%0x ", opcode);
+        // printf("Running instruction with opcode: 0x%0x \n", opcode);
 
         bool found = false;
 

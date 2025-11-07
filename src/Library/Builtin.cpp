@@ -19,6 +19,7 @@
 #include "java/io/FileOutputStream.h"
 #include "java/io/FileInputStream.h"
 #include "java/lang/Class.h"
+#include "java/lang/ClassLoader.h"
 #include "java/lang/Double.h"
 #include "java/lang/Float.h"
 #include "java/lang/Object.h"
@@ -47,6 +48,7 @@ void registerBuiltinRegisterNatives()
     registerNative("java/lang/String/intern", "()Ljava/lang/String;", lib_java_lang_String_intern);
     registerNative("java/lang/Throwable/fillInStackTrace", "(I)Ljava/lang/Throwable;", lib_java_lang_Throwable_fillInStackTrace);
     registerNative("java/util/concurrent/atomic/AtomicLong/VMSupportsCS8", "()Z", lib_java_util_concurrent_atomic_AtomicLong_VMSupportsCS8);
+    registerNative("java/lang/ClassLoader/registerNatives", "()V", lib_java_lang_ClassLoader_registerNatives);
     // java/io package
     registerNative("java/io/FileOutputStream/initIDs", "()V", lib_java_io_FileOutputStream_initIDs);
     registerNative("java/io/FileInputStream/initIDs", "()V", lib_java_io_FileInputStream_initIDs);
@@ -61,6 +63,7 @@ void registerBuiltinRegisterNatives()
     registerNative("java/security/AccessController/getStackAccessControlContext", "()Ljava/security/AccessControlContext;", lib_java_security_AccessController_getStackAccessControlContext);
     // Vigur/lang package
     registerNative("vigur/lang/System/registerNatives", "()V", lib_vigur_lang_System_registerNatives);
+    registerNative("vigur/lang/System/printLnString", "(Ljava/lang/String;)V", lib_vigur_lang_System_printLnString);
     // Reflection API
     registerNative("sun/reflect/Reflection/getCallerClass", "()Ljava/lang/Class;", lib_sun_reflect_Reflection_getCallerClass);
     registerNative("sun/reflect/Reflection/getClassAccessFlags", "(Ljava/lang/Class;)I", lib_sun_reflect_Reflection_getClassAccessFlags);
