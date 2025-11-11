@@ -38,7 +38,7 @@
 #include <malloc.h>
 #endif
 
-#if defined(PHYSFS_PLATFORM_SOLARIS) || defined(PHYSFS_PLATFORM_LINUX)
+#if defined(PHYSFS_PLATFORM_SOLARIS) || defined(PHYSFS_PLATFORM_LINUX) || defined(PHYSFS_PLATFORM_OGC)
 #include <alloca.h>
 #endif
 
@@ -92,6 +92,9 @@ extern const PHYSFS_Archiver __PHYSFS_Archiver_CSM;
 extern const PHYSFS_Archiver __PHYSFS_Archiver_SLB;
 extern const PHYSFS_Archiver __PHYSFS_Archiver_ISO9660;
 extern const PHYSFS_Archiver __PHYSFS_Archiver_VDF;
+extern const PHYSFS_Archiver __PHYSFS_Archiver_GOB;
+extern const PHYSFS_Archiver __PHYSFS_Archiver_LFD;
+extern const PHYSFS_Archiver __PHYSFS_Archiver_LAB;
 
 /* a real C99-compliant snprintf() is in Visual Studio 2015,
    but just use this everywhere for binary compatibility. */
@@ -111,7 +114,9 @@ const void *__PHYSFS_winrtCalcPrefDir(void);
 
 /* atomic operations. */
 /* increment/decrement operations return the final incremented/decremented value. */
-#if defined(_MSC_VER) && (_MSC_VER >= 1500)
+#ifdef PHYSFS_PLATFORM_PLAYDATE
+#define PHYSFS_NEED_ATOMIC_OP_FALLBACK 1
+#elif defined(_MSC_VER) && (_MSC_VER >= 1500)
 #include <intrin.h>
 __PHYSFS_COMPILE_TIME_ASSERT(LongEqualsInt, sizeof (int) == sizeof (long));
 #define __PHYSFS_ATOMIC_INCR(ptrval) _InterlockedIncrement((long*)(ptrval))
@@ -130,6 +135,9 @@ extern __inline int _xadd_watcom(volatile int *a, int v);
 #define __PHYSFS_ATOMIC_DECR(ptrval) (_xadd_watcom(ptrval, -1)-1)
 #else
 #define PHYSFS_NEED_ATOMIC_OP_FALLBACK 1
+#endif
+
+#ifdef PHYSFS_NEED_ATOMIC_OP_FALLBACK
 int __PHYSFS_ATOMIC_INCR(int *ptrval);
 int __PHYSFS_ATOMIC_DECR(int *ptrval);
 #endif
@@ -216,6 +224,10 @@ void __PHYSFS_smallFree(void *ptr);
 #ifndef PHYSFS_SUPPORTS_VDF
 #define PHYSFS_SUPPORTS_VDF PHYSFS_SUPPORTS_DEFAULT
 #endif
+#ifndef PHYSFS_SUPPORTS_LECARCHIVES
+#define PHYSFS_SUPPORTS_LECARCHIVES PHYSFS_SUPPORTS_DEFAULT
+#endif
+
 
 #if PHYSFS_SUPPORTS_7Z
 /* 7zip support needs a global init function called at startup (no deinit). */
@@ -466,12 +478,14 @@ void __PHYSFS_DirTreeDeinit(__PHYSFS_DirTree *dt);
 
 /*
  * Initialize the platform. This is called when PHYSFS_init() is called from
- *  the application.
+ *  the application. argv[0] (or whatever the app is passing) is
+ *  supplied here, since some platforms need it immediately, but this same
+ *  pointer is also passed to __PHYSFS_platformCalcBaseDir a little later.
  *
  * Return zero if there was a catastrophic failure (which prevents you from
  *  functioning at all), and non-zero otherwise.
  */
-int __PHYSFS_platformInit(void);
+int __PHYSFS_platformInit(const char *argv0);
 
 
 /*

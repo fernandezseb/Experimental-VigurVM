@@ -524,6 +524,16 @@ typedef struct PHYSFS_AndroidInit
  *          succeed, but PHYSFS_getBaseDir() and PHYSFS_getPrefDir() will be
  *          incorrect.
  *
+ * \warning On Playdate, argv0 should be a non-NULL pointer to a PlaydateAPI
+ *          struct. PhysicsFS uses this object for system-level access and
+ *          will hold it until PHYSFS_deinit is called.
+ *          If you pass a NULL here, PhysicsFS will crash.
+ *
+ * \warning On libretro, argv0 should be a non-NULL pointer to the
+ *          retro_environment_t callback. PhysicsFS will use this callback
+ *          to get libretro's virtual file system interface, along with
+ *          any other related directory paths.
+ *
  *   \param argv0 the argv[0] string passed to your program's mainline.
  *          This may be NULL on most platforms (such as ones without a
  *          standard main() function), but you should always try to pass
@@ -3183,12 +3193,15 @@ typedef struct PHYSFS_Io
      *  being destroyed separately (so, for example: they can't share a file
      *  handle; they each need their own).
      *
+     * The current seek position does not need to be duplicated; the caller
+     *  is expected to explicitly seek the duplicated object before using it.
+     *
      * If you can't duplicate a handle, it's legal to return NULL, but you
      *  almost certainly need this functionality if you want to use this to
      *  PHYSFS_Io to back an archive.
      *
      *   \param io The i/o instance to duplicate.
-     *  \return A new value for a stream's (opaque) field, or NULL on error.
+     *  \return A new instance of `io` that can operate independently.
      */
     struct PHYSFS_Io *(*duplicate)(struct PHYSFS_Io *io);
 
