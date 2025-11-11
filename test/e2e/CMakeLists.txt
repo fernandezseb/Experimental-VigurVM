@@ -16,6 +16,7 @@ add_jar(e2e
 	StaticTest.java
 	LookupSwitchTest.java
 	ShrTest.java
+	DivMulTest.java
 )
 
 get_target_property(_classDir e2e CLASSDIR)
@@ -28,6 +29,7 @@ add_test(NAME ArgsTest COMMAND VigurVM "-classpath" "${_classDir}" "ArgsTest" "a
 add_test(NAME StaticTest COMMAND VigurVM "-classpath" "${_classDir}" "StaticTest" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 add_test(NAME LookupSwitchTest COMMAND VigurVM "-classpath" "${_classDir}" "LookupSwitchTest" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 add_test(NAME ShrTest COMMAND VigurVM "-classpath" "${_classDir}" "ShrTest" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+add_test(NAME DivMulTest COMMAND VigurVM "-classpath" "${_classDir}" "DivMulTest" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
 set (failRegex "^Error:")
 set_property(TEST SmokeTest PROPERTY FAIL_REGULAR_EXPRESSION "${failRegex}")
@@ -38,3 +40,4 @@ set_property(TEST ArgsTest PROPERTY FAIL_REGULAR_EXPRESSION "${failRegex}")
 set_property(TEST StaticTest PROPERTY FAIL_REGULAR_EXPRESSION "${failRegex}")
 set_property(TEST LookupSwitchTest PROPERTY FAIL_REGULAR_EXPRESSION "${failRegex}")
 set_property(TEST ShrTest PROPERTY FAIL_REGULAR_EXPRESSION "${failRegex}")
+set_property(TEST DivMulTest PROPERTY FAIL_REGULAR_EXPRESSION "${failRegex}")
