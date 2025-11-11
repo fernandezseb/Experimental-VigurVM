@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Sebastiaan Fernandez.
+ * Copyright (c) 2023-2025 Sebastiaan Fernandez.
  *
  * This file is part of VigurVM.
  *
@@ -9,7 +9,7 @@
  * VigurVM is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License along with Foobar.
+ * You should have received a copy of the GNU General Public License along with VigurVM.
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -26,6 +26,7 @@ JCALL void lib_vigur_lang_System_printLnString(const NativeArgs& args)
     const Object* obj = args.heap->getObject(strVar.data);
     const FieldData* charArrRef = obj->getField("value", "[C", args.heap);
     const Array* charArr = args.heap->getArray(charArrRef->data[0].data);
-    Platform::print(reinterpret_cast<const char*>(charArr->data), charArr->length);
+    // TODO: Convert UTF-16 to UTF-8
+    Platform::print(reinterpret_cast<const char*>(charArr->data), charArr->length*2);
     Platform::print("\n", 1);
 }

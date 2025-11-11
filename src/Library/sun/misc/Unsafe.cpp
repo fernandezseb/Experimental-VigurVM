@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Sebastiaan Fernandez.
+ * Copyright (c) 2023-2025 Sebastiaan Fernandez.
  *
  * This file is part of VigurVM.
  *
@@ -9,7 +9,7 @@
  * VigurVM is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License along with Foobar.
+ * You should have received a copy of the GNU General Public License along with VigurVM.
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -48,7 +48,7 @@ JCALL void lib_sun_misc_Unsafe_arrayIndexScale(const NativeArgs& args)
     u4 length = 4;
     if (classObject->name[1] == 'C')
     {
-        length = 1;
+        length = 2;
     } else if (classObject->name[1] == 'D' || classObject->name[1] == 'J')
     {
         length = 8;

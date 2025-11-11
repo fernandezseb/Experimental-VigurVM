@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Sebastiaan Fernandez.
+ * Copyright (c) 2023-2025 Sebastiaan Fernandez.
  *
  * This file is part of VigurVM.
  *
@@ -9,7 +9,7 @@
  * VigurVM is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License along with Foobar.
+ * You should have received a copy of the GNU General Public License along with VigurVM.
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -399,9 +399,21 @@ void invokestatic(const InstructionInput& input)
         input.thread->popFrame();
     } else
     {
-        input.thread->pushStackFrameStatic(targetClass, methodInfo, topFrame);
-        printf("> Created new stack frame for static call: %s.%s\n",
-            topFrame->constantPool->getString(targetClassInfo->nameIndex).data(), methodInfo->name.data());
+        std::string_view className = topFrame->constantPool->getString(targetClassInfo->nameIndex);
+        if (
+            // methodInfo->name == "loadLibrary"
+             (methodInfo->name == "setup" && className == "java/lang/Terminator")
+            || (methodInfo->name == "initializeOSEnvironment" && className == "sun/misc/VM")
+            || (methodInfo->name == "booted" && className == "sun/misc/VM")
+            )
+        {
+            printf("!!! Skipping LoadLibrary");
+        } else
+        {
+            input.thread->pushStackFrameStatic(targetClass, methodInfo, topFrame);
+            printf("> Created new stack frame for static call: %s.%s\n",
+                topFrame->constantPool->getString(targetClassInfo->nameIndex).data(), methodInfo->name.data());
+        }
     }
 }
 
@@ -455,7 +467,8 @@ void newarray(const InstructionInput& input)
     const Variable countVar = input.thread->m_currentFrame->popOperand();
     input.vm->checkType(countVar, VariableType_INT, input.thread);
 
-    const uint32_t reference = input.heap->createArray(type, countVar.data);
+    // TODO: Fix by putting the correct descriptor based on the type
+    const uint32_t reference = input.heap->createArray(type, countVar.data, "");
     const Variable variable{VariableType_REFERENCE, reference};
 
     input.thread->m_currentFrame->operands.push_back(variable);
@@ -466,7 +479,9 @@ void anewarray(const InstructionInput& input)
     StackFrame* topFrame = input.thread->m_currentFrame;
     uint16_t index = readShort(input.thread);
     CPClassInfo* cpclassInfo = topFrame->constantPool->getClassInfo(index);
-    [[maybe_unused]] ClassInfo* classInfo = input.vm->getClass(topFrame->constantPool->getString(cpclassInfo->nameIndex).data(), input.thread);
+    const char* className = topFrame->constantPool->getString(cpclassInfo->nameIndex).data();
+    // TODO: Is this needed? This loads the class eagerly
+    [[maybe_unused]] ClassInfo* classInfo = input.vm->getClass(className, input.thread);
 
     const int32_t size = std::bit_cast<i4>(topFrame->popOperand().data);
 
@@ -475,7 +490,10 @@ void anewarray(const InstructionInput& input)
         input.thread->internalError("Error: Can't create an array with negative size");
     }
 
-    const uint32_t reference = input.heap->createArray(AT_REFERENCE, size);
+    std::string *str = new std::string(className);
+    str->insert(0, "L");
+    str->push_back(';');
+    const uint32_t reference = input.heap->createArray(AT_REFERENCE, size, *str);
     const Variable variable{VariableType_REFERENCE, reference};
 
     topFrame->operands.push_back(variable);
@@ -496,8 +514,26 @@ void athrow(const InstructionInput& input)
     const Variable throwableRef = input.thread->m_currentFrame->popOperand();
     const Object* throwable = input.heap->getObject(throwableRef.data);
 
+    // remove ==
+
+    printf("String pool:\n");
+
+    input.heap->printStringPool();
+
+    input.thread->internalError("Unhandled exception");
+
+    // ==
+
     while(!input.thread->m_stack.frames.empty()) {
-        const std::span<ExceptionTableEntry> exceptionHandlers =  input.thread->m_currentMethod->code->exceptionTable;
+        const AttributeCode* codeAttribute = input.thread->m_currentMethod->code;
+        if (codeAttribute == nullptr)
+        {
+            // This happens when we have a native code stackframe.
+            // In this case we have to skip the frame because it can't and won't contain exception handlers.
+            input.thread->popFrame();
+            continue;
+        }
+        const std::span<ExceptionTableEntry> exceptionHandlers =  codeAttribute->exceptionTable;
 
         for (const ExceptionTableEntry& handler : exceptionHandlers)
         {

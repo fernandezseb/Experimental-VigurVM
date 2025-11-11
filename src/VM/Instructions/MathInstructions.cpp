@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Sebastiaan Fernandez.
+ * Copyright (c) 2023-2025 Sebastiaan Fernandez.
  *
  * This file is part of VigurVM.
  *
@@ -9,7 +9,7 @@
  * VigurVM is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License along with Foobar.
+ * You should have received a copy of the GNU General Public License along with VigurVM.
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -60,6 +60,14 @@ void fmul(const InstructionInput& input)
     input.thread->m_currentFrame->operands.push_back(added);
 }
 
+void idiv(const InstructionInput& input)
+{
+    const i4 val2 = input.thread->m_currentFrame->popInt();
+    const i4 val1 = input.thread->m_currentFrame->popInt();
+    const i4 result = val1/val2;
+    input.thread->m_currentFrame->pushInt(result);
+}
+
 void fdiv(const InstructionInput& input)
 {
     const Variable var2 = input.thread->m_currentFrame->popOperand();
@@ -77,6 +85,12 @@ void irem(const InstructionInput& input)
     const i4 result = val1%val2;
     // TODO: Fix for edge cases
     input.thread->m_currentFrame->pushInt(result);
+}
+
+void ineg(const InstructionInput& input)
+{
+    const i4 val = input.thread->m_currentFrame->popInt();
+    input.thread->m_currentFrame->pushInt(-val);
 }
 
 void lshl(const InstructionInput& input)
@@ -106,8 +120,10 @@ void ishr(const InstructionInput& input)
     const Variable value2 = input.thread->m_currentFrame->popOperand();
     const Variable value1 = input.thread->m_currentFrame->popOperand();
 
-    const i4 s = ((i4)value2.data) & 0x1f;
-    const i4 resultVal = value1.data >> s;
+    const i4 sIntValue = static_cast<i4>(value2.data);
+    const i4 valueIntValue = static_cast<i4>(value1.data);
+    const i4 s = sIntValue & 0x1f;
+    const i4 resultVal = valueIntValue >> s;
     const Variable result{VariableType_INT,
         std::bit_cast<u4>(resultVal)};
 

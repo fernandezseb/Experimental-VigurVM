@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Sebastiaan Fernandez.
+ * Copyright (c) 2023-2025 Sebastiaan Fernandez.
  *
  * This file is part of VigurVM.
  *
@@ -9,7 +9,7 @@
  * VigurVM is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License along with Foobar.
+ * You should have received a copy of the GNU General Public License along with VigurVM.
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -156,6 +156,11 @@ void VMThread::internalError(const std::string_view error) const
 
 u1 VMThread::readUnsignedByte()
 {
+    if (m_pc >= m_currentMethod->code->codeLength)
+    {
+        printf("Trying to access code at location: %d, whereas code has length: %d\n", m_pc, m_currentMethod->code->codeLength);
+        internalError("Trying to access code at invalid location");
+    }
     return m_currentMethod->code->code[m_pc++];
 }
 

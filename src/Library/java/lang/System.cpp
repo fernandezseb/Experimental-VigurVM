@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Sebastiaan Fernandez.
+ * Copyright (c) 2023-2025 Sebastiaan Fernandez.
  *
  * This file is part of VigurVM.
  *
@@ -9,7 +9,7 @@
  * VigurVM is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License along with Foobar.
+ * You should have received a copy of the GNU General Public License along with VigurVM.
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -40,7 +40,7 @@ JCALL void lib_java_lang_System_arraycopy(const NativeArgs& args)
     u1 bytes = 4;
     if (srcArray->arrayType == AT_CHAR)
     {
-        bytes = 1;
+        bytes = 2;
     }
     else if (srcArray->arrayType == AT_LONG || srcArray->arrayType == AT_DOUBLE)
     {
@@ -69,9 +69,12 @@ JCALL void lib_java_lang_System_initProperties(const NativeArgs& args)
     const Object* properties = args.heap->getObject(propertiesObjectRef.data);
     const MethodInfo* entryPoint = properties->classInfo->findMethodWithNameAndDescriptor("setProperty", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Object;");
 
-    setProperty(args, propertiesObjectRef, properties->classInfo, entryPoint, "file.encoding", "UTF-8");
+    setProperty(args, propertiesObjectRef, properties->classInfo, entryPoint, "file.encoding", "Cp1252");
     setProperty(args, propertiesObjectRef, properties->classInfo, entryPoint, "user.dir", args.vm->userDir.c_str());
     setProperty(args, propertiesObjectRef, properties->classInfo, entryPoint, "sun.jnu.encoding", "Cp1252");
+    setProperty(args, propertiesObjectRef, properties->classInfo, entryPoint, "os.version", "10.0");
+    // setProperty(args, propertiesObjectRef, properties->classInfo, entryPoint, "sun.stdout.encoding", "cp850");
+    // setProperty(args, propertiesObjectRef, properties->classInfo, entryPoint, "sun.stderr.encoding", "cp850");
 
     args.thread->returnVar(propertiesObjectRef);
 }

@@ -13,7 +13,11 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "String.h"
+#include "ClassLoader.h"
+#include "Data/Descriptor.h"
+
+#include <algorithm>
+#include <string>
 
 [[nodiscard]] static const Object* getThisObjectReference(
     VMThread* thread,
@@ -26,14 +30,19 @@
     return heap->getObject(var.data);
 }
 
-JCALL void lib_java_lang_String_intern(const NativeArgs& args)
+[[nodiscard]] static const ClassObject* getThisClassObjectReference(
+    VMThread* thread,
+    const JavaHeap* heap,
+    const VM* VM)
 {
-    Variable var = args.thread->m_currentFrame->localVariables[0];
-    // const Object* stringObject = getThisObjectReference(args.thread, args.heap, args.vm);
-    // const u4 arrayReference = stringObject->fields[0].data->data;
-    // const Array* charArray = args.heap->getArray(arrayReference);
-    // const u4 stringRef = args.heap->createString(reinterpret_cast<const char*>(charArray->data), args.vm);
-    // TODO: Ensure creation of string on the string pool
-    printf("|String Interned with id: %d\n", var.data);
-    args.thread->returnVar(Variable{VariableType_REFERENCE, var.data});
+    const StackFrame* currentFrame = thread->m_currentFrame;
+    const Variable var = currentFrame->localVariables[0];
+    VM->checkType(var, VariableType_REFERENCE, thread);
+    return heap->getClassObject(var.data);
+}
+
+JCALL void lib_java_lang_ClassLoader_registerNatives(const NativeArgs& args)
+{
+    // registerNative("java/lang/Class/getPrimitiveClass", "(Ljava/lang/String;)Ljava/lang/Class;",
+    //                lib_java_lang_Class_getPrimitiveClass);
 }

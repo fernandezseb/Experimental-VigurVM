@@ -74,6 +74,7 @@ public:
     ArrayType arrayType;
     uint64_t length;
     u1* data;
+    std::string_view descriptor;
 };
 
 class MethodArea {
@@ -100,7 +101,7 @@ public:
     /*
      * Object operations
      */
-    u4 createArray(ArrayType type, uint64_t size);
+    u4 createArray(ArrayType type, uint64_t size, std::string_view descriptor);
     u4 createObject(ClassInfo* classInfo, VM* VM);
     u4 createClassObject(ClassInfo* classInfo, VM* VM, std::string_view name);
     u4 createString(const char* utf8String, VM* VM);
@@ -120,4 +121,5 @@ public:
      */
     void addClassInfo(ClassInfo* classInfo);
     [[nodiscard]] ClassInfo* getClassByName(std::string_view className) const;
+    void printStringPool();
 };

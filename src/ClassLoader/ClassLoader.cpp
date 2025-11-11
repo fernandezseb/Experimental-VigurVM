@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Sebastiaan Fernandez.
+ * Copyright (c) 2023-2025 Sebastiaan Fernandez.
  *
  * This file is part of VigurVM.
  *
@@ -9,7 +9,7 @@
  * VigurVM is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License along with Foobar.
+ * You should have received a copy of the GNU General Public License along with VigurVM.
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -262,6 +262,7 @@ ClassInfo* ClassLoader::readClass(const char* className, Memory* memory, [[maybe
     snprintf(name, 300, "%s.class", className);
 
     PHYSFS_addToSearchPath("extern/classpath/rt.jar/rt.jar", 1);
+    PHYSFS_addToSearchPath("extern/classpath/charsets.jar/charsets.jar", 1);
     if (classPath != nullptr && strlen(classPath) > 0) {
         PHYSFS_addToSearchPath(classPath, 1);
     }

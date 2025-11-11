@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Sebastiaan Fernandez.
+ * Copyright (c) 2023-2025 Sebastiaan Fernandez.
  *
  * This file is part of VigurVM.
  *
@@ -9,7 +9,7 @@
  * VigurVM is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License along with Foobar.
+ * You should have received a copy of the GNU General Public License along with VigurVM.
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -107,11 +107,14 @@ void bastore(const InstructionInput& input)
 
 void castore(const InstructionInput& input)
 {
+    // TODO: Fix for utf-16
     StackFrame* currentFrame = input.thread->m_currentFrame;
     const Variable value = currentFrame->popOperand();
     const Variable index = currentFrame->popOperand();
     const Variable arrayref = currentFrame->popOperand();
 
     const Array* array = input.heap->getArray(arrayref.data);
-    array->data[index.data] = castToU1<u4>(value.data);
+
+    u2* charArray = reinterpret_cast<u2*>(array->data);
+    charArray[index.data] = castToU2<u4>(value.data); // XXX
 }

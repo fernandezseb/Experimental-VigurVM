@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Sebastiaan Fernandez.
+ * Copyright (c) 2023-2025 Sebastiaan Fernandez.
  *
  * This file is part of VigurVM.
  *
@@ -9,7 +9,7 @@
  * VigurVM is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License along with Foobar.
+ * You should have received a copy of the GNU General Public License along with VigurVM.
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -56,6 +56,7 @@ JCALL void lib_java_lang_Class_registerNatives(const NativeArgs& args)
     registerNative("java/lang/Class/getDeclaredConstructors0", "(Z)[Ljava/lang/reflect/Constructor;", lib_java_lang_Class_getDeclaredConstructors0);
     registerNative("java/lang/Class/getModifiers", "()I", lib_java_lang_Class_getModifiers);
     registerNative("java/lang/Class/getSuperclass", "()Ljava/lang/Class;", lib_java_lang_Class_getSuperClass);
+    registerNative("java/lang/Class/getInterfaces0", "()[Ljava/lang/Class;", lib_java_lang_Class_getInterfaces0);
 }
 
 JCALL void lib_java_lang_Class_getPrimitiveClass(const NativeArgs& args)
@@ -147,7 +148,7 @@ JCALL void lib_java_lang_Class_getDeclaredFields0(const NativeArgs& args)
     // TODO: Use publicOnlyBooleanVar
     [[maybe_unused]] const Variable publicOnlyBooleanVar  = currentFrame->localVariables[1];
     const u4 arraySize = classObject->classClassInfo->fieldsCount;
-    const u4 arrayObject =  args.heap->createArray(AT_REFERENCE, arraySize);
+    const u4 arrayObject =  args.heap->createArray(AT_REFERENCE, arraySize, "Ljava/lang/reflect/Field;");
 
     const Array* fieldsArray = args.heap->getArray(arrayObject);
 
@@ -271,7 +272,7 @@ JCALL void lib_java_lang_Class_getDeclaredConstructors0(const NativeArgs& args)
     // TODO: Use publicOnlyBooleanVar
     [[maybe_unused]] const Variable publicOnlyBooleanVar  = currentFrame->localVariables[1];
     const u4 arraySize = classObject->classClassInfo->methods.size();
-    const u4 arrayObject =  args.heap->createArray(AT_REFERENCE, 1);
+    const u4 arrayObject =  args.heap->createArray(AT_REFERENCE, 1, "Ljava/lang/reflect/Constructor,");
 
     const Array* constructorsArray = args.heap->getArray(arrayObject);
 
@@ -297,7 +298,8 @@ JCALL void lib_java_lang_Class_getDeclaredConstructors0(const NativeArgs& args)
 
         // Set the parameterTypes field
         FieldData* parameterTypes = constructorObject->getField("parameterTypes", "[Ljava/lang/Class;", args.heap);
-        const u4 argsArray = args.heap->createArray(AT_REFERENCE, 0);
+        // TODO: Not sure about the descriptor in the array
+        const u4 argsArray = args.heap->createArray(AT_REFERENCE, 0, "Ljava/lang/Class;");
         parameterTypes->data->data = argsArray;
 
         u4* array = reinterpret_cast<u4*>(constructorsArray->data);
@@ -330,4 +332,26 @@ JCALL void lib_java_lang_Class_getSuperClass(const NativeArgs& args)
         args.thread->returnVar(Variable{VariableType_REFERENCE, 0});
     }
     printf("");
+}
+
+JCALL void lib_java_lang_Class_getInterfaces0(const NativeArgs& args)
+{
+    const ClassObject* classObject = getThisClassObjectReference(args.thread, args.heap, args.vm);
+    std::span<uint16_t> interfaces = classObject->classClassInfo->interfaces;
+
+    const u4 newArrayRef = args.heap->createArray(ArrayType::AT_REFERENCE, interfaces.size(), "Ljava/lang/Class;");
+    const Array* newArray = args.heap->getArray(newArrayRef);
+    u4* arrayData = reinterpret_cast<u4*>(newArray->data);
+
+    for (uint16_t currentInterface = 0; currentInterface < interfaces.size(); ++currentInterface)
+    {
+        CPClassInfo* intefaceInfo = classObject->classClassInfo->constantPool->getClassInfo(interfaces[currentInterface]);
+        std::string_view interfaceName = classObject->classClassInfo->constantPool->getString(intefaceInfo->nameIndex);
+        ClassInfo* classInfo =  args.vm->getClass(interfaceName, args.thread);
+        const u4 interfaceObject = args.heap->createClassObject(classInfo,args.vm,  interfaceName);
+        arrayData[currentInterface] = interfaceObject;
+        printf("brol");
+    }
+    printf("");
+    args.thread->returnVar(Variable{VariableType_REFERENCE, newArrayRef});
 }

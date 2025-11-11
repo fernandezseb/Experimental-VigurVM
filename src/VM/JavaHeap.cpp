@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Sebastiaan Fernandez.
+ * Copyright (c) 2023-2025 Sebastiaan Fernandez.
  *
  * This file is part of VigurVM.
  *
@@ -9,7 +9,7 @@
  * VigurVM is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License along with Foobar.
+ * You should have received a copy of the GNU General Public License along with VigurVM.
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -25,19 +25,20 @@ JavaHeap::JavaHeap()
     objects.push_back(0);
 }
 
-u4 JavaHeap::createArray(ArrayType type, uint64_t size)
+u4 JavaHeap::createArray(ArrayType type, uint64_t size, std::string_view descriptor)
 {
     Array* array = static_cast<Array*>(Platform::allocateMemory(sizeof(Array), 0));
     array->length = size;
     array->type = ARRAY;
     array->arrayType = type;
     array->data = 0;
+    array->descriptor = descriptor;
     if (size > 0 )
     {
         u1 bytes = 4;
         if (type == AT_CHAR)
         {
-            bytes = 1;
+            bytes = 2;
         }
         else if (type == AT_LONG || type == AT_DOUBLE)
         {
@@ -195,9 +196,12 @@ u4 JavaHeap::createString(const char* utf8String, VM* VM) {
     const u4 strObjectId = createObject(getClassByName("java/lang/String"), VM);
     const Object* strObject = getObject(strObjectId);
 
-    const u4 arrId = createArray(AT_CHAR, strlen(utf8String));
+    const u4 arrId = createArray(AT_CHAR, strlen(utf8String), "C"); // TODO: C?
     const Array* charArray = getArray(arrId);
-    memcpy((char*)charArray->data, utf8String, strlen(utf8String));
+    // TODO: Correctly convert utf-8 modified to utf16
+    for (u4 currentIndex = 0; currentIndex < strlen(utf8String); currentIndex++) {
+        ((u2*)(charArray->data))[currentIndex] = utf8String[currentIndex];
+    }
 
     const Variable var{VariableType_REFERENCE, arrId};
     strObject->fields[0].data[0] = var;
@@ -276,6 +280,14 @@ const Array* JavaHeap::getArray(const uint32_t id) const
 
 u4 JavaHeap::getString(const char* utf8String) const
 {
+    u4 size = strlen(utf8String);
+    u2* utf16Chars = new u2[size];
+
+    // TODO: Correctly convert utf-8 modified to utf16
+    for (u4 currentIndex = 0; currentIndex < strlen(utf8String); currentIndex++) {
+        utf16Chars[currentIndex] = utf8String[currentIndex];
+    }
+
     for (uint32_t currentObj = 1; currentObj < objects.size(); ++currentObj)
     {
         const Reference* ref = objects[currentObj];
@@ -284,6 +296,11 @@ u4 JavaHeap::getString(const char* utf8String) const
             if (obj->classInfo->getName() == std::string_view{"java/lang/String"})
             {
                 Variable charArrRef =  obj->fields[0].data[0];
+                if (charArrRef.data == 0)
+                {
+                    printf("WARN: String contains null reference to characters");
+                    continue;
+                }
                 const Array* arr = getArray(charArrRef.data);
                 if (arr->length == 0)
                 {
@@ -292,9 +309,25 @@ u4 JavaHeap::getString(const char* utf8String) const
                         return currentObj;
                     }
                 } else {
-                    if (strncmp((const char*)arr->data, utf8String,
-                        (arr->length > strlen(utf8String) ? arr->length : strlen(utf8String))) == 0) {
-                        return currentObj;
+                    if (strlen(utf8String) == arr->length)
+                    {
+                        // printf("======= same size ...");
+                        bool foundDifference = false;
+                        for (u4 currentIndex = 0; currentIndex < arr->length; ++currentIndex)
+                        {
+                            if (utf16Chars[currentIndex] != ((u2*)arr->data)[currentIndex])
+                            {
+                                foundDifference = true;
+                            }
+                        }
+                        if (foundDifference)
+                        {
+                            continue;
+                        } else
+                        {
+                            printf(" --> Found copy! of %s\n", utf8String);
+                            return currentObj;
+                        }
                     }
                 }
             }
@@ -313,7 +346,20 @@ std::string_view JavaHeap::getStringContent(const Object* stringObject) const
 
     const u4 arrayRefId = stringObject->fields[0].data->data;
     const Array* array = getArray(arrayRefId);
-    return std::string_view{reinterpret_cast<char*>(array->data), array->length};
+    // TODO: Fix interpretation of this UTF16 string
+    // std::string_view sv = std::string_view{reinterpret_cast<char*>(array->data), array->length*2};
+    char *str = new char[array->length+1];
+
+    const u2* charArray = reinterpret_cast<const u2*>(array->data);
+
+    u4 new_current_length = 0;
+    for (u4 currentChar = 0; currentChar < array->length; currentChar++)
+    {
+        str[currentChar] = charArray[currentChar];
+    }
+
+    std::string_view sv = std::string_view{str, array->length};
+    return sv;
 }
 
 std::string_view JavaHeap::getStringContent(const u4 id) const
@@ -353,6 +399,29 @@ ClassInfo* JavaHeap::getClassByName(std::string_view className) const
         }
     }
     return nullptr;
+}
+
+void JavaHeap::printStringPool()
+{
+    for (uint32_t currentObj = 1; currentObj < objects.size(); ++currentObj)
+    {
+        const Reference* ref = objects[currentObj];
+        if (ref->type == ReferenceType::OBJECT) {
+            const Object* obj = static_cast<const Object*>(ref);
+            if (obj->classInfo->getName() == std::string_view{"java/lang/String"})
+            {
+                printf("|%d|", currentObj);
+                Variable charArrRef =  obj->fields[0].data[0];
+                const Array* arr = getArray(charArrRef.data);
+                for (u4 currentIndex = 0; currentIndex < arr->length; ++currentIndex)
+                {
+                    u1 charDowncasted = ((u2*)arr->data)[currentIndex];
+                    printf("%c", charDowncasted);
+                }
+                printf("|\n");
+            }
+        }
+    }
 }
 
 FieldData* Object::getField(const char* name, const char* descriptor, JavaHeap* heap) const

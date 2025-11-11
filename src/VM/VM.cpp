@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Sebastiaan Fernandez.
+ * Copyright (c) 2023-2025 Sebastiaan Fernandez.
  *
  * This file is part of VigurVM.
  *
@@ -9,7 +9,7 @@
  * VigurVM is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License along with Foobar.
+ * You should have received a copy of the GNU General Public License along with VigurVM.
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -259,7 +259,7 @@ void VM::executeLoop(VMThread* thread)
     while (thread->m_stack.frames.size() > depth)
     {
         uint8_t opcode = thread->readUnsignedByte();
-        // printf("Running instruction with opcode: 0x%0x ", opcode);
+        // printf("Running instruction with opcode: 0x%0x \n", opcode);
 
         bool found = false;
 
@@ -365,7 +365,7 @@ void VM::executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* met
 
 void VM::createArgsArray(const VMThread* thread)
 {
-    const u4 arrayRef =  m_heap.createArray(AT_REFERENCE, m_configuration.args.size());
+    const u4 arrayRef =  m_heap.createArray(AT_REFERENCE, m_configuration.args.size(), "Ljava/lang/String;");
     const Array* array = m_heap.getArray(arrayRef);
     u4* arrayData = reinterpret_cast<u4*>(array->data);
     u4 currentArg = 0;

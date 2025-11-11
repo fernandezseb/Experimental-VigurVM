@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Sebastiaan Fernandez.
+ * Copyright (c) 2023-2025 Sebastiaan Fernandez.
  *
  * This file is part of VigurVM.
  *
@@ -9,7 +9,7 @@
  * VigurVM is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License along with Foobar.
+ * You should have received a copy of the GNU General Public License along with VigurVM.
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -31,10 +31,27 @@ JCALL void lib_java_lang_Object_hashCode(const NativeArgs& args)
 
 JCALL void lib_java_lang_Object_getClass(const NativeArgs& args)
 {
+    // TODO: Implement getClass for arrays as well
     const StackFrame* currentFrame = args.thread->m_currentFrame;
-    const Object* object = args.heap->getObject(currentFrame->localVariables[0].data);
-    const u4 classObject = args.heap->createClassObject(object->classInfo, args.vm, object->classInfo->getName());
-    args.thread->returnVar(Variable{VariableType_REFERENCE, classObject});
+    const Reference* reference = args.heap->getReference(currentFrame->localVariables[0].data);
+
+    if (reference->type == OBJECT)
+    {
+        const Object* object = args.heap->getObject(currentFrame->localVariables[0].data);
+        const u4 classObject = args.heap->createClassObject(object->classInfo, args.vm, object->classInfo->getName());
+        args.thread->returnVar(Variable{VariableType_REFERENCE, classObject});
+    } else if (reference->type == ARRAY)
+    {
+        const Array* array = args.heap->getArray(currentFrame->localVariables[0].data);
+        printf("brol");
+        std::string *name = new std::string(array->descriptor);
+        name->insert(0, "[");
+        const u4 classObject = args.heap->createClassObject(nullptr, args.vm, name->c_str());
+        args.thread->returnVar(Variable{VariableType_REFERENCE, classObject});
+    } else
+    {
+        args.thread->internalError("Running getClass on unknown type of object");
+    }
 }
 
 JCALL void lib_java_lang_Object_clone(const NativeArgs& args)
@@ -43,9 +60,15 @@ JCALL void lib_java_lang_Object_clone(const NativeArgs& args)
     if (reference->type == ARRAY)
     {
         const Array* array = reference->getArray();
-        const u4 cloneRef = args.heap->createArray(array->arrayType, array->length);
+        const u4 cloneRef = args.heap->createArray(array->arrayType, array->length, array->descriptor);
         const Array* clone = args.heap->getArray(cloneRef);
         // TODO: Do the copy of the data
+        u4* newArrayData = reinterpret_cast<u4*>(clone->data);
+        u4* oldArrayData = reinterpret_cast<u4*>(array->data);
+        for (u4 currentItemIndex = 0; currentItemIndex < array->length; ++currentItemIndex)
+        {
+            newArrayData[currentItemIndex] = oldArrayData[currentItemIndex];
+        }
         args.thread->returnVar(Variable{VariableType_REFERENCE, cloneRef});
         printf("");
     } else if (reference->type == CLASSOBJECT || reference->type == OBJECT) {
