@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Sebastiaan Fernandez.
+ * Copyright (c) 2023-2025 Sebastiaan Fernandez.
  *
  * This file is part of VigurVM.
  *
@@ -9,7 +9,7 @@
  * VigurVM is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License along with Foobar.
+ * You should have received a copy of the GNU General Public License along with VigurVM.
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -144,10 +144,15 @@ void caload(const InstructionInput& input)
     const Variable arrayRef = input.thread->m_currentFrame->popOperand();
 
     const Array* array = input.heap->getArray(arrayRef.data);
-    const i1* intArray = (i1*) array->data;
+    const u2* intArray = reinterpret_cast<u2*>(array->data);
 
-    const i1 data = intArray[index.data];
+    const i4 indexSigned = static_cast<i4>(index.data);
+    if ((indexSigned > array->length) || (indexSigned < 0))
+    {
+        input.thread->internalError("Index out of bound");
+    }
+    const u2 data = intArray[indexSigned];
 
-    const Variable dataVar{VariableType_INT, static_cast<uint32_t>(static_cast<int32_t>(data))};
+    const Variable dataVar{VariableType_INT, std::bit_cast<u4>(static_cast<i4>(data))};
     input.thread->m_currentFrame->operands.push_back(dataVar);
 }

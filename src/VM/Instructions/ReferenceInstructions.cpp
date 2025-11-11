@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Sebastiaan Fernandez.
+ * Copyright (c) 2023-2025 Sebastiaan Fernandez.
  *
  * This file is part of VigurVM.
  *
@@ -9,7 +9,7 @@
  * VigurVM is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License along with Foobar.
+ * You should have received a copy of the GNU General Public License along with VigurVM.
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -399,9 +399,21 @@ void invokestatic(const InstructionInput& input)
         input.thread->popFrame();
     } else
     {
-        input.thread->pushStackFrameStatic(targetClass, methodInfo, topFrame);
-        printf("> Created new stack frame for static call: %s.%s\n",
-            topFrame->constantPool->getString(targetClassInfo->nameIndex).data(), methodInfo->name.data());
+        std::string_view className = topFrame->constantPool->getString(targetClassInfo->nameIndex);
+        if (
+            // methodInfo->name == "loadLibrary"
+             (methodInfo->name == "setup" && className == "java/lang/Terminator")
+            || (methodInfo->name == "initializeOSEnvironment" && className == "sun/misc/VM")
+            || (methodInfo->name == "booted" && className == "sun/misc/VM")
+            )
+        {
+            printf("!!! Skipping LoadLibrary");
+        } else
+        {
+            input.thread->pushStackFrameStatic(targetClass, methodInfo, topFrame);
+            printf("> Created new stack frame for static call: %s.%s\n",
+                topFrame->constantPool->getString(targetClassInfo->nameIndex).data(), methodInfo->name.data());
+        }
     }
 }
 

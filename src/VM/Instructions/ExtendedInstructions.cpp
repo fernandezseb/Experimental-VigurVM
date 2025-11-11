@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Sebastiaan Fernandez.
+ * Copyright (c) 2023-2025 Sebastiaan Fernandez.
  *
  * This file is part of VigurVM.
  *
@@ -9,7 +9,7 @@
  * VigurVM is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License along with Foobar.
+ * You should have received a copy of the GNU General Public License along with VigurVM.
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -25,6 +25,28 @@ static i2 readShort(VMThread* thread)
     const u1 buffer[2] = {code[thread->m_pc++], code[thread->m_pc++]};
     const i2 value = static_cast<i2>(buffer[1]) | static_cast<i2>(buffer[0]) << 8;
     return value;
+}
+
+void wide(const InstructionInput& input)
+{
+    u1 opcode = input.thread->readUnsignedByte();
+    switch (opcode)
+    {
+    case i_iinc:
+        {
+            u2 index = input.thread->readUnsignedShort();
+            i2 constant = readShort(input.thread);
+            Variable* var =  &input.thread->m_currentFrame->localVariables[index];
+            // var->data += constData;
+            i4 currentInt = std::bit_cast<i4>(var->data);
+            currentInt += constant;
+            var->data = std::bit_cast<u4>(currentInt);
+            printf("");
+            break;
+        }
+    default:
+        input.thread->internalError("Unknown opcode accompanying wide instruction");
+    }
 }
 
 void ifnull(const InstructionInput& input)

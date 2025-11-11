@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Sebastiaan Fernandez.
+ * Copyright (c) 2023-2025 Sebastiaan Fernandez.
  *
  * This file is part of VigurVM.
  *
@@ -9,7 +9,7 @@
  * VigurVM is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License along with Foobar.
+ * You should have received a copy of the GNU General Public License along with VigurVM.
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -71,8 +71,9 @@ void dconst_i(const InstructionInput& input)
 
 void bipush(const InstructionInput& input)
 {
-    const uint8_t byte = input.args[0];
-    const Variable variable{VariableType_INT, byte};
+    const i1 byte = std::bit_cast<u1>(input.args[0]);
+    const i4 intVal = byte;
+    const Variable variable{VariableType_INT, static_cast<u4>(intVal)};
     input.thread->m_currentFrame->operands.push_back(variable);
 }
 

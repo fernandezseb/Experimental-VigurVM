@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2023-2024 Sebastiaan Fernandez.
+* Copyright (c) 2023-2025 Sebastiaan Fernandez.
  *
  * This file is part of VigurVM.
  *
@@ -9,7 +9,7 @@
  * VigurVM is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License along with Foobar.
+ * You should have received a copy of the GNU General Public License along with VigurVM.
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -51,6 +51,6 @@ void f2i(const InstructionInput& input)
 void i2c(const InstructionInput& input)
 {
     const i4 intValue = input.thread->m_currentFrame->popInt();
-    const i2 f = static_cast<i2>(intValue);
+    const i2 f = static_cast<i2>(intValue);// TODO: Check if correct
     input.thread->m_currentFrame->pushInt(f);
 }
