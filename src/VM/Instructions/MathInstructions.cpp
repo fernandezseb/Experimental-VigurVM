@@ -107,13 +107,14 @@ void ishl(const InstructionInput& input)
     const Variable value2 = input.thread->m_currentFrame->popOperand();
     const Variable value1 = input.thread->m_currentFrame->popOperand();
 
-    const i4 s = ((i4)value2.data) & 0x1f;
-    const i4 resultVal = value1.data << s;
+    const i4 sIntValue = static_cast<i4>(value2.data);
+    const i4 valueIntValue = static_cast<i4>(value1.data);
+    const i4 s = sIntValue & 0x1f;
+    const i4 resultVal = valueIntValue << s;
     const Variable result{VariableType_INT,
         std::bit_cast<u4>(resultVal)};
 
-    input.thread->m_currentFrame->operands.push_back(result);
-}
+    input.thread->m_currentFrame->operands.push_back(result);}
 
 void ishr(const InstructionInput& input)
 {
