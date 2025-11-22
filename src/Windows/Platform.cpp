@@ -18,6 +18,7 @@
 #include <Windows.h>
 
 #include "Util.h"
+#include "Error.h"
 
 void Platform::initialize()
 {
@@ -45,14 +46,26 @@ void Platform::print(const char* string, uint64_t length)
 	printf(""); // TODO: Rework printing code
 }
 
-void* Platform::allocateMemory(size_t size, size_t baseAddress)
+void* Platform::allocateMemory(const size_t size, const size_t baseAddress)
 {
-	LPVOID lpBaseAddress = (LPVOID)baseAddress;
-	return VirtualAlloc(
+	if (size <= 0)
+	{
+		printf("ERROR allocating memory of invalid size! (%llu)\n", size);
+		Platform::exitProgram(ErrorCode::INVALID_MEMORY_SIZE);
+	}
+	const LPVOID lpBaseAddress = (LPVOID)baseAddress;
+
+	void* addr = VirtualAlloc(
 		lpBaseAddress, 
 		size, 
 		MEM_COMMIT, 
 		PAGE_READWRITE);
+	if (addr == nullptr)
+	{
+		printf("ERROR allocating memory! \n");
+		Platform::exitProgram(ErrorCode::OUT_OF_MEMORY);
+	}
+	return addr;
 }
 
 void Platform::freeMemory(void* allocatedMemory)

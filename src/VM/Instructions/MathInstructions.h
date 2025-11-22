@@ -18,5 +18,6 @@ void iushr(const InstructionInput& input);
 void iand(const InstructionInput& input);
 void land(const InstructionInput& input);
 void ior(const InstructionInput& input);
+void lor(const InstructionInput& input);
 void ixor(const InstructionInput& input);
 void iinc(const InstructionInput& input);

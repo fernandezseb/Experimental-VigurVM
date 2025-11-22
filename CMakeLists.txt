@@ -21,6 +21,7 @@ add_executable(${PROJECT_NAME}
         src/Util.cpp
         src/Util.h
         src/Memory.h
+        src/Error.h
         src/DynamicArray.cpp
         src/DynamicArray.h
         src/VM/VM.cpp
@@ -70,7 +71,6 @@ add_executable(${PROJECT_NAME}
         src/VM/Instructions/ComparisonInstructions.cpp
         src/VM/Instructions/ConversionInstructions.h
         src/VM/Instructions/ConversionInstructions.cpp
-
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")

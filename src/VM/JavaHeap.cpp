@@ -15,6 +15,7 @@
 
 #include "JavaHeap.h"
 
+#include "physfs.h"
 #include "Util.h"
 #include "VM.h"
 
@@ -195,12 +196,13 @@ u4 JavaHeap::createString(const char* utf8String, VM* VM) {
 
     const u4 strObjectId = createObject(getClassByName("java/lang/String"), VM);
     const Object* strObject = getObject(strObjectId);
-
-    const u4 arrId = createArray(AT_CHAR, strlen(utf8String), "C"); // TODO: C?
+    const J16String j16String = utf8ToJ16String(utf8String);
+    const u4 arrId = createArray(AT_CHAR, j16String.length, "C"); // TODO: C?
     const Array* charArray = getArray(arrId);
-    // TODO: Correctly convert utf-8 modified to utf16
-    for (u4 currentIndex = 0; currentIndex < strlen(utf8String); currentIndex++) {
-        ((u2*)(charArray->data))[currentIndex] = utf8String[currentIndex];
+    if (strlen(utf8String) > 0)
+    {
+        memcpy(charArray->data, j16String.chars, j16String.length * sizeof(u2));
+        free(j16String.chars);
     }
 
     const Variable var{VariableType_REFERENCE, arrId};
@@ -280,13 +282,8 @@ const Array* JavaHeap::getArray(const uint32_t id) const
 
 u4 JavaHeap::getString(const char* utf8String) const
 {
-    u4 size = strlen(utf8String);
-    u2* utf16Chars = new u2[size];
-
-    // TODO: Correctly convert utf-8 modified to utf16
-    for (u4 currentIndex = 0; currentIndex < strlen(utf8String); currentIndex++) {
-        utf16Chars[currentIndex] = utf8String[currentIndex];
-    }
+    u4 utf8Size = strlen(utf8String);
+    const J16String j16String =  utf8ToJ16String(utf8String);
 
     for (uint32_t currentObj = 1; currentObj < objects.size(); ++currentObj)
     {
@@ -302,41 +299,38 @@ u4 JavaHeap::getString(const char* utf8String) const
                     continue;
                 }
                 const Array* arr = getArray(charArrRef.data);
-                if (arr->length == 0)
+                if (arr->length == 0 && j16String.length == 0)
                 {
-                    if (strlen(utf8String) == 0)
+                    return currentObj;
+                }
+                if (j16String.length == arr->length)
+                {
+                    // printf("======= same size ...");
+                    bool foundDifference = false;
+                    for (u4 currentIndex = 0; currentIndex < arr->length; ++currentIndex)
                     {
-                        return currentObj;
+                        if (j16String.chars[currentIndex] != ((u2*)arr->data)[currentIndex])
+                        {
+                            foundDifference = true;
+                        }
                     }
-                } else {
-                    if (strlen(utf8String) == arr->length)
+                    if (!foundDifference)
                     {
-                        // printf("======= same size ...");
-                        bool foundDifference = false;
-                        for (u4 currentIndex = 0; currentIndex < arr->length; ++currentIndex)
-                        {
-                            if (utf16Chars[currentIndex] != ((u2*)arr->data)[currentIndex])
-                            {
-                                foundDifference = true;
-                            }
-                        }
-                        if (foundDifference)
-                        {
-                            continue;
-                        } else
-                        {
-                            printf(" --> Found copy! of %s\n", utf8String);
-                            return currentObj;
-                        }
+                        printf(" --> Found copy! of %s\n", utf8String);
+                        return currentObj;
                     }
                 }
             }
         }
     }
+    if (utf8Size > 0)
+    {
+        free(j16String.chars);
+    }
     return 0;
 }
 
-std::string_view JavaHeap::getStringContent(const Object* stringObject) const
+J16String JavaHeap::getStringContent(const Object* stringObject) const
 {
     if (stringObject->classInfo->getName() != "java/lang/String")
     {
@@ -346,23 +340,12 @@ std::string_view JavaHeap::getStringContent(const Object* stringObject) const
 
     const u4 arrayRefId = stringObject->fields[0].data->data;
     const Array* array = getArray(arrayRefId);
-    // TODO: Fix interpretation of this UTF16 string
-    // std::string_view sv = std::string_view{reinterpret_cast<char*>(array->data), array->length*2};
-    char *str = new char[array->length+1];
 
-    const u2* charArray = reinterpret_cast<const u2*>(array->data);
-
-    u4 new_current_length = 0;
-    for (u4 currentChar = 0; currentChar < array->length; currentChar++)
-    {
-        str[currentChar] = charArray[currentChar];
-    }
-
-    std::string_view sv = std::string_view{str, array->length};
-    return sv;
+    u2* charArray = reinterpret_cast<u2*>(array->data);
+    return J16String{charArray, array->length};
 }
 
-std::string_view JavaHeap::getStringContent(const u4 id) const
+J16String JavaHeap::getStringContent(const u4 id) const
 {
     const Object* stringObject = getObject(id);
     return getStringContent(stringObject);

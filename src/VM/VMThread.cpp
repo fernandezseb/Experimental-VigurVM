@@ -138,7 +138,7 @@ void VMThread::pushStackFrameSpecial(ClassInfo* classInfo, const MethodInfo* met
     }
 }
 
-void VMThread::internalError(const std::string_view error) const
+void VMThread::internalError(const std::string_view error, const i4 errorCode) const
 {
     fprintf(stdout, "Unhandled VM error in thread \"%s\": %s\n", m_name.data(), error.data());
     for (i8 currentFrame = m_stack.frames.size() - 1; currentFrame >= 0; --currentFrame)
@@ -151,7 +151,23 @@ void VMThread::internalError(const std::string_view error) const
         }
         printf("    at %s.%s%s\n", frame.className.data(), frame.methodName.data(), nativeText);
     }
-    Platform::exitProgram(6);
+    Platform::exitProgram(errorCode);
+}
+
+void VMThread::internalError(std::string_view error) const
+{
+    fprintf(stdout, "Unhandled VM error in thread \"%s\": %s\n", m_name.data(), error.data());
+    for (i8 currentFrame = m_stack.frames.size() - 1; currentFrame >= 0; --currentFrame)
+    {
+        const StackFrame frame = m_stack.frames[currentFrame];
+        const char *nativeText = "";
+        if (frame.isNative)
+        {
+            nativeText = " (native)";
+        }
+        printf("    at %s.%s%s\n", frame.className.data(), frame.methodName.data(), nativeText);
+    }
+    Platform::exitProgram(-79);
 }
 
 u1 VMThread::readUnsignedByte()
@@ -159,7 +175,7 @@ u1 VMThread::readUnsignedByte()
     if (m_pc >= m_currentMethod->code->codeLength)
     {
         printf("Trying to access code at location: %d, whereas code has length: %d\n", m_pc, m_currentMethod->code->codeLength);
-        internalError("Trying to access code at invalid location");
+        internalError("Trying to access code at invalid location", 5);
     }
     return m_currentMethod->code->code[m_pc++];
 }

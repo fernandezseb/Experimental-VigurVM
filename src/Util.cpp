@@ -15,6 +15,8 @@
 
 #include "Util.h"
 
+#include "physfs.h"
+
 std::string_view modifiedUtf8ToStandardUtf8(const char *input, char* outputMemory)
 {
 	std::size_t currentOut = 0;
@@ -40,4 +42,35 @@ std::string_view modifiedUtf8ToStandardUtf8(const char *input, char* outputMemor
 	}
 
 	return std::string_view{outputMemory, currentOut};
+}
+
+J16String utf8ToJ16String(const char* utf8String)
+{
+	const size_t utf8size = strlen(utf8String);
+	u2* tempArray = nullptr;
+	u8 utf16size = 0;
+	if (utf8size > 0)
+	{
+		tempArray = (u2*)malloc((utf8size+1) * sizeof(u2)); // TODO: Use temp memory from JVM
+		// u2* tempArray = (u2*) malloc(strlen(utf8String) * sizeof(u2));
+		PHYSFS_utf8ToUtf16(utf8String, tempArray, (utf8size+1) *2);
+
+		for (u4 current = 0; current <= strlen(utf8String); ++current)
+		{
+			u2 character = tempArray[current];
+			if (character == 0) // TODO: Is not conform Java UTF-16 standard, should be other nultermination?
+			{
+				utf16size = current;
+				break;
+			}
+		}
+	}
+	return J16String{tempArray, utf16size};
+}
+
+const char* J16StringToUtf8String(J16String j16String)
+{
+	char* tempArray = (char*)malloc((j16String.length*2)+1);
+	PHYSFS_utf8FromUtf16(j16String.chars, tempArray, j16String.length*2+1);
+	return tempArray;
 }

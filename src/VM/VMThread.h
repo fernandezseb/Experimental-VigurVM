@@ -32,6 +32,7 @@ public:
     void pushStackFrameSpecial(ClassInfo* classInfo, const MethodInfo* methodInfo, StackFrame* previousFrame, JavaHeap* heap);
     void returnVar(Variable returnValue);
     void returnVar(Variable highByte, Variable lowByte);
+    void internalError(std::string_view error, i4 errorCode) const;
     void internalError(std::string_view error) const;
     u1 readUnsignedByte();
     u2 readUnsignedShort();

@@ -177,6 +177,15 @@ void ior(const InstructionInput& input)
     input.thread->m_currentFrame->operands.push_back(result);
 }
 
+void lor(const InstructionInput& input)
+{
+    StackFrame* currentFrame = input.thread->m_currentFrame;
+    const i8 long2 = currentFrame->popLong();
+    const i8 long1 = currentFrame->popLong();
+    const i8 conjunction = long1 | long2;
+    input.thread->m_currentFrame->pushLong(conjunction);
+}
+
 void ixor(const InstructionInput& input)
 {
     const Variable value2 = input.thread->m_currentFrame->popOperand();

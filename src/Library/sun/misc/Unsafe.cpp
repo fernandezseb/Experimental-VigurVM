@@ -96,7 +96,7 @@ JCALL void lib_sun_misc_Unsafe_compareAndSwapObject(const NativeArgs& args)
     const u4 fieldIndex = (offsetVar-baseOffset)/sizeof(FieldData);
     if (fieldIndex >= oObject->fields.size())
     {
-        args.thread->internalError("Too big offset");
+        args.thread->internalError("Too big offset", 78);
     }
     const FieldData* fieldData = &oObject->fields[fieldIndex];
     if (fieldData->data->data == expectedObjectRef.data)
@@ -120,7 +120,7 @@ JCALL void lib_sun_misc_Unsafe_compareAndSwapInt(const NativeArgs& args)
     const u4 fieldIndex = (offsetVar-baseOffset)/sizeof(FieldData);
     if (fieldIndex >= oObject->fields.size())
     {
-        args.thread->internalError("Too big offset");
+        args.thread->internalError("Too big offset", -9);
     }
     const FieldData* fieldData = &oObject->fields[fieldIndex];
     if (fieldData->data->data == expectedIntVar.data)

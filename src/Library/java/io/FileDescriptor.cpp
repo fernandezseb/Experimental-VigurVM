@@ -38,7 +38,7 @@ JCALL void lib_java_io_FileDescriptor_set(const NativeArgs& args)
         filePtr = stderr;
         break;
     default:
-        args.thread->internalError("Filedescriptor not found");
+        args.thread->internalError("Filedescriptor not found", 9);
     }
 
     u8 handle = reinterpret_cast<u8>(filePtr);

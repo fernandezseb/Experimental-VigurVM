@@ -75,7 +75,7 @@ JCALL void lib_java_lang_Thread_start0(const NativeArgs& args)
     const FieldData* runnableField = threadObject->getField("target", "Ljava/lang/Runnable;", args.heap);
     if (runnableField->data->data != 0)
     {
-        args.thread->internalError("Running of Runnables, not implemented yet");
+        args.thread->internalError("Running of Runnables, not implemented yet", 45);
     } else
     {
         // TODO: Run the run method on a new thread

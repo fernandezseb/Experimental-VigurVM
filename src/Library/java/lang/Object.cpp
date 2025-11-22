@@ -50,7 +50,7 @@ JCALL void lib_java_lang_Object_getClass(const NativeArgs& args)
         args.thread->returnVar(Variable{VariableType_REFERENCE, classObject});
     } else
     {
-        args.thread->internalError("Running getClass on unknown type of object");
+        args.thread->internalError("Running getClass on unknown type of object", 12);
     }
 }
 
@@ -72,6 +72,6 @@ JCALL void lib_java_lang_Object_clone(const NativeArgs& args)
         args.thread->returnVar(Variable{VariableType_REFERENCE, cloneRef});
         printf("");
     } else if (reference->type == CLASSOBJECT || reference->type == OBJECT) {
-        args.thread->internalError("Not implemented yet");
+        args.thread->internalError("Not implemented yet", 781);
     }
 }

@@ -3,6 +3,7 @@
 #include <span>
 #include <string_view>
 
+#include "Util.h"
 #include "Core.h"
 #include "DynamicArray.h"
 #include "Data/Class.h"
@@ -112,8 +113,8 @@ public:
     [[nodiscard]] const Object* getChildObject(uint32_t id, ClassInfo* classInfo);
     [[nodiscard]] const Array* getArray(u4 id) const;
     [[nodiscard]] u4 getString(const char* utf8String) const;
-    [[nodiscard]] std::string_view getStringContent(const Object* stringObject) const;
-    [[nodiscard]] std::string_view getStringContent(const u4 id) const;
+    [[nodiscard]] J16String getStringContent(const Object* stringObject) const;
+    [[nodiscard]] J16String getStringContent(const u4 id) const;
     [[nodiscard]] u4 getClassObjectByName(std::string_view name) const;
 
     /*

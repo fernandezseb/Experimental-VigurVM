@@ -63,8 +63,8 @@ void dconst_i(const InstructionInput& input)
 
     // /uint64_t bytes = ((uint64_t)highBytes << 32) + (uint64_t)lowBytes;
     // The value is double back = *reinterpret_cast<double*> (&bytes);
-    const Variable variableHigh{VariableType_LONG, highBytes};
-    const Variable variableLow{VariableType_LONG, lowBytes};
+    const Variable variableHigh{VariableType_DOUBLE, highBytes};
+    const Variable variableLow{VariableType_DOUBLE, lowBytes};
     input.thread->m_currentFrame->operands.push_back(variableHigh);
     input.thread->m_currentFrame->operands.push_back(variableLow);
 }

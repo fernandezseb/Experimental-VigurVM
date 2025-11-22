@@ -15,6 +15,7 @@
 
 #include "VM.h"
 
+#include "Error.h"
 #include "Configuration.h"
 #include "Memory.h"
 #include "Library/Builtin.h"
@@ -46,6 +47,7 @@ void VM::start(std::string_view commandLineName)
     getClass("java/lang/Object", &m_mainThread);
     getClass("java/lang/Number", &m_mainThread);
     ClassInfo* classInfo = getClass("java/lang/Class", &m_mainThread);
+    m_heap.setClassInfo(classInfo);
     getClass("java/lang/String", &m_mainThread);
     ClassInfo* systemClass = getClass("java/lang/System", &m_mainThread);
     getClass("java/lang/Thread", &m_mainThread);
@@ -59,13 +61,11 @@ void VM::start(std::string_view commandLineName)
     getClass("java/io/OutputStream", &m_mainThread);
     getClass("java/util/Properties", &m_mainThread);
 
-    m_heap.setClassInfo(classInfo);
-
     const u4 threadGroupReference = createThreadGroupObject(&m_mainThread);
     m_mainThread.threadObject = createThreadObject(&m_mainThread, threadGroupReference);
 
     // TODO: Enable when fixed
-    // initSystemClass(systemClass, &m_mainThread);
+    initSystemClass(systemClass, &m_mainThread);
 }
 
 u4 VM::createThreadGroupObject(VMThread* thread)
@@ -248,7 +248,7 @@ void VM::updateVariableFromVariable(Variable* variable, std::string_view descrip
     {
         char buffer[200];
         snprintf(buffer, 200, "Error: Setting of variable of type with descriptor: %s not implemented yet!\n", descriptor.data());
-        thread->internalError(buffer);
+        thread->internalError(buffer, 5);
     }
 }
 
@@ -297,7 +297,7 @@ void VM::executeLoop(VMThread* thread)
             printf("\n");
             char buffer[200];
             snprintf(buffer, 200, "Unrecognized opcode detected: 0x%0x", opcode);
-            thread->internalError(buffer);
+            thread->internalError(buffer, 78);
         }
     }
 }
@@ -464,7 +464,7 @@ void VM::checkType(const Variable var, const VariableType type, VMThread* thread
 {
     if (var.type != type)
     {
-        thread->internalError("Error: TypeMismatch");
+        thread->internalError("Error: Type mismatch", ErrorCode::TYPE_MISMATCH);
     }
 }
 
