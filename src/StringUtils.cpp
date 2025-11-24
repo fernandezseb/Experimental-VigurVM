@@ -13,6 +13,8 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <cstdlib>
+
 #include "physfs.h"
 #include "StringUtils.h"
 
