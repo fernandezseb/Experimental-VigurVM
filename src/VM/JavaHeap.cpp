@@ -16,7 +16,7 @@
 #include "JavaHeap.h"
 
 #include "physfs.h"
-#include "Util.h"
+#include "CoreUtils.h"
 #include "VM.h"
 
 JavaHeap::JavaHeap()

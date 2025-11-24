@@ -17,7 +17,7 @@
 
 #include <Windows.h>
 
-#include "Util.h"
+#include "CoreUtils.h"
 #include "Error.h"
 
 void Platform::initialize()

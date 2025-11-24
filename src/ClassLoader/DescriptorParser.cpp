@@ -14,7 +14,7 @@
  */
 
 #include "DescriptorParser.h"
-#include "Util.h"
+#include "CoreUtils.h"
 
 char* DescriptorParser::getArgsPart(char* descriptor, uint16_t* length)
 {

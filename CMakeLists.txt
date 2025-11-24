@@ -18,8 +18,10 @@ add_executable(${PROJECT_NAME}
         src/ByteArray.h
         src/ByteArray.cpp
         src/Platform.h
-        src/Util.cpp
-        src/Util.h
+        src/CoreUtils.cpp
+        src/CoreUtils.h
+        src/StringUtils.h
+        src/StringUtils.cpp
         src/Memory.h
         src/Error.h
         src/DynamicArray.cpp

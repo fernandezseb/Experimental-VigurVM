@@ -3,7 +3,8 @@
 #include <span>
 #include <string_view>
 
-#include "Util.h"
+#include "CoreUtils.h"
+#include "StringUtils.h"
 #include "Core.h"
 #include "DynamicArray.h"
 #include "Data/Class.h"

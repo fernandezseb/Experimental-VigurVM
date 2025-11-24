@@ -19,7 +19,7 @@
 
 #include "Core.h"
 #include "DescriptorParser.h"
-#include "Util.h"
+#include "CoreUtils.h"
 #include "Platform.h"
 #include "Memory.h"
 #include "physfs.h"

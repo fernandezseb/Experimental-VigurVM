@@ -17,7 +17,7 @@
 
 #include "VM/VM.h"
 #include "Data/Variable.h"
-#include "Util.h"
+#include "CoreUtils.h"
 
 #include <bit>
 

@@ -3,8 +3,8 @@ add_executable(DynamicArrayTest
         ${PROJECT_SOURCE_DIR}/src/Platform.h
         ${PROJECT_SOURCE_DIR}/src/DynamicArray.h
         ${PROJECT_SOURCE_DIR}/src/DynamicArray.cpp
-        ${PROJECT_SOURCE_DIR}/src/Util.h
-        ${PROJECT_SOURCE_DIR}/src/Util.cpp
+        ${PROJECT_SOURCE_DIR}/src/CoreUtils.h
+        ${PROJECT_SOURCE_DIR}/src/CoreUtils.cpp
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
