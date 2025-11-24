@@ -25,7 +25,7 @@
 #include <sys/types.h>
 
 #include "Core.h"
-#include "Util.h"
+#include "CoreUtils.h"
 
 void Platform::initialize()
 {
