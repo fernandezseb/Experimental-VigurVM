@@ -15,6 +15,9 @@
 
 #include "System.h"
 
+#include <cstdint>
+#include <chrono>
+
 JCALL void lib_java_lang_System_registerNatives(const NativeArgs& args)
 {
     registerNative("java/lang/System/arraycopy", "(Ljava/lang/Object;ILjava/lang/Object;II)V", lib_java_lang_System_arraycopy);
@@ -22,6 +25,7 @@ JCALL void lib_java_lang_System_registerNatives(const NativeArgs& args)
     registerNative("java/lang/System/setIn0", "(Ljava/io/InputStream;)V", lib_java_lang_System_setIn0);
     registerNative("java/lang/System/setOut0", "(Ljava/io/PrintStream;)V", lib_java_lang_System_setOut0);
     registerNative("java/lang/System/setErr0", "(Ljava/io/PrintStream;)V", lib_java_lang_System_setErr0);
+    registerNative("java/lang/System/currentTimeMillis", "()J", lib_java_lang_System_currentTimeMillis);
 }
 
 JCALL void lib_java_lang_System_arraycopy(const NativeArgs& args)
@@ -98,4 +102,13 @@ JCALL void lib_java_lang_System_setErr0(const NativeArgs& args)
     const ClassInfo* classInfo = args.vm->getClass("java/lang/System", args.thread);
     const FieldInfo* field = classInfo->findField("err", "Ljava/io/PrintStream;");
     field->staticData->data = args.thread->m_currentFrame->localVariables[0].data;
+}
+
+JCALL void lib_java_lang_System_currentTimeMillis(const NativeArgs &args) {
+    using namespace std::chrono;
+    const u8 millis = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+    const auto parts = reinterpret_cast<const u4*>(&millis);
+    args.thread->returnVar(Variable{VariableType_LONG, parts[1]},
+        Variable{VariableType_LONG, parts[0]});
+    printf("");
 }
