@@ -246,10 +246,28 @@ void VMThread::pushStackFrameStatic(ClassInfo* classInfo, MethodInfo* methodInfo
 
     if (previousFrame != nullptr)
     {
+        std::deque<Variable> arguments;
         // The arguments
         for (int i = methodInfo->argsCount; i > 0; --i)
         {
-            m_currentFrame->localVariables[i-1] = previousFrame->popOperand();
+            Variable operand = previousFrame->popOperand();
+            if (operand.getCategory() == 2)
+            {
+                Variable highByte = previousFrame->popOperand();
+                arguments.push_front(operand);
+                arguments.push_front(highByte);
+            } else {
+                arguments.push_front(operand);
+            }
         }
+
+        if (!arguments.empty())
+        {
+            for (int i = 0; i < arguments.size(); ++i)
+            {
+                m_currentFrame->localVariables[i] = arguments[i];
+            }
+        }
+
     }
 }
