@@ -90,6 +90,11 @@ JCALL void lib_java_lang_Class_getPrimitiveClass(const NativeArgs& args)
         ClassInfo* classInfo = args.vm->getClass("java/lang/Boolean", args.thread);
         classRef = args.heap->createClassObject(classInfo, args.vm, "java/lang/Boolean");
     }
+    else if (u16str == u"long")
+    {
+        ClassInfo* classInfo = args.vm->getClass("java/lang/Long", args.thread);
+        classRef = args.heap->createClassObject(classInfo, args.vm, "java/lang/Long");
+    }
     else
     {
         args.thread->internalError("Typestring not found", 45);
