@@ -6,10 +6,10 @@ class FieldInfo;
 enum VariableType
 {
     VariableType_UNDEFINED,
-    VariableType_BOOLEAN,
-    VariableType_CHAR,
+    // VariableType_BOOLEAN,
+    // VariableType_CHAR,
     VariableType_REFERENCE,
-    VariableType_BYTE,
+    // VariableType_BYTE,
     VariableType_INT,
     VariableType_FLOAT,
     VariableType_LONG,

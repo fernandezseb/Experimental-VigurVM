@@ -159,7 +159,7 @@ std::vector<Variable> VM::createVariableForDescriptor(std::string_view descripto
         variables.push_back(variable);
     } else if (descriptor[0] == 'C')
     {
-        constexpr Variable variable{VariableType_CHAR};
+        constexpr Variable variable{VariableType_INT};
         variables.push_back(variable);
     }
     else
@@ -219,6 +219,12 @@ void VM::updateVariableFromVariable(Variable* variable, std::string_view descrip
     {
         checkType(*variable, VariableType_INT, thread);
         checkType(operand, VariableType_INT, thread);
+
+        variable->data = operand.data;
+    } else if (descriptor ==  "C")
+    {
+        checkType(*variable, VariableType_INT, thread);
+        // checkType(operand, VariableType_CHAR, thread);
 
         variable->data = operand.data;
     } else if (descriptor ==  "Z")
@@ -359,7 +365,7 @@ void VM::executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* met
     {
         char errorString[400];
         snprintf(errorString, 400, "Can't find native method %s %s", fullName.c_str(), description.data());
-        thread->internalError(errorString);
+        thread->internalError(errorString, NATIVE_METHOD_NOT_FOUND);
     }
 }
 
