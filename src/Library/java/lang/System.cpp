@@ -26,6 +26,7 @@ JCALL void lib_java_lang_System_registerNatives(const NativeArgs& args)
     registerNative("java/lang/System/setOut0", "(Ljava/io/PrintStream;)V", lib_java_lang_System_setOut0);
     registerNative("java/lang/System/setErr0", "(Ljava/io/PrintStream;)V", lib_java_lang_System_setErr0);
     registerNative("java/lang/System/currentTimeMillis", "()J", lib_java_lang_System_currentTimeMillis);
+    registerNative("java/lang/System/mapLibraryName", "(Ljava/lang/String;)Ljava/lang/String;", lib_java_lang_System_mapLibraryName);
 }
 
 JCALL void lib_java_lang_System_arraycopy(const NativeArgs& args)
@@ -77,6 +78,8 @@ JCALL void lib_java_lang_System_initProperties(const NativeArgs& args)
     setProperty(args, propertiesObjectRef, properties->classInfo, entryPoint, "user.dir", args.vm->userDir.c_str());
     setProperty(args, propertiesObjectRef, properties->classInfo, entryPoint, "sun.jnu.encoding", "Cp1252");
     setProperty(args, propertiesObjectRef, properties->classInfo, entryPoint, "os.version", "10.0");
+    setProperty(args, propertiesObjectRef, properties->classInfo, entryPoint, "file.separator", "\\");
+    setProperty(args, propertiesObjectRef, properties->classInfo, entryPoint, "path.separator", ";");
     // setProperty(args, propertiesObjectRef, properties->classInfo, entryPoint, "sun.stdout.encoding", "cp850");
     // setProperty(args, propertiesObjectRef, properties->classInfo, entryPoint, "sun.stderr.encoding", "cp850");
 
@@ -111,4 +114,11 @@ JCALL void lib_java_lang_System_currentTimeMillis(const NativeArgs &args) {
     args.thread->returnVar(Variable{VariableType_LONG, parts[1]},
         Variable{VariableType_LONG, parts[0]});
     printf("");
+}
+
+JCALL void lib_java_lang_System_mapLibraryName(const NativeArgs &args) {
+    Variable var = args.thread->m_currentFrame->localVariables[0];
+    // TODO: Append '.dll' for Windows
+    printf("|String Interned with id: %d\n", var.data);
+    args.thread->returnVar(Variable{VariableType_REFERENCE, var.data});
 }

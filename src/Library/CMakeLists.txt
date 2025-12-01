@@ -40,5 +40,7 @@ add_library(Library
         java/security/AccessController.cpp
         vigur/lang/System.h
         vigur/lang/System.cpp
+        java/io/WinNTFileSystem.h
+        java/io/WinNTFileSystem.cpp
 )
 target_include_directories(Library PRIVATE ${PROJECT_SOURCE_DIR}/src/)
