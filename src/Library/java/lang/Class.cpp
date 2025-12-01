@@ -62,35 +62,34 @@ JCALL void lib_java_lang_Class_registerNatives(const NativeArgs& args)
 JCALL void lib_java_lang_Class_getPrimitiveClass(const NativeArgs& args)
 {
     const Object* strObject = getThisObjectReference(args.thread, args.heap, args.vm);
-    const J16String typeString = args.heap->getStringContent(strObject);
-    std::u16string u16str = std::u16string((char16_t*)typeString.chars, typeString.length);
+    const std::u16string_view typeString = args.heap->getStringContent(strObject);
     u4 classRef = 0;
-    if (u16str == u"float")
+    if (typeString == u"float")
     {
         ClassInfo* classInfo = args.vm->getClass("java/lang/Float", args.thread);
         classRef = args.heap->createClassObject(classInfo, args.vm, "java/lang/Float");
     }
-    else if (u16str == u"int")
+    else if (typeString == u"int")
     {
         ClassInfo* classInfo = args.vm->getClass("java/lang/Integer", args.thread);
         classRef = args.heap->createClassObject(classInfo, args.vm, "java/lang/Integer");
     }
-    else if (u16str == u"double")
+    else if (typeString == u"double")
     {
         ClassInfo* classInfo = args.vm->getClass("java/lang/Double", args.thread);
         classRef = args.heap->createClassObject(classInfo, args.vm, "java/lang/Double");
     }
-    else if (u16str == u"char")
+    else if (typeString == u"char")
     {
         ClassInfo* classInfo = args.vm->getClass("java/lang/Character", args.thread);
         classRef = args.heap->createClassObject(classInfo, args.vm, "java/lang/Character");
     }
-    else if (u16str == u"boolean")
+    else if (typeString == u"boolean")
     {
         ClassInfo* classInfo = args.vm->getClass("java/lang/Boolean", args.thread);
         classRef = args.heap->createClassObject(classInfo, args.vm, "java/lang/Boolean");
     }
-    else if (u16str == u"long")
+    else if (typeString == u"long")
     {
         ClassInfo* classInfo = args.vm->getClass("java/lang/Long", args.thread);
         classRef = args.heap->createClassObject(classInfo, args.vm, "java/lang/Long");
@@ -121,10 +120,10 @@ JCALL void lib_java_lang_Class_forName0(const NativeArgs& args)
     const Variable var = currentFrame->localVariables[0];
     args.vm->checkType(var, VariableType_REFERENCE, args.thread);
     // TODO: Allocate this string on the memory collected heap
-    const J16String className = args.heap->getStringContent(var.data);
-    std::u16string *canonicalClassName = new std::u16string((char16_t*)className.chars, className.length);
+    const std::u16string_view className = args.heap->getStringContent(var.data);
+    std::u16string canonicalClassName(className);
     // std::string *canonicalClassName = new std::string(className.data(), className.size());
-    std::replace(canonicalClassName->begin(), canonicalClassName->end(),
+    std::replace(canonicalClassName.begin(), canonicalClassName.end(),
         '.', '/');
 
     // TODO: Check initialize bool
@@ -143,7 +142,7 @@ JCALL void lib_java_lang_Class_forName0(const NativeArgs& args)
         args.thread->internalError("Use of custom classloader not implemented yet", -3);
     }
 
-    const char* utf8ClassName = J16StringToUtf8String(J16String((u2*)canonicalClassName->data(), canonicalClassName->length()));
+    const char* utf8ClassName = u16StringToU8String(canonicalClassName);
     ClassInfo* classInfo = args.vm->getClass(utf8ClassName, args.thread);
     const u4 classObjectRef = args.heap->createClassObject(classInfo, args.vm, utf8ClassName);
     free((void*)utf8ClassName);

@@ -114,8 +114,8 @@ public:
     [[nodiscard]] const Object* getChildObject(uint32_t id, ClassInfo* classInfo);
     [[nodiscard]] const Array* getArray(u4 id) const;
     [[nodiscard]] u4 getString(const char* utf8String) const;
-    [[nodiscard]] J16String getStringContent(const Object* stringObject) const;
-    [[nodiscard]] J16String getStringContent(const u4 id) const;
+    [[nodiscard]] std::u16string_view getStringContent(const Object* stringObject) const;
+    [[nodiscard]] std::u16string_view getStringContent(const u4 id) const;
     [[nodiscard]] u4 getClassObjectByName(std::string_view name) const;
 
     /*
