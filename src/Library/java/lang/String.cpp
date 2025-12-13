@@ -15,16 +15,6 @@
 
 #include "String.h"
 
-[[nodiscard]] static const Object* getThisObjectReference(
-    VMThread* thread,
-    const JavaHeap* heap,
-    const VM* VM)
-{
-    const StackFrame* currentFrame = thread->m_currentFrame;
-    const Variable var = currentFrame->localVariables[0];
-    VM->checkType(var, VariableType_REFERENCE, thread);
-    return heap->getObject(var.data);
-}
 
 JCALL void lib_java_lang_String_intern(const NativeArgs& args)
 {

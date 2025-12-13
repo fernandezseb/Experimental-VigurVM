@@ -65,7 +65,7 @@ void VM::start(std::string_view commandLineName)
     m_mainThread.threadObject = createThreadObject(&m_mainThread, threadGroupReference);
 
     // TODO: Enable when fixed
-    // initSystemClass(systemClass, &m_mainThread);
+    initSystemClass(systemClass, &m_mainThread);
 }
 
 u4 VM::createThreadGroupObject(VMThread* thread)

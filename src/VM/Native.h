@@ -10,6 +10,14 @@ struct NativeArgs
     JavaHeap* heap;
     VMThread* thread;
     VM* vm;
+
+    [[nodiscard]] const Object* getThisObjectReference() const
+    {
+        const StackFrame* currentFrame = thread->m_currentFrame;
+        const Variable var = currentFrame->localVariables[0];
+        vm->checkType(var, VariableType_REFERENCE, thread);
+        return heap->getObject(var.data);
+    }
 };
 
 typedef void (*nativeImplementation)(const NativeArgs& args);

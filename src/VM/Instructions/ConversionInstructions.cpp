@@ -48,6 +48,14 @@ void f2i(const InstructionInput& input)
     input.thread->m_currentFrame->pushInt(intValue);
 }
 
+void i2b(const InstructionInput& input)
+{
+    const i4 intValue = input.thread->m_currentFrame->popInt();
+    const u1 b = static_cast<u1>(intValue);// TODO: Check if correct
+    const i4 result = b;
+    input.thread->m_currentFrame->pushInt(result);
+}
+
 void i2c(const InstructionInput& input)
 {
     const i4 intValue = input.thread->m_currentFrame->popInt();

@@ -62,7 +62,7 @@ public:
     std::string userDir;
 private:
     void initSystemClass(ClassInfo* class_info, VMThread* vm_thread);
-    static constexpr std::array<Instruction,136> m_instructions{{
+    static constexpr std::array<Instruction,137> m_instructions{{
         // Constants
         {i_nop, 0, "nop", 0, nop},
         {i_aconst_null, 0, "aconst_null", 0, aconst_null},
@@ -159,6 +159,7 @@ private:
         {i_i2l, 0, "i2l", 0, i2l},
         {i_i2f, 0, "i2f", 0, i2f},
         {i_f2i, 0, "f2i", 0, f2i},
+        {i_i2b, 0, "i2b", 0, i2b},
         {i_i2c, 0, "i2c", 0, i2c},
         // Comparisons
         {i_lcmp, 0, "lcmp", 0, lcmp},

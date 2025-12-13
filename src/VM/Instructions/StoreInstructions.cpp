@@ -97,13 +97,14 @@ void aastore(const InstructionInput& input)
 
 void bastore(const InstructionInput& input)
 {
+    // TODO: Fix!!!!!
     Variable value = input.thread->m_currentFrame->popOperand();
     const Variable index = input.thread->m_currentFrame->popOperand();
     const Variable arrayref = input.thread->m_currentFrame->popOperand();
 
     const Array* array = input.heap->getArray(arrayref.data);
-    i4* intArray = reinterpret_cast<i4*>(array->data);
-    intArray[index.data] = *reinterpret_cast<i4*>(&value.data);
+    i1* byteArray = reinterpret_cast<i1*>(array->data);
+    byteArray[index.data] = static_cast<i1>(*reinterpret_cast<i4*>(&value.data));
 }
 
 void castore(const InstructionInput& input)

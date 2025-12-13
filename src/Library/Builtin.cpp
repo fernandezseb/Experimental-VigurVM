@@ -56,6 +56,7 @@ void registerBuiltinRegisterNatives()
     registerNative("java/io/FileDescriptor/initIDs", "()V", lib_java_io_FileDescriptor_initIDs);
     registerNative("java/io/FileDescriptor/set", "(I)J", lib_java_io_FileDescriptor_set);
     registerNative("java/io/WinNTFileSystem/initIDs", "()V", lib_java_io_WinNTFileSystem_initIDs);
+    registerNative("java/io/FileOutputStream/writeBytes", "([BIIZ)V", lib_java_io_FileOutputStream_writeBytes);
     // sun/misc
     registerNative("sun/misc/Unsafe/registerNatives", "()V", lib_sun_misc_Unsafe_registerNatives);
     registerNative("sun/misc/VM/initialize", "()V", lib_sun_misc_VM_initialize);

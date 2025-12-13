@@ -80,7 +80,8 @@ JCALL void lib_java_lang_System_initProperties(const NativeArgs& args)
     setProperty(args, propertiesObjectRef, properties->classInfo, entryPoint, "os.version", "10.0");
     setProperty(args, propertiesObjectRef, properties->classInfo, entryPoint, "file.separator", "\\");
     setProperty(args, propertiesObjectRef, properties->classInfo, entryPoint, "path.separator", ";");
-    // setProperty(args, propertiesObjectRef, properties->classInfo, entryPoint, "sun.stdout.encoding", "cp850");
+    setProperty(args, propertiesObjectRef, properties->classInfo, entryPoint, "line.separator", "\n");
+    setProperty(args, propertiesObjectRef, properties->classInfo, entryPoint, "sun.stdout.encoding", "UTF-8");
     // setProperty(args, propertiesObjectRef, properties->classInfo, entryPoint, "sun.stderr.encoding", "cp850");
 
     args.thread->returnVar(propertiesObjectRef);
