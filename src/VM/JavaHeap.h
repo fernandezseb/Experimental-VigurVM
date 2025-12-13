@@ -61,6 +61,8 @@ public:
     ClassInfo* classInfo{nullptr};
     u4 superClassObject{0};
     FieldData* getField(const char* name, const char* descriptor, JavaHeap* heap) const;
+    [[nodiscard]] const Object* getObject(u4 fieldIndex, JavaHeap* heap) const;
+    [[nodiscard]] const i8 getLong(u4 fieldIndex, JavaHeap* heap) const;
 };
 
 class ClassObject : public Object

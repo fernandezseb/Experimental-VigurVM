@@ -18,6 +18,23 @@ struct NativeArgs
         vm->checkType(var, VariableType_REFERENCE, thread);
         return heap->getObject(var.data);
     }
+
+    [[nodiscard]] i4 getInt(const int argIndex) const
+    {
+        const StackFrame* currentFrame = thread->m_currentFrame;
+        const Variable intVar = currentFrame->localVariables[argIndex];
+        vm->checkType(intVar, VariableType_INT, thread);
+        return static_cast<i4>(intVar.data);
+    }
+
+    [[nodiscard]] const Array* getArray(const int argIndex) const
+    {
+        const StackFrame* currentFrame = thread->m_currentFrame;
+        const Variable arrayVar = currentFrame->localVariables[argIndex];
+        vm->checkType(arrayVar, VariableType_REFERENCE, thread);
+        const Array* array = heap->getArray(arrayVar.data);
+        return array;
+    }
 };
 
 typedef void (*nativeImplementation)(const NativeArgs& args);

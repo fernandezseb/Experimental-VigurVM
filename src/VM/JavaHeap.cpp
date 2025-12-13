@@ -429,3 +429,18 @@ FieldData* Object::getField(const char* name, const char* descriptor, JavaHeap* 
     Platform::exitProgram(23);
     return nullptr;
 }
+
+const Object* Object::getObject(const u4 fieldIndex, JavaHeap* heap) const
+{
+    return heap->getObject(fields[0].data->data);
+}
+
+const i8 Object::getLong(u4 fieldIndex, JavaHeap* heap) const
+{
+    const FieldData fieldData = fields[fieldIndex];
+    const Variable highBytes = fieldData.data[0];
+    const Variable lowBytes = fieldData.data[1];
+    const i8 longValue = ((i8)highBytes.data << 32) + (i8)lowBytes.data;
+    return longValue;
+}
+

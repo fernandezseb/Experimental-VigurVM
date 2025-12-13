@@ -37,19 +37,22 @@ JCALL void lib_java_io_FileOutputStream_initIDs(const NativeArgs& args)
 JCALL void lib_java_io_FileOutputStream_writeBytes(const NativeArgs& args) {
     // Get the file handle
     const Object* thisObject = args.getThisObjectReference();
-    const Object* descriptorObject = args.heap->getObject(thisObject->fields[0].data->data);
-    u4 data1 = descriptorObject->fields[1].data->data;
-    Variable var = descriptorObject->fields[1].data[1];
+    const Object* descriptorObject = thisObject->getObject(0, args.heap);
+    const i8 handle = descriptorObject->getLong(1, args.heap);
 
     // TODO: Implement correct handle determination
-    if (var.data == 1)
+    if (handle == 1)
     {
-        const StackFrame* currentFrame = args.thread->m_currentFrame;
-        const Variable dataArray = currentFrame->localVariables[1];
-        args.vm->checkType(dataArray, VariableType_REFERENCE, args.thread);
-        const Array* array = args.heap->getArray(dataArray.data);
-        const Variable lengthVar = currentFrame->localVariables[3]; // must be int
-        Platform::print((const char*)array->data, lengthVar.data);
+        const Array* array = args.getArray(1);
+        const i4 offset = args.getInt(2);
+        const i4 length = args.getInt(3);
+        const i4 appendBoolean = args.getInt(4);
+        if (appendBoolean != 0)
+        {
+            args.thread->internalError("Not implemented yet to append in FileOutputStreams", ErrorCode::NOT_IMPLEMENTED_YET);
+
+        }
+        Platform::print(&(((const char*)array->data)[offset]), length);
     } else
     {
         args.thread->internalError("Not implemented yet for arbitrary file handles", ErrorCode::NOT_IMPLEMENTED_YET);
