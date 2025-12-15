@@ -19,7 +19,7 @@
 
 JCALL void lib_java_io_FileOutputStream_initIDs(const NativeArgs& args)
 {
-    printf("[Running initIDs from FileOutputStream]\n");
+    // printf("[Running initIDs from FileOutputStream]\n");
 }
 
 // Method descriptor: ([BIIZ)V

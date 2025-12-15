@@ -316,7 +316,7 @@ u4 JavaHeap::getString(const char* utf8String) const
                     }
                     if (!foundDifference)
                     {
-                        printf(" --> Found copy! of %s\n", utf8String);
+                        // printf(" --> Found copy! of %s\n", utf8String);
                         return currentObj;
                     }
                 }

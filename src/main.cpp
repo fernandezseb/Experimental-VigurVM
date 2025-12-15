@@ -33,6 +33,9 @@ static Configuration parseArguments(const std::span<const char*> args)
                 config.classPath = std::string_view{args[currentArg+1]};
                 currentArg++;
             }
+        } else if (arg == "-disableSystemInit")
+        {
+            config.disableSystemInit = true;
         }
         else
         {

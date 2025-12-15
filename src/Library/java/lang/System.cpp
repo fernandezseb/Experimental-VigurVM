@@ -120,6 +120,5 @@ JCALL void lib_java_lang_System_currentTimeMillis(const NativeArgs &args) {
 JCALL void lib_java_lang_System_mapLibraryName(const NativeArgs &args) {
     Variable var = args.thread->m_currentFrame->localVariables[0];
     // TODO: Append '.dll' for Windows
-    printf("|String Interned with id: %d\n", var.data);
     args.thread->returnVar(Variable{VariableType_REFERENCE, var.data});
 }

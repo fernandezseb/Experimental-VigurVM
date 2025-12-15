@@ -23,7 +23,7 @@ JCALL void lib_java_lang_String_intern(const NativeArgs& args)
     // const u4 arrayReference = stringObject->fields[0].data->data;
     // const Array* charArray = args.heap->getArray(arrayReference);
     // const u4 stringRef = args.heap->createString(reinterpret_cast<const char*>(charArray->data), args.vm);
-    // TODO: Ensure creation of string on the string pool
-    printf("|String Interned with id: %d\n", var.data);
+    // TODO: Refactor to use string pool
+    // printf("|String Interned with id: %d\n", var.data);
     args.thread->returnVar(Variable{VariableType_REFERENCE, var.data});
 }

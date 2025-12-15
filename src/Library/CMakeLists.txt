@@ -42,5 +42,9 @@ add_library(Library
         vigur/lang/System.cpp
         java/io/WinNTFileSystem.h
         java/io/WinNTFileSystem.cpp
+        sun/misc/Signal.h
+        sun/misc/Signal.cpp
+        sun/io/Win32ErrorMode.h
+        sun/io/Win32ErrorMode.cpp
 )
 target_include_directories(Library PRIVATE ${PROJECT_SOURCE_DIR}/src/)

@@ -8,4 +8,5 @@ struct Configuration
     std::string_view classPath;
     std::string_view mainClassName;
     std::vector<std::string_view> args;
+    bool disableSystemInit = false;
 };

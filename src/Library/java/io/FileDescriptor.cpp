@@ -17,7 +17,7 @@
 
 JCALL void lib_java_io_FileDescriptor_initIDs(const NativeArgs& args)
 {
-    printf("[Running initIDs from FileDescriptor]\n");
+    // printf("[Running initIDs from FileDescriptor]\n");
 }
 
 JCALL void lib_java_io_FileDescriptor_set(const NativeArgs& args)

@@ -20,6 +20,7 @@ JCALL void lib_java_lang_Object_registerNatives(const NativeArgs& args)
     registerNative("java/lang/Object/hashCode", "()I", lib_java_lang_Object_hashCode);
     registerNative("java/lang/Object/getClass", "()Ljava/lang/Class;", lib_java_lang_Object_getClass);
     registerNative("java/lang/Object/clone", "()Ljava/lang/Object;", lib_java_lang_Object_clone);
+    registerNative("java/lang/Object/notifyAll", "()V", lib_java_lang_Object_notifyAll);
 }
 
 JCALL void lib_java_lang_Object_hashCode(const NativeArgs& args)
@@ -74,4 +75,9 @@ JCALL void lib_java_lang_Object_clone(const NativeArgs& args)
     } else if (reference->type == CLASSOBJECT || reference->type == OBJECT) {
         args.thread->internalError("Not implemented yet", 781);
     }
+}
+
+JCALL void lib_java_lang_Object_notifyAll(const NativeArgs& args)
+{
+    // TODO: Implement when multithreading logic is working
 }

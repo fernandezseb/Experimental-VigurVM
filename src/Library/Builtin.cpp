@@ -30,6 +30,8 @@
 #include "java/lang/Throwable.h"
 #include "java/security/AccessController.h"
 #include "java/util/concurrent/atomic/AtomicLong.h"
+#include "sun/io/Win32ErrorMode.h"
+#include "sun/misc/Signal.h"
 #include "sun/misc/Unsafe.h"
 #include "sun/misc/VM.h"
 #include "sun/reflect/Reflection.h"
@@ -60,6 +62,7 @@ void registerBuiltinRegisterNatives()
     // sun/misc
     registerNative("sun/misc/Unsafe/registerNatives", "()V", lib_sun_misc_Unsafe_registerNatives);
     registerNative("sun/misc/VM/initialize", "()V", lib_sun_misc_VM_initialize);
+    registerNative("sun/misc/Signal/findSignal", "(Ljava/lang/String;)I", lib_sun_misc_Signal_findSignal);
     // Security API
     registerNative("java/security/AccessController/doPrivileged", "(Ljava/security/PrivilegedAction;)Ljava/lang/Object;", lib_java_security_AccessController_doPriviliged);
     registerNative("java/security/AccessController/doPrivileged", "(Ljava/security/PrivilegedExceptionAction;)Ljava/lang/Object;", lib_java_security_AccessController_doPriviliged_PriviligedExceptionAction);
@@ -71,4 +74,6 @@ void registerBuiltinRegisterNatives()
     registerNative("sun/reflect/Reflection/getCallerClass", "()Ljava/lang/Class;", lib_sun_reflect_Reflection_getCallerClass);
     registerNative("sun/reflect/Reflection/getClassAccessFlags", "(Ljava/lang/Class;)I", lib_sun_reflect_Reflection_getClassAccessFlags);
     registerNative("sun/reflect/NativeConstructorAccessorImpl/newInstance0", "(Ljava/lang/reflect/Constructor;[Ljava/lang/Object;)Ljava/lang/Object;", lib_sun_reflect_NativeConstructorAccessorImpl_newInstance0);
+    // sun/io
+    registerNative("sun/io/Win32ErrorMode/setErrorMode", "(J)J", lib_sun_io_Win32ErrorMode_setErrorMode);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Sebastiaan Fernandez.
+* Copyright (c) 2023-2025 Sebastiaan Fernandez.
  *
  * This file is part of VigurVM.
  *
@@ -13,9 +13,14 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "FileInputStream.h"
+#include "Signal.h"
 
-JCALL void lib_java_io_FileInputStream_initIDs(const NativeArgs& args)
+JCALL void lib_sun_misc_Signal_findSignal(const NativeArgs& args)
 {
-    // printf("[Running initIDs from FileInputStream]\n");
+    const Object* sigNameObject = args.getObject(0);
+    const std::u16string_view sigName = args.heap->getStringContent(sigNameObject);
+    const i4 signal = -1; // TODO: Implement signals on supported OS's
+    const u4 signalUnsigned = static_cast<u4>(signal);
+    args.thread->returnVar(Variable{VariableType_INT, signalUnsigned});
+    printf("");
 }

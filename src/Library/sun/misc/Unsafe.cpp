@@ -20,7 +20,7 @@
 
 JCALL void lib_sun_misc_Unsafe_registerNatives([[maybe_unused]]const NativeArgs& args)
 {
-    printf("[Running sun/misc/Unsafe/registerNatives()V]\n");
+    // printf("[Running sun/misc/Unsafe/registerNatives()V]\n");
     registerNative("sun/misc/Unsafe/arrayBaseOffset", "(Ljava/lang/Class;)I", lib_sun_misc_Unsafe_arrayBaseOffset);
     registerNative("sun/misc/Unsafe/arrayIndexScale", "(Ljava/lang/Class;)I", lib_sun_misc_Unsafe_arrayIndexScale);
     registerNative("sun/misc/Unsafe/addressSize", "()I", lib_sun_misc_Unsafe_addressSize);

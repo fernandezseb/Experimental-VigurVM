@@ -321,7 +321,7 @@ void invokevirtual(const InstructionInput& input)
     // END BROL
 
     invokeVirtual(targetClassInfo, targetMethod, input.thread, input.vm, input.heap);
-    printf("> Created new stack frame for virtual call on: %s.%s()\n", className.data(), methodName.data());
+    // printf("> Created new stack frame for virtual call on: %s.%s()\n", className.data(), methodName.data());
 }
 
 void invokespecial(const InstructionInput& input)
@@ -348,7 +348,7 @@ void invokespecial(const InstructionInput& input)
         input.thread->popFrame();
     }
 
-    printf("> Created new stack frame for method call %s on: %s\n", input.thread->m_currentFrame->methodName.data(), input.thread->m_currentFrame->className.data());
+    // printf("> Created new stack frame for method call %s on: %s\n", input.thread->m_currentFrame->methodName.data(), input.thread->m_currentFrame->className.data());
 }
 
 void invokestatic(const InstructionInput& input)
@@ -399,21 +399,9 @@ void invokestatic(const InstructionInput& input)
         input.thread->popFrame();
     } else
     {
-        std::string_view className = topFrame->constantPool->getString(targetClassInfo->nameIndex);
-        if (
-            // methodInfo->name == "loadLibrary"
-             (methodInfo->name == "setup" && className == "java/lang/Terminator")
-            || (methodInfo->name == "initializeOSEnvironment" && className == "sun/misc/VM")
-            || (methodInfo->name == "booted" && className == "sun/misc/VM")
-            )
-        {
-            printf("!!! Skipping LoadLibrary");
-        } else
-        {
-            input.thread->pushStackFrameStatic(targetClass, methodInfo, topFrame);
-            printf("> Created new stack frame for static call: %s.%s\n",
-                topFrame->constantPool->getString(targetClassInfo->nameIndex).data(), methodInfo->name.data());
-        }
+        input.thread->pushStackFrameStatic(targetClass, methodInfo, topFrame);
+        // printf("> Created new stack frame for static call: %s.%s\n",
+        // topFrame->constantPool->getString(targetClassInfo->nameIndex).data(), methodInfo->name.data());
     }
 }
 
@@ -430,7 +418,7 @@ void invokeinterface(const InstructionInput& input) {
         topFrame->constantPool->getString(nameAndTypeInfo->descriptorIndex).data());
 
     invokeVirtual(targetClass, methodInfo, input.thread, input.vm, input.heap);
-    printf("> Created new stack frame for virtual call on: %s.%s()\n", input.thread->m_currentFrame->className.data(), input.thread->m_currentFrame->methodName.data());
+    // printf("> Created new stack frame for virtual call on: %s.%s()\n", input.thread->m_currentFrame->className.data(), input.thread->m_currentFrame->methodName.data());
 }
 
 void newInstruction(const InstructionInput& input)
@@ -514,16 +502,6 @@ void athrow(const InstructionInput& input)
     const Variable throwableRef = input.thread->m_currentFrame->popOperand();
     const Object* throwable = input.heap->getObject(throwableRef.data);
 
-    // remove ==
-
-    printf("String pool:\n");
-
-    input.heap->printStringPool();
-
-    input.thread->internalError("Unhandled exception");
-
-    // ==
-
     while(!input.thread->m_stack.frames.empty()) {
         const AttributeCode* codeAttribute = input.thread->m_currentMethod->code;
         if (codeAttribute == nullptr)
@@ -557,10 +535,13 @@ void athrow(const InstructionInput& input)
 
     // TODO: Notify other threads when program crashes
 
+
     printf("Exception in thread \"%s\" %s\n",
     input.thread->m_name.data(),
     throwable->classInfo->getName().data());
-    Platform::exitProgram(1);
+    printf("String pool:\n");
+    input.heap->printStringPool();
+    input.thread->internalError("Unhandled exception");
     printf("");
 }
 

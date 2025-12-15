@@ -11,5 +11,6 @@ public:
 	static void freeMemory(void* allocatedMemory);
 	static void exitProgram(int32_t exitCode);
 	static std::size_t getPageSize();
+	static void WinAPISetErrorMode(uint32_t errorMode);
 	static void cleanup();
 };

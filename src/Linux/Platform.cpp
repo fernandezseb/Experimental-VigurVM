@@ -58,6 +58,10 @@ size_t Platform::getPageSize()
 	return getpagesize();
 }
 
+void Platform::WinAPISetErrorMode(uint32_t errorMode)
+{
+}
+
 void Platform::cleanup()
 {
 }

@@ -64,8 +64,10 @@ void VM::start(std::string_view commandLineName)
     const u4 threadGroupReference = createThreadGroupObject(&m_mainThread);
     m_mainThread.threadObject = createThreadObject(&m_mainThread, threadGroupReference);
 
-    // TODO: Enable when fixed
-    // initSystemClass(systemClass, &m_mainThread);
+    if (!m_configuration.disableSystemInit)
+    {
+        initSystemClass(systemClass, &m_mainThread);
+    }
 }
 
 u4 VM::createThreadGroupObject(VMThread* thread)
@@ -320,7 +322,7 @@ void VM::runStaticInitializer(ClassInfo* classInfo, VMThread* thread)
 
     thread->pushStackFrameWithoutParams(classInfo, entryPoint);
 
-    printf("Executing static initializers...\n");
+    // printf("Executing static initializers...\n");
     executeLoop(thread);
 }
 
@@ -333,7 +335,7 @@ ClassInfo* VM::getClass(std::string_view className, VMThread* thread)
     ClassInfo* classInfo = m_heap.getClassByName(className);
     if (classInfo == nullptr) {
         Memory *memory = new Memory(MIB(1), MIB(30));
-        printf("Loading class %s...\n", className.data());
+        // printf("Loading class %s...\n", className.data());
         classInfo = m_bootstrapClassLoader.readClass(className.data(), memory, m_configuration.classPath.data());
         initStaticFields(classInfo, thread);
         m_heap.addClassInfo(classInfo);
@@ -346,7 +348,7 @@ ClassInfo* VM::getClass(std::string_view className, VMThread* thread)
 void VM::executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* methodInfo, JavaHeap* heap, VMThread* thread)
 {
     const std::string_view className = targetClass->getName();
-    printf("Running native code of method: %s.%s\n", className.data(), methodInfo->name.data());
+    // printf("Running native code of method: %s.%s\n", className.data(), methodInfo->name.data());
     const std::string_view description = targetClass->constantPool->getString(methodInfo->descriptorIndex);
     const std::string_view methodName = methodInfo->name;
     std::string fullName = std::string{className};

@@ -11,12 +11,17 @@ struct NativeArgs
     VMThread* thread;
     VM* vm;
 
-    [[nodiscard]] const Object* getThisObjectReference() const
+    [[nodiscard]] const Object* getObject(const int argIndex) const
     {
         const StackFrame* currentFrame = thread->m_currentFrame;
-        const Variable var = currentFrame->localVariables[0];
+        const Variable var = currentFrame->localVariables[argIndex];
         vm->checkType(var, VariableType_REFERENCE, thread);
         return heap->getObject(var.data);
+    }
+
+    [[nodiscard]] const Object* getThisObjectReference() const
+    {
+        return getObject(0);
     }
 
     [[nodiscard]] i4 getInt(const int argIndex) const

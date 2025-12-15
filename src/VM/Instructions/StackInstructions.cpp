@@ -23,6 +23,12 @@ void pop(const InstructionInput& input)
     input.thread->m_currentFrame->popOperand();
 }
 
+void pop2(const InstructionInput& input)
+{
+    input.thread->m_currentFrame->popOperand();
+    input.thread->m_currentFrame->popOperand();
+}
+
 void dup(const InstructionInput& input)
 {
     const Variable top = input.thread->m_currentFrame->popOperand();
