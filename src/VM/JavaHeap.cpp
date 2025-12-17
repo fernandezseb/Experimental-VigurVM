@@ -46,7 +46,7 @@ u4 JavaHeap::createArray(ArrayType type, uint64_t size, std::string_view descrip
             bytes = 8;
         }
         array->data = (u1*) Platform::allocateMemory(bytes * size, 0);
-        for (int i = 0; i < size; ++i)
+        for (int i = 0; i < size * bytes; ++i)
         {
             array->data[i] = 0;
         }
@@ -217,6 +217,9 @@ const Object* JavaHeap::getObject(const uint32_t id) const
     {
         // Nullpointer
         fprintf(stderr, "Error: Null pointer exception!\n");
+        Platform::exitProgram(1);
+    } else if (id >= objects.size()) {
+        fprintf(stderr, "Error: Id out of bounds!\n");
         Platform::exitProgram(1);
     }
     return objects[id]->getObject();
@@ -432,7 +435,7 @@ FieldData* Object::getField(const char* name, const char* descriptor, JavaHeap* 
 
 const Object* Object::getObject(const u4 fieldIndex, JavaHeap* heap) const
 {
-    return heap->getObject(fields[0].data->data);
+    return heap->getObject(fields[fieldIndex].data->data);
 }
 
 const i8 Object::getLong(u4 fieldIndex, JavaHeap* heap) const
