@@ -16,7 +16,6 @@ struct InstructionInput
     i1 arg;
     JavaHeap* heap;
     VMThread* thread;
-    VM* vm;
 };
 
 struct Instruction

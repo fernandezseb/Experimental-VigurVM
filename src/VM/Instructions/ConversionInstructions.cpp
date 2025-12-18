@@ -24,7 +24,7 @@
 void i2l(const InstructionInput& input)
 {
     const Variable valueVar = input.thread->m_currentFrame->popOperand();
-    input.vm->checkType(valueVar, VariableType_INT, input.thread);
+    VM::get()->checkType(valueVar, VariableType_INT, input.thread);
     const i4 intValue = std::bit_cast<i4>(valueVar.data);
     const i8 l = intValue;
     const u4* bytes = (u4*)(&l);

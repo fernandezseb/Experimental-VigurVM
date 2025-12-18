@@ -56,7 +56,7 @@ u4 JavaHeap::createArray(ArrayType type, uint64_t size, std::string_view descrip
     return castToU4<std::size_t>(objects.size()-1);
 }
 
-u4 JavaHeap::createObject(ClassInfo* classInfo, VM* VM)
+u4 JavaHeap::createObject(ClassInfo* classInfo)
 {
     void* objectMemory = Platform::allocateMemory(sizeof(Object), 0);
     const auto object = new (objectMemory) Object;
@@ -104,7 +104,7 @@ u4 JavaHeap::createObject(ClassInfo* classInfo, VM* VM)
     {
         const std::string_view superClassName = classInfo->constantPool->getString(classInfo->constantPool->getClassInfo(classInfo->superClass)->nameIndex);
         ClassInfo* superClass = getClassByName(superClassName.data());
-        const u4 superClassObject = createObject(superClass, VM);
+        const u4 superClassObject = createObject(superClass);
         object->superClassObject = superClassObject;
     }
 
@@ -113,7 +113,7 @@ u4 JavaHeap::createObject(ClassInfo* classInfo, VM* VM)
 }
 
 // TODO: De-duplicate code from createObject
-u4 JavaHeap::createClassObject(ClassInfo* classInfo, VM* VM, std::string_view name)
+u4 JavaHeap::createClassObject(ClassInfo* classInfo, std::string_view name)
 {
     const u4 existingClassObject = getClassObjectByName(name);
     if (existingClassObject != 0)
@@ -172,7 +172,7 @@ u4 JavaHeap::createClassObject(ClassInfo* classInfo, VM* VM, std::string_view na
         {
             // TODO: Load the class if needed
             ClassInfo* superClass = getClassByName(superClassName.data());
-            u4 superClassObject = createObject(superClass, VM);
+            u4 superClassObject = createObject(superClass);
             object->superClassObject = superClassObject;
         }
     }
@@ -182,13 +182,13 @@ u4 JavaHeap::createClassObject(ClassInfo* classInfo, VM* VM, std::string_view na
 }
 
 
-u4 JavaHeap::createString(const char* utf8String, VM* VM) {
+u4 JavaHeap::createString(const char* utf8String) {
     const u4 existingString = getString(utf8String);
     if (existingString != 0) {
         return existingString;
     }
 
-    const u4 strObjectId = createObject(getClassByName("java/lang/String"), VM);
+    const u4 strObjectId = createObject(getClassByName("java/lang/String"));
     const Object* strObject = getObject(strObjectId);
     const std::u16string_view u16String = u8ToU16String(utf8String);
     const u4 arrId = createArray(AT_CHAR, u16String.length(), "C"); // TODO: C?

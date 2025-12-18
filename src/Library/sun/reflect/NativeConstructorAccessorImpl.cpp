@@ -35,13 +35,13 @@ JCALL void lib_sun_reflect_NativeConstructorAccessorImpl_newInstance0(const Nati
     const MethodInfo* constructorMethod = classObject->classClassInfo->methods[slotField->data];
 
 
-    const u4 objectRef = args.heap->createObject(classObject->classClassInfo, args.vm);
+    const u4 objectRef = args.heap->createObject(classObject->classClassInfo);
 
     args.thread->pushStackFrameWithoutParams(classObject->classClassInfo, constructorMethod);
     args.thread->m_currentFrame->localVariables[0] = Variable{VariableType_REFERENCE, objectRef};
     // TODO: Implement passing of n arguments to constructor
 
-    args.vm->executeLoop(args.thread);
+    VM::get()->executeLoop(args.thread);
 
     args.thread->returnVar(Variable{VariableType_REFERENCE,  objectRef});
 

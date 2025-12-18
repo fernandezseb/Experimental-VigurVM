@@ -26,10 +26,11 @@ int main(const int argc, const char* argv[])
     const std::span args{argv, size};
     const Configuration config = Configuration::fromArguments(args);
 
-    VM vm(config);
-    vm.start(std::string_view{args[0]});
-    vm.runMain();
-    vm.shutdown();
+
+    VM* vm = VM::create(config);
+    vm->start(std::string_view{args[0]});
+    vm->runMain();
+    vm->shutdown();
 
     return 0;
 }

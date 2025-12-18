@@ -17,12 +17,11 @@
 
 [[nodiscard]] static const Object* getThisObjectReference(
     VMThread* thread,
-    const JavaHeap* heap,
-    const VM* VM)
+    const JavaHeap* heap)
 {
     const StackFrame* currentFrame = thread->m_currentFrame;
     const Variable var = currentFrame->localVariables[0];
-    VM->checkType(var, VariableType_REFERENCE, thread);
+    VM::get()->checkType(var, VariableType_REFERENCE, thread);
     return heap->getObject(var.data);
 }
 
@@ -42,10 +41,10 @@ JCALL void lib_java_lang_Thread_currentThread(const NativeArgs& args)
 
 JCALL void lib_java_lang_Thread_setPriority0(const NativeArgs& args)
 {
-    const Object* threadObject = getThisObjectReference(args.thread, args.heap, args.vm);
+    const Object* threadObject = getThisObjectReference(args.thread, args.heap);
     const StackFrame* currentFrame = args.thread->m_currentFrame;
     const Variable argument = currentFrame->localVariables[1];
-    args.vm->checkType(argument, VariableType_INT, args.thread);
+    VM::get()->checkType(argument, VariableType_INT, args.thread);
 
     FieldData* field = threadObject->getField("priority", "I", args.heap);
     field->data = argument.data;
@@ -55,9 +54,9 @@ JCALL void lib_java_lang_Thread_isAlive(const NativeArgs& args)
 {
     const StackFrame* currentFrame = args.thread->m_currentFrame;
     const Variable var = currentFrame->localVariables[0];
-    args.vm->checkType(var, VariableType_REFERENCE, args.thread);
+    VM::get()->checkType(var, VariableType_REFERENCE, args.thread);
     const u4 objectReference = var.data;
-    const VMThread* vmThread =  args.vm->getVMThreadByObjectRef(objectReference);
+    const VMThread* vmThread =  VM::get()->getVMThreadByObjectRef(objectReference);
 
     bool alive = false;
     if (vmThread != nullptr)
@@ -71,7 +70,7 @@ JCALL void lib_java_lang_Thread_isAlive(const NativeArgs& args)
 
 JCALL void lib_java_lang_Thread_start0(const NativeArgs& args)
 {
-    const Object* threadObject = getThisObjectReference(args.thread, args.heap,args.vm);
+    const Object* threadObject = getThisObjectReference(args.thread, args.heap);
     const FieldData* runnableField = threadObject->getField("target", "Ljava/lang/Runnable;", args.heap);
     if (runnableField->data != 0)
     {

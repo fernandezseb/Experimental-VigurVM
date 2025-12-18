@@ -20,8 +20,8 @@ void lib_sun_io_Win32ErrorMode_setErrorMode(const NativeArgs& args)
 {
     const Variable lowBytes = args.thread->m_currentFrame->localVariables[1];
     const Variable highBytes = args.thread->m_currentFrame->localVariables[0];
-    args.vm->checkType(highBytes, VariableType_LONG, args.thread);
-    args.vm->checkType(lowBytes, VariableType_LONG, args.thread);
+    VM::get()->checkType(highBytes, VariableType_LONG, args.thread);
+    VM::get()->checkType(lowBytes, VariableType_LONG, args.thread);
 
     const i8 longValue = ((i8)highBytes.data << 32) + (i8)lowBytes.data;
     const u4 errorModeValue = longValue;

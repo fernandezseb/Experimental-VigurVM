@@ -22,7 +22,7 @@
 void istore(const InstructionInput& input)
 {
     const Variable refVar = input.thread->m_currentFrame->popOperand();
-    input.vm->checkType(refVar, VariableType_INT, input.thread);
+    VM::get()->checkType(refVar, VariableType_INT, input.thread);
     const u1 index = input.args[0];
     input.thread->m_currentFrame->localVariables[index] = refVar;
 }

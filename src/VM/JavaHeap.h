@@ -111,9 +111,9 @@ public:
      * Object operations
      */
     u4 createArray(ArrayType type, uint64_t size, std::string_view descriptor);
-    u4 createObject(ClassInfo* classInfo, VM* VM);
-    u4 createClassObject(ClassInfo* classInfo, VM* VM, std::string_view name);
-    u4 createString(const char* utf8String, VM* VM);
+    u4 createObject(ClassInfo* classInfo);
+    u4 createClassObject(ClassInfo* classInfo, std::string_view name);
+    u4 createString(const char* utf8String);
 
     [[nodiscard]] const Object* getObject(uint32_t id) const;
     [[nodiscard]] Reference* getReference(u4 id) const;

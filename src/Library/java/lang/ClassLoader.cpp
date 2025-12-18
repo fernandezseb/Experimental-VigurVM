@@ -32,10 +32,9 @@ JCALL void lib_java_lang_ClassLoader_registerNatives(const NativeArgs& args)
 JCALL void lib_java_lang_ClassLoader_findBuiltinLib(const NativeArgs& args)
 {
     VMThread* thread = args.thread;
-    const VM* VM = args.vm;
     const StackFrame* currentFrame = thread->m_currentFrame;
     const Variable var = currentFrame->localVariables[0];
-    VM->checkType(var, VariableType_REFERENCE, thread);
+    VM::get()->checkType(var, VariableType_REFERENCE, thread);
     args.thread->returnVar(Variable{VariableType_REFERENCE, var.data});
 }
 

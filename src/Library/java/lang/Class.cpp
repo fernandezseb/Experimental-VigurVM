@@ -21,23 +21,21 @@
 
 [[nodiscard]] static const Object* getThisObjectReference(
     VMThread* thread,
-    const JavaHeap* heap,
-    const VM* VM)
+    const JavaHeap* heap)
 {
     const StackFrame* currentFrame = thread->m_currentFrame;
     const Variable var = currentFrame->localVariables[0];
-    VM->checkType(var, VariableType_REFERENCE, thread);
+    VM::get()->checkType(var, VariableType_REFERENCE, thread);
     return heap->getObject(var.data);
 }
 
 [[nodiscard]] static const ClassObject* getThisClassObjectReference(
     VMThread* thread,
-    const JavaHeap* heap,
-    const VM* VM)
+    const JavaHeap* heap)
 {
     const StackFrame* currentFrame = thread->m_currentFrame;
     const Variable var = currentFrame->localVariables[0];
-    VM->checkType(var, VariableType_REFERENCE, thread);
+    VM::get()->checkType(var, VariableType_REFERENCE, thread);
     return heap->getClassObject(var.data);
 }
 
@@ -61,38 +59,38 @@ JCALL void lib_java_lang_Class_registerNatives(const NativeArgs& args)
 
 JCALL void lib_java_lang_Class_getPrimitiveClass(const NativeArgs& args)
 {
-    const Object* strObject = getThisObjectReference(args.thread, args.heap, args.vm);
+    const Object* strObject = getThisObjectReference(args.thread, args.heap);
     const std::u16string_view typeString = args.heap->getStringContent(strObject);
     u4 classRef = 0;
     if (typeString == u"float")
     {
-        ClassInfo* classInfo = args.vm->getClass("java/lang/Float", args.thread);
-        classRef = args.heap->createClassObject(classInfo, args.vm, "java/lang/Float");
+        ClassInfo* classInfo = VM::get()->getClass("java/lang/Float", args.thread);
+        classRef = args.heap->createClassObject(classInfo, "java/lang/Float");
     }
     else if (typeString == u"int")
     {
-        ClassInfo* classInfo = args.vm->getClass("java/lang/Integer", args.thread);
-        classRef = args.heap->createClassObject(classInfo, args.vm, "java/lang/Integer");
+        ClassInfo* classInfo = VM::get()->getClass("java/lang/Integer", args.thread);
+        classRef = args.heap->createClassObject(classInfo, "java/lang/Integer");
     }
     else if (typeString == u"double")
     {
-        ClassInfo* classInfo = args.vm->getClass("java/lang/Double", args.thread);
-        classRef = args.heap->createClassObject(classInfo, args.vm, "java/lang/Double");
+        ClassInfo* classInfo = VM::get()->getClass("java/lang/Double", args.thread);
+        classRef = args.heap->createClassObject(classInfo, "java/lang/Double");
     }
     else if (typeString == u"char")
     {
-        ClassInfo* classInfo = args.vm->getClass("java/lang/Character", args.thread);
-        classRef = args.heap->createClassObject(classInfo, args.vm, "java/lang/Character");
+        ClassInfo* classInfo = VM::get()->getClass("java/lang/Character", args.thread);
+        classRef = args.heap->createClassObject(classInfo, "java/lang/Character");
     }
     else if (typeString == u"boolean")
     {
-        ClassInfo* classInfo = args.vm->getClass("java/lang/Boolean", args.thread);
-        classRef = args.heap->createClassObject(classInfo, args.vm, "java/lang/Boolean");
+        ClassInfo* classInfo = VM::get()->getClass("java/lang/Boolean", args.thread);
+        classRef = args.heap->createClassObject(classInfo, "java/lang/Boolean");
     }
     else if (typeString == u"long")
     {
-        ClassInfo* classInfo = args.vm->getClass("java/lang/Long", args.thread);
-        classRef = args.heap->createClassObject(classInfo, args.vm, "java/lang/Long");
+        ClassInfo* classInfo = VM::get()->getClass("java/lang/Long", args.thread);
+        classRef = args.heap->createClassObject(classInfo, "java/lang/Long");
     }
     else
     {
@@ -108,9 +106,9 @@ JCALL void lib_java_lang_Class_desiredAssertionStatus0(const NativeArgs& args)
 
 JCALL void lib_java_lang_Class_getName0(const NativeArgs& args)
 {
-    const ClassObject* classObject = getThisClassObjectReference(args.thread, args.heap, args.vm);
+    const ClassObject* classObject = getThisClassObjectReference(args.thread, args.heap);
     const std::string_view name = classObject->name;
-    const u4 stringObject = args.heap->createString(name.data(), args.vm);
+    const u4 stringObject = args.heap->createString(name.data());
     args.thread->returnVar(Variable{VariableType_REFERENCE, stringObject});
 }
 
@@ -118,7 +116,7 @@ JCALL void lib_java_lang_Class_forName0(const NativeArgs& args)
 {
     const StackFrame* currentFrame = args.thread->m_currentFrame;
     const Variable var = currentFrame->localVariables[0];
-    args.vm->checkType(var, VariableType_REFERENCE, args.thread);
+    VM::get()->checkType(var, VariableType_REFERENCE, args.thread);
     // TODO: Allocate this string on the memory collected heap
     const std::u16string_view className = args.heap->getStringContent(var.data);
     std::u16string canonicalClassName(className);
@@ -128,7 +126,7 @@ JCALL void lib_java_lang_Class_forName0(const NativeArgs& args)
 
     // TODO: Check initialize bool
     const Variable var2 = currentFrame->localVariables[1];
-    args.vm->checkType(var2, VariableType_INT, args.thread);
+    VM::get()->checkType(var2, VariableType_INT, args.thread);
     if (var2.data == 0u)
     {
         args.thread->internalError("Loading class without initialization is not implemente yet", 44);
@@ -136,22 +134,22 @@ JCALL void lib_java_lang_Class_forName0(const NativeArgs& args)
 
     // TODO: Use custom classloader if defined
     const Variable var3 = currentFrame->localVariables[2];
-    args.vm->checkType(var3, VariableType_REFERENCE, args.thread);
+    VM::get()->checkType(var3, VariableType_REFERENCE, args.thread);
     if (var3.data != 0u)
     {
         args.thread->internalError("Use of custom classloader not implemented yet", -3);
     }
 
     const char* utf8ClassName = u16StringToU8String(canonicalClassName);
-    ClassInfo* classInfo = args.vm->getClass(utf8ClassName, args.thread);
-    const u4 classObjectRef = args.heap->createClassObject(classInfo, args.vm, utf8ClassName);
+    ClassInfo* classInfo = VM::get()->getClass(utf8ClassName, args.thread);
+    const u4 classObjectRef = args.heap->createClassObject(classInfo, utf8ClassName);
     free((void*)utf8ClassName);
     args.thread->returnVar(Variable{VariableType_REFERENCE, classObjectRef});
 }
 
 JCALL void lib_java_lang_Class_getDeclaredFields0(const NativeArgs& args)
 {
-    const ClassObject* classObject = getThisClassObjectReference(args.thread, args.heap, args.vm);
+    const ClassObject* classObject = getThisClassObjectReference(args.thread, args.heap);
     const StackFrame* currentFrame = args.thread->m_currentFrame;
     // TODO: Use publicOnlyBooleanVar
     [[maybe_unused]] const Variable publicOnlyBooleanVar  = currentFrame->localVariables[1];
@@ -159,11 +157,11 @@ JCALL void lib_java_lang_Class_getDeclaredFields0(const NativeArgs& args)
     const u4 arrayObject =  args.heap->createArray(AT_REFERENCE, arraySize, "Ljava/lang/reflect/Field;");
 
     const Array* fieldsArray = args.heap->getArray(arrayObject);
-    ClassInfo* fieldClass = args.vm->getClass("java/lang/reflect/Field", args.thread);
+    ClassInfo* fieldClass = VM::get()->getClass("java/lang/reflect/Field", args.thread);
 
     for (u4 currentField = 0; currentField < arraySize; ++currentField)
     {
-        const u4 fieldObjectRef = args.heap->createObject(fieldClass, args.vm);
+        const u4 fieldObjectRef = args.heap->createObject(fieldClass);
         const Object* fieldObject = args.heap->getObject(fieldObjectRef);
         const FieldInfo* fieldInfo = classObject->classClassInfo->fields[currentField];
 
@@ -171,7 +169,7 @@ JCALL void lib_java_lang_Class_getDeclaredFields0(const NativeArgs& args)
         FieldData* nameField = fieldObject->getField("name", "Ljava/lang/String;", args.heap);
         std::string_view fieldName =  classObject->classClassInfo->constantPool->getString(fieldInfo->nameIndex);
         std::string_view fieldType = classObject->classClassInfo->constantPool->getString(fieldInfo->descriptorIndex);
-        const u4 fieldNameStringObjectRef = args.heap->createString(fieldName.data(), args.vm);
+        const u4 fieldNameStringObjectRef = args.heap->createString(fieldName.data());
         nameField->data = fieldNameStringObjectRef;
 
         // Set the slot field
@@ -187,7 +185,7 @@ JCALL void lib_java_lang_Class_getDeclaredFields0(const NativeArgs& args)
         modifiersField->data = fieldInfo->accessFlags;
 
         FieldData* typeField = fieldObject->getField("type", "Ljava/lang/Class;", args.heap);
-        const u4 classObjectRef = args.heap->createClassObject(nullptr, args.vm, getTypeAsString(fieldType));
+        const u4 classObjectRef = args.heap->createClassObject(nullptr, getTypeAsString(fieldType));
         typeField->data = classObjectRef;
 
 
@@ -200,7 +198,7 @@ JCALL void lib_java_lang_Class_getDeclaredFields0(const NativeArgs& args)
 
 JCALL void lib_java_lang_Class_isPrimitive(const NativeArgs& args)
 {
-    const ClassObject* classObject =  getThisClassObjectReference(args.thread, args.heap, args.vm);
+    const ClassObject* classObject =  getThisClassObjectReference(args.thread, args.heap);
     u4 result = 0;
 
     if (classObject->name == "int")
@@ -248,15 +246,15 @@ JCALL void lib_java_lang_Class_isPrimitive(const NativeArgs& args)
 
 JCALL void lib_java_lang_Class_isAssignableFrom(const NativeArgs& args)
 {
-    const ClassObject* thisClassObject =  getThisClassObjectReference(args.thread, args.heap, args.vm);
+    const ClassObject* thisClassObject =  getThisClassObjectReference(args.thread, args.heap);
 
     const StackFrame* currentFrame = args.thread->m_currentFrame;
     const Variable var = currentFrame->localVariables[1];
-    args.vm->checkType(var, VariableType_REFERENCE, args.thread);
+    VM::get()->checkType(var, VariableType_REFERENCE, args.thread);
     const ClassObject* clsClassObject =  args.heap->getClassObject(var.data);
 
     // TODO: Add type conversion checking
-    const u4 result = args.vm->isSubclass(args.thread, thisClassObject->classClassInfo, clsClassObject->classClassInfo);
+    const u4 result = VM::get()->isSubclass(args.thread, thisClassObject->classClassInfo, clsClassObject->classClassInfo);
 
     args.thread->returnVar(Variable{VariableType_INT, result});
 }
@@ -274,7 +272,7 @@ JCALL void lib_java_lang_Class_isInterface(const NativeArgs& args)
 
 JCALL void lib_java_lang_Class_getDeclaredConstructors0(const NativeArgs& args)
 {
-    const ClassObject* classObject = getThisClassObjectReference(args.thread, args.heap, args.vm);
+    const ClassObject* classObject = getThisClassObjectReference(args.thread, args.heap);
     const StackFrame* currentFrame = args.thread->m_currentFrame;
     // TODO: Use publicOnlyBooleanVar
     [[maybe_unused]] const Variable publicOnlyBooleanVar  = currentFrame->localVariables[1];
@@ -283,11 +281,11 @@ JCALL void lib_java_lang_Class_getDeclaredConstructors0(const NativeArgs& args)
 
     const Array* constructorsArray = args.heap->getArray(arrayObject);
 
-    ClassInfo* constructorClass = args.vm->getClass("java/lang/reflect/Constructor", args.thread);
+    ClassInfo* constructorClass = VM::get()->getClass("java/lang/reflect/Constructor", args.thread);
 
     for (u4 currentMethod = 0; currentMethod < arraySize; ++currentMethod)
     {
-        const u4 constructorObjectRef = args.heap->createObject(constructorClass, args.vm);
+        const u4 constructorObjectRef = args.heap->createObject(constructorClass);
         const Object* constructorObject = args.heap->getObject(constructorObjectRef);
         const MethodInfo* methodInfo = classObject->classClassInfo->methods[currentMethod];
 
@@ -319,20 +317,20 @@ JCALL void lib_java_lang_Class_getDeclaredConstructors0(const NativeArgs& args)
 
 JCALL void lib_java_lang_Class_getModifiers(const NativeArgs& args)
 {
-    const ClassObject* classObject = getThisClassObjectReference(args.thread, args.heap, args.vm);
+    const ClassObject* classObject = getThisClassObjectReference(args.thread, args.heap);
     args.thread->returnVar(Variable{VariableType_INT, classObject->classClassInfo->accessFlags});
     printf("");
 }
 
 JCALL void lib_java_lang_Class_getSuperClass(const NativeArgs& args)
 {
-    const ClassObject* classObject = getThisClassObjectReference(args.thread, args.heap, args.vm);
+    const ClassObject* classObject = getThisClassObjectReference(args.thread, args.heap);
     if (classObject->classClassInfo->superClass != 0)
     {
         const CPClassInfo* classInfoConstant = classObject->classClassInfo->constantPool->getClassInfo(classObject->classClassInfo->superClass);
         const std::string_view className =  classObject->classClassInfo->constantPool->getString(classInfoConstant->nameIndex);
-        ClassInfo* classInfo =  args.vm->getClass(className, args.thread);
-        const u4 superClassObject = args.heap->createClassObject(classInfo,args.vm,  className);
+        ClassInfo* classInfo =  VM::get()->getClass(className, args.thread);
+        const u4 superClassObject = args.heap->createClassObject(classInfo,  className);
         args.thread->returnVar(Variable{VariableType_REFERENCE, superClassObject});
     } else
     {
@@ -343,7 +341,7 @@ JCALL void lib_java_lang_Class_getSuperClass(const NativeArgs& args)
 
 JCALL void lib_java_lang_Class_getInterfaces0(const NativeArgs& args)
 {
-    const ClassObject* classObject = getThisClassObjectReference(args.thread, args.heap, args.vm);
+    const ClassObject* classObject = getThisClassObjectReference(args.thread, args.heap);
     std::span<uint16_t> interfaces = classObject->classClassInfo->interfaces;
 
     const u4 newArrayRef = args.heap->createArray(ArrayType::AT_REFERENCE, interfaces.size(), "Ljava/lang/Class;");
@@ -354,8 +352,8 @@ JCALL void lib_java_lang_Class_getInterfaces0(const NativeArgs& args)
     {
         CPClassInfo* intefaceInfo = classObject->classClassInfo->constantPool->getClassInfo(interfaces[currentInterface]);
         std::string_view interfaceName = classObject->classClassInfo->constantPool->getString(intefaceInfo->nameIndex);
-        ClassInfo* classInfo =  args.vm->getClass(interfaceName, args.thread);
-        const u4 interfaceObject = args.heap->createClassObject(classInfo,args.vm,  interfaceName);
+        ClassInfo* classInfo =  VM::get()->getClass(interfaceName, args.thread);
+        const u4 interfaceObject = args.heap->createClassObject(classInfo,  interfaceName);
         arrayData[currentInterface] = interfaceObject;
         printf("brol");
     }

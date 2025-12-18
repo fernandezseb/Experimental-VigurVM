@@ -25,6 +25,19 @@
 #include <string>
 #include <variant>
 
+VM* VM::m_vm = nullptr;
+
+VM* VM::create(const Configuration config)
+{
+    m_vm = new VM(config);
+    return m_vm;
+}
+
+VM* VM::get()
+{
+    return m_vm;
+}
+
 VM::VM(const Configuration configuration) noexcept
     : m_bootstrapClassLoader(), m_configuration(configuration)
 {
@@ -73,7 +86,7 @@ void VM::start(std::string_view commandLineName)
 u4 VM::createThreadGroupObject(VMThread* thread)
 {
     ClassInfo* threadGroupClass = getClass("java/lang/ThreadGroup", thread);
-    const u4 threadGroupReference = m_heap.createObject(threadGroupClass, this);
+    const u4 threadGroupReference = m_heap.createObject(threadGroupClass);
     const Object* threadGroupObject = m_heap.getObject(threadGroupReference);
 
     FieldData* maxPrioField = threadGroupObject->getField("maxPriority", "I", &m_heap);
@@ -109,7 +122,7 @@ bool VM::isSubclass(VMThread* thread, const ClassInfo* targetClass, ClassInfo* s
 u4 VM::createThreadObject(VMThread* thread, const u4 threadGroupReference)
 {
     ClassInfo* threadClass = getClass("java/lang/Thread", thread);
-    const u4 objectReference = m_heap.createObject(threadClass, this);
+    const u4 objectReference = m_heap.createObject(threadClass);
     const Object* threadObject = m_heap.getObject(objectReference);
 
     FieldData* groupField = threadObject->getField("group", "Ljava/lang/ThreadGroup;", &m_heap);
@@ -291,7 +304,6 @@ void VM::executeLoop(VMThread* thread)
                     input.arg = instruction.arg;
                     input.heap = &m_heap;
                     input.thread = thread;
-                    input.vm = this;
                     instruction.instructionFunction(input);
                 }
                 break;
@@ -360,7 +372,6 @@ void VM::executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* met
         NativeArgs nativeArgs{};
         nativeArgs.heap = heap;
         nativeArgs.thread = thread;
-        nativeArgs.vm = this;
         impl(nativeArgs);
     }
     else
@@ -379,7 +390,7 @@ void VM::createArgsArray(const VMThread* thread)
     u4 currentArg = 0;
     for (std::string_view arg : m_configuration.m_args)
     {
-        const u4 stringRef = m_heap.createString(arg.data(), this);
+        const u4 stringRef = m_heap.createString(arg.data());
         arrayData[currentArg++] = stringRef;
     }
     thread->m_currentFrame->localVariables[0] = Variable{VariableType_REFERENCE, arrayRef};

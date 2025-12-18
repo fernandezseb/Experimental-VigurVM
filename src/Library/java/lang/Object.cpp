@@ -39,7 +39,7 @@ JCALL void lib_java_lang_Object_getClass(const NativeArgs& args)
     if (reference->type == OBJECT)
     {
         const Object* object = args.heap->getObject(currentFrame->localVariables[0].data);
-        const u4 classObject = args.heap->createClassObject(object->classInfo, args.vm, object->classInfo->getName());
+        const u4 classObject = args.heap->createClassObject(object->classInfo, object->classInfo->getName());
         args.thread->returnVar(Variable{VariableType_REFERENCE, classObject});
     } else if (reference->type == ARRAY)
     {
@@ -47,7 +47,7 @@ JCALL void lib_java_lang_Object_getClass(const NativeArgs& args)
         printf("brol");
         std::string *name = new std::string(array->descriptor);
         name->insert(0, "[");
-        const u4 classObject = args.heap->createClassObject(nullptr, args.vm, name->c_str());
+        const u4 classObject = args.heap->createClassObject(nullptr, name->c_str());
         args.thread->returnVar(Variable{VariableType_REFERENCE, classObject});
     } else
     {

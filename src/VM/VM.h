@@ -55,8 +55,11 @@ public:
     bool isSubclass(VMThread* thread, const ClassInfo* targetClass, ClassInfo* subClass);
     FieldInfo* findField(ClassInfo* classInfo, const char* name, const char* descriptor, VMThread* thread);
     std::string userDir;
+    static VM* create(Configuration config);
+    static VM* get();
 
 private:
+    static VM *m_vm;
     void initSystemClass(ClassInfo* class_info, VMThread* vm_thread);
     static constexpr std::array<Instruction, 138> m_instructions{
         {
