@@ -172,23 +172,23 @@ JCALL void lib_java_lang_Class_getDeclaredFields0(const NativeArgs& args)
         std::string_view fieldName =  classObject->classClassInfo->constantPool->getString(fieldInfo->nameIndex);
         std::string_view fieldType = classObject->classClassInfo->constantPool->getString(fieldInfo->descriptorIndex);
         const u4 fieldNameStringObjectRef = args.heap->createString(fieldName.data(), args.vm);
-        nameField->data->data = fieldNameStringObjectRef;
+        nameField->data = fieldNameStringObjectRef;
 
         // Set the slot field
         FieldData* slotField = fieldObject->getField("slot", "I", args.heap);
-        slotField->data->data = currentField;
+        slotField->data = currentField;
 
         // Set the class field
         FieldData* classField = fieldObject->getField("clazz", "Ljava/lang/Class;", args.heap);
-        classField->data->data =  currentFrame->localVariables[0].data;
+        classField->data =  currentFrame->localVariables[0].data;
 
         // Set the modifiers field
         FieldData* modifiersField = fieldObject->getField("modifiers", "I", args.heap);
-        modifiersField->data->data = fieldInfo->accessFlags;
+        modifiersField->data = fieldInfo->accessFlags;
 
-        const FieldData* typeField = fieldObject->getField("type", "Ljava/lang/Class;", args.heap);
+        FieldData* typeField = fieldObject->getField("type", "Ljava/lang/Class;", args.heap);
         const u4 classObjectRef = args.heap->createClassObject(nullptr, args.vm, getTypeAsString(fieldType));
-        typeField->data->data = classObjectRef;
+        typeField->data = classObjectRef;
 
 
         u4* array = reinterpret_cast<u4*>(fieldsArray->data);
@@ -293,21 +293,21 @@ JCALL void lib_java_lang_Class_getDeclaredConstructors0(const NativeArgs& args)
 
         // Set the slot field
         FieldData* slotField = constructorObject->getField("slot", "I", args.heap);
-        slotField->data->data = currentMethod;
+        slotField->data = currentMethod;
 
         // Set the class field
         FieldData* classField = constructorObject->getField("clazz", "Ljava/lang/Class;", args.heap);
-        classField->data->data =  currentFrame->localVariables[0].data;
+        classField->data =  currentFrame->localVariables[0].data;
 
         // Set the modifiers field
         FieldData* modifiersField = constructorObject->getField("modifiers", "I", args.heap);
-        modifiersField->data->data = methodInfo->accessFlags;
+        modifiersField->data = methodInfo->accessFlags;
 
         // Set the parameterTypes field
         FieldData* parameterTypes = constructorObject->getField("parameterTypes", "[Ljava/lang/Class;", args.heap);
         // TODO: Not sure about the descriptor in the array
         const u4 argsArray = args.heap->createArray(AT_REFERENCE, 0, "Ljava/lang/Class;");
-        parameterTypes->data->data = argsArray;
+        parameterTypes->data = argsArray;
 
         u4* array = reinterpret_cast<u4*>(constructorsArray->data);
         array[currentMethod] = constructorObjectRef;

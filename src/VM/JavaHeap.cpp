@@ -90,14 +90,11 @@ u4 JavaHeap::createObject(ClassInfo* classInfo, VM* VM)
             data.descriptorIndex = fieldInfo->descriptorIndex;
             data.nameIndex = fieldInfo->nameIndex;
             const std::string_view descriptorText = classInfo->constantPool->getString(fieldInfo->descriptorIndex);
-            std::vector<Variable> vars = VM->createVariableForDescriptor(descriptorText);
-            Variable* varsAllocated = (Variable*) Platform::allocateMemory(sizeof(Variable) * vars.size(), 0);
-            for (u1 currentVar = 0; currentVar < vars.size(); ++currentVar)
-            {
-                varsAllocated[currentVar] = vars[currentVar];
-            }
-            data.dataSize = castToU1<std::size_t>(vars.size());
-            data.data = varsAllocated;
+            const VariableType type = fromDescriptor(descriptorText);
+            data.dataSize = getCategoryFromVariableType(type);
+            data.highBytes = 0;
+            data.lowBytes = 0;
+            data.type = type;
             object->fields[fieldsCount++] = data;
         }
     }
@@ -158,14 +155,11 @@ u4 JavaHeap::createClassObject(ClassInfo* classInfo, VM* VM, std::string_view na
             data.descriptorIndex = fieldInfo->descriptorIndex;
             data.nameIndex = fieldInfo->nameIndex;
             const std::string_view descriptorText = classClassInfo->constantPool->getString(fieldInfo->descriptorIndex);
-            std::vector<Variable> vars = VM->createVariableForDescriptor(descriptorText);
-            Variable* varsAllocated = (Variable*) Platform::allocateMemory(sizeof(Variable) * vars.size(), 0);
-            for (u1 currentVar = 0; currentVar < vars.size(); ++currentVar)
-            {
-                varsAllocated[currentVar] = vars[currentVar];
-            }
-            data.dataSize = castToU1<std::size_t>(vars.size());
-            data.data = varsAllocated;
+            const VariableType type = fromDescriptor(descriptorText);
+            data.dataSize = getCategoryFromVariableType(type);
+            data.highBytes = 0;
+            data.lowBytes = 0;
+            data.type = type;
             object->fields[fieldsCount++] = data;
         }
     }
@@ -205,8 +199,8 @@ u4 JavaHeap::createString(const char* utf8String, VM* VM) {
         free((void*)u16String.data());
     }
 
-    const Variable var{VariableType_REFERENCE, arrId};
-    strObject->fields[0].data[0] = var;
+    strObject->fields[0].data = arrId;
+    strObject->fields[0].type = VariableType_REFERENCE;
 
     return strObjectId;
 }
@@ -295,13 +289,13 @@ u4 JavaHeap::getString(const char* utf8String) const
             const Object* obj = static_cast<const Object*>(ref);
             if (obj->classInfo->getName() == std::string_view{"java/lang/String"})
             {
-                Variable charArrRef =  obj->fields[0].data[0];
-                if (charArrRef.data == 0)
+                const u4 charArrRef =  obj->fields[0].data;
+                if (charArrRef == 0)
                 {
                     printf("WARN: String contains null reference to characters");
                     continue;
                 }
-                const Array* arr = getArray(charArrRef.data);
+                const Array* arr = getArray(charArrRef);
                 if (arr->length == 0 && u16String.length() == 0)
                 {
                     return currentObj;
@@ -341,7 +335,7 @@ std::u16string_view JavaHeap::getStringContent(const Object* stringObject) const
         Platform::exitProgram(3);
     }
 
-    const u4 arrayRefId = stringObject->fields[0].data->data;
+    const u4 arrayRefId = stringObject->fields[0].data;
     const Array* array = getArray(arrayRefId);
 
     char16_t* charArray = reinterpret_cast<char16_t*>(array->data);
@@ -397,8 +391,8 @@ void JavaHeap::printStringPool()
             if (obj->classInfo->getName() == std::string_view{"java/lang/String"})
             {
                 printf("|%d|", currentObj);
-                Variable charArrRef =  obj->fields[0].data[0];
-                const Array* arr = getArray(charArrRef.data);
+                u4 charArrRef =  obj->fields[0].data;
+                const Array* arr = getArray(charArrRef);
                 for (u4 currentIndex = 0; currentIndex < arr->length; ++currentIndex)
                 {
                     u1 charDowncasted = ((u2*)arr->data)[currentIndex];
@@ -435,15 +429,15 @@ FieldData* Object::getField(const char* name, const char* descriptor, JavaHeap* 
 
 const Object* Object::getObject(const u4 fieldIndex, JavaHeap* heap) const
 {
-    return heap->getObject(fields[fieldIndex].data->data);
+    return heap->getObject(fields[fieldIndex].data);
 }
 
 const i8 Object::getLong(u4 fieldIndex, JavaHeap* heap) const
 {
     const FieldData fieldData = fields[fieldIndex];
-    const Variable highBytes = fieldData.data[0];
-    const Variable lowBytes = fieldData.data[1];
-    const i8 longValue = ((i8)highBytes.data << 32) + (i8)lowBytes.data;
+    const u4 highBytes = fieldData.highBytes;
+    const u4 lowBytes = fieldData.lowBytes;
+    const i8 longValue = ((i8)highBytes << 32) + (i8)lowBytes;
     return longValue;
 }
 

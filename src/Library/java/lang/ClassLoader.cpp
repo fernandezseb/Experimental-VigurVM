@@ -47,7 +47,7 @@ JCALL void lib_java_lang_ClassLoader$NativeLibrary_load(const NativeArgs& args)
         // TODO: Set the loaded boolean of the NativeLibrary instance to true
         const Object* object = args.getThisObjectReference();
         FieldData& data = object->fields[5];
-        data.data->data = 1;
+        data.data = 1;
         printf("");
     } else
     {

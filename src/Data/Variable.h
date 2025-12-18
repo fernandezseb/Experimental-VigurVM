@@ -1,5 +1,9 @@
 #pragma once
 
+#include "Core.h"
+
+#include <string_view>
+
 
 class FieldInfo;
 
@@ -15,6 +19,10 @@ enum VariableType
     VariableType_LONG,
     VariableType_DOUBLE
 };
+
+VariableType fromDescriptor(std::string_view descriptor);
+
+u1 getCategoryFromVariableType(const VariableType type);
 
 enum ArrayType : char {
     AT_BOOLEAN = 4,

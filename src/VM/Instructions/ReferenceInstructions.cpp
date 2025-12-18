@@ -122,10 +122,10 @@ void getfield(const InstructionInput& input)
         {
             input.thread->internalError("Error: Field not found in object!");
         }
-        Variable* vars = field->data;
-        for (u1 currentVar = 0; currentVar < field->dataSize; ++currentVar)
+        input.thread->m_currentFrame->operands.emplace_back(field->type, field->data);
+        if (field->dataSize == 2)
         {
-            input.thread->m_currentFrame->operands.push_back(vars[currentVar]);
+            input.thread->m_currentFrame->operands.emplace_back(field->type, field->highBytes);
         }
     }
 }
@@ -155,12 +155,12 @@ void putfield(const InstructionInput& input)
     FieldData* fieldData = targetObject->getField(fieldName.data(), fieldDescr.data(), input.heap);
 
     // TODO: Check for type descriptor
-    fieldData->data[0] = targetValue;
+    fieldData->data = targetValue.data;
     if (targetValue.getCategory() == 2 && fieldData->dataSize == 2)
     {
         // ARRAY: | MOST SIGN | LEAST SIGN |
-        fieldData->data[0] = targetValue2; // Most significant bits
-        fieldData->data[1] = targetValue;  // Least significant bits
+        fieldData->lowBytes = targetValue.data;  // Least significant bits
+        fieldData->highBytes = targetValue2.data; // Most significant bits
     }
 }
 

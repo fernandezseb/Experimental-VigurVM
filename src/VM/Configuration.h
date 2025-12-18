@@ -6,10 +6,10 @@
 
 struct Configuration
 {
-    std::string_view classPath;
-    std::string_view mainClassName;
-    std::vector<std::string_view> args;
-    bool disableSystemInit = false;
+    std::string_view m_classPath;
+    std::string_view m_mainClassName;
+    std::vector<std::string_view> m_args;
+    bool m_disableSystemInit = false;
 
     static Configuration fromArguments(const std::span<const char*> cargs)
     {
@@ -22,22 +22,22 @@ struct Configuration
             {
                 if (currentArg+1 < cargs.size())
                 {
-                    config.classPath = std::string_view{cargs[currentArg+1]};
+                    config.m_classPath = std::string_view{cargs[currentArg+1]};
                     currentArg++;
                 }
             } else if (arg == "-disableSystemInit")
             {
-                config.disableSystemInit = true;
+                config.m_disableSystemInit = true;
             }
             else
             {
                 if (!mainNameFound)
                 {
-                    config.mainClassName = arg;
+                    config.m_mainClassName = arg;
                     mainNameFound = true;
                 } else
                 {
-                    config.args.push_back(arg);
+                    config.m_args.push_back(arg);
                 }
             }
         }

@@ -23,7 +23,7 @@ JCALL void lib_sun_reflect_NativeConstructorAccessorImpl_newInstance0(const Nati
 
     // Set the class field
     const FieldData* classField = constructor->getField("clazz", "Ljava/lang/Class;", args.heap);
-    const ClassObject* classObject = args.heap->getClassObject(classField->data->data);
+    const ClassObject* classObject = args.heap->getClassObject(classField->data);
 
     // Set the modifiers field
     const FieldData* modifiersField = constructor->getField("modifiers", "I", args.heap);
@@ -32,7 +32,7 @@ JCALL void lib_sun_reflect_NativeConstructorAccessorImpl_newInstance0(const Nati
     const FieldData* parameterTypes = constructor->getField("parameterTypes", "[Ljava/lang/Class;", args.heap);
 
 
-    const MethodInfo* constructorMethod = classObject->classClassInfo->methods[slotField->data->data];
+    const MethodInfo* constructorMethod = classObject->classClassInfo->methods[slotField->data];
 
 
     const u4 objectRef = args.heap->createObject(classObject->classClassInfo, args.vm);

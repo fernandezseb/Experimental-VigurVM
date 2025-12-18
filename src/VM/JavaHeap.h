@@ -45,12 +45,17 @@ public:
     };
 };
 
-class FieldData {
-public:
+struct FieldData {
+    u1 dataSize;
     uint16_t nameIndex;
     uint16_t descriptorIndex;
-    Variable* data;
-    u1 dataSize;
+    VariableType type{VariableType_UNDEFINED};
+    union
+    {
+        u4 data;
+        u4 lowBytes;
+    };
+    u4 highBytes;
 };
 
 class Object : public Reference {

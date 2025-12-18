@@ -67,9 +67,9 @@ JCALL void lib_sun_misc_Unsafe_objectFieldOffset(const NativeArgs& args)
     const Variable fieldObjectRef = args.thread->m_currentFrame->localVariables[1];
     const Object* fieldObject = args.heap->getObject(fieldObjectRef.data);
     const FieldData* slotField = fieldObject->getField("slot", "I", args.heap);
-    const u4 slot = slotField->data->data;
+    const u4 slot = slotField->data;
     const FieldData* classField = fieldObject->getField("clazz", "Ljava/lang/Class;", args.heap);
-    ClassObject* classObject = args.heap->getClassObject(classField->data->data);
+    ClassObject* classObject = args.heap->getClassObject(classField->data);
     u4 index = 0;
     // Ignore static fields
     for (u4 currentField = 0; currentField < slot; ++currentField)
@@ -98,10 +98,10 @@ JCALL void lib_sun_misc_Unsafe_compareAndSwapObject(const NativeArgs& args)
     {
         args.thread->internalError("Too big offset", 78);
     }
-    const FieldData* fieldData = &oObject->fields[fieldIndex];
-    if (fieldData->data->data == expectedObjectRef.data)
+    FieldData* fieldData = &oObject->fields[fieldIndex];
+    if (fieldData->data == expectedObjectRef.data)
     {
-        fieldData->data->data = xObjectRef.data;
+        fieldData->data = xObjectRef.data;
         args.thread->returnVar(Variable{VariableType_INT, 1u});
     } else
     {
@@ -122,10 +122,10 @@ JCALL void lib_sun_misc_Unsafe_compareAndSwapInt(const NativeArgs& args)
     {
         args.thread->internalError("Too big offset", -9);
     }
-    const FieldData* fieldData = &oObject->fields[fieldIndex];
-    if (fieldData->data->data == expectedIntVar.data)
+    FieldData* fieldData = &oObject->fields[fieldIndex];
+    if (fieldData->data == expectedIntVar.data)
     {
-        fieldData->data->data = xIntVar.data;
+        fieldData->data = xIntVar.data;
         args.thread->returnVar(Variable{VariableType_INT, 1u});
     } else
     {
@@ -142,7 +142,7 @@ JCALL void lib_sun_misc_Unsafe_getIntVolatile(const NativeArgs& args)
     const u4 fieldOffset = (offset-baseOffset)/sizeof(FieldData);
     const FieldData fieldData = oObject->fields[fieldOffset];
 
-    args.thread->returnVar(Variable{VariableType_INT, fieldData.data->data});
+    args.thread->returnVar(Variable{VariableType_INT, fieldData.data});
 }
 
 JCALL void lib_sun_misc_Unsafe_allocateMemory(const NativeArgs& args)

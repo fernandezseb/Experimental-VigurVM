@@ -64,7 +64,7 @@ void VM::start(std::string_view commandLineName)
     const u4 threadGroupReference = createThreadGroupObject(&m_mainThread);
     m_mainThread.threadObject = createThreadObject(&m_mainThread, threadGroupReference);
 
-    if (!m_configuration.disableSystemInit)
+    if (!m_configuration.m_disableSystemInit)
     {
         initSystemClass(systemClass, &m_mainThread);
     }
@@ -76,8 +76,8 @@ u4 VM::createThreadGroupObject(VMThread* thread)
     const u4 threadGroupReference = m_heap.createObject(threadGroupClass, this);
     const Object* threadGroupObject = m_heap.getObject(threadGroupReference);
 
-    const FieldData* maxPrioField = threadGroupObject->getField("maxPriority", "I", &m_heap);
-    maxPrioField->data->data = 10;
+    FieldData* maxPrioField = threadGroupObject->getField("maxPriority", "I", &m_heap);
+    maxPrioField->data = 10;
 
 
     return threadGroupReference;
@@ -112,11 +112,11 @@ u4 VM::createThreadObject(VMThread* thread, const u4 threadGroupReference)
     const u4 objectReference = m_heap.createObject(threadClass, this);
     const Object* threadObject = m_heap.getObject(objectReference);
 
-    const FieldData* groupField = threadObject->getField("group", "Ljava/lang/ThreadGroup;", &m_heap);
-    groupField->data->data = threadGroupReference;
+    FieldData* groupField = threadObject->getField("group", "Ljava/lang/ThreadGroup;", &m_heap);
+    groupField->data = threadGroupReference;
 
-    const FieldData* priorityField = threadObject->getField("priority", "I", &m_heap);
-    priorityField->data->data = thread->priority;
+    FieldData* priorityField = threadObject->getField("priority", "I", &m_heap);
+    priorityField->data = thread->priority;
 
     return objectReference;
 }
@@ -336,7 +336,7 @@ ClassInfo* VM::getClass(std::string_view className, VMThread* thread)
     if (classInfo == nullptr) {
         Memory *memory = new Memory(MIB(1), MIB(30));
         // printf("Loading class %s...\n", className.data());
-        classInfo = m_bootstrapClassLoader.readClass(className.data(), memory, m_configuration.classPath.data());
+        classInfo = m_bootstrapClassLoader.readClass(className.data(), memory, m_configuration.m_classPath.data());
         initStaticFields(classInfo, thread);
         m_heap.addClassInfo(classInfo);
         runStaticInitializer(classInfo, thread);
@@ -373,11 +373,11 @@ void VM::executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* met
 
 void VM::createArgsArray(const VMThread* thread)
 {
-    const u4 arrayRef =  m_heap.createArray(AT_REFERENCE, m_configuration.args.size(), "Ljava/lang/String;");
+    const u4 arrayRef =  m_heap.createArray(AT_REFERENCE, m_configuration.m_args.size(), "Ljava/lang/String;");
     const Array* array = m_heap.getArray(arrayRef);
     u4* arrayData = reinterpret_cast<u4*>(array->data);
     u4 currentArg = 0;
-    for (std::string_view arg : m_configuration.args)
+    for (std::string_view arg : m_configuration.m_args)
     {
         const u4 stringRef = m_heap.createString(arg.data(), this);
         arrayData[currentArg++] = stringRef;
@@ -418,13 +418,13 @@ FieldInfo* VM::findField(ClassInfo* classInfo, const char* name, const char* des
 void VM::runMain()
 {
     VMThread* mainThread = &m_mainThread;
-    if (m_configuration.mainClassName.empty())
+    if (m_configuration.m_mainClassName.empty())
     {
         fprintf(stderr, "Error: Class name of starting class not defined..\n");
         Platform::exitProgram(6);
     }
 
-    ClassInfo* startupClass = getClass(m_configuration.mainClassName.data(), mainThread);
+    ClassInfo* startupClass = getClass(m_configuration.m_mainClassName.data(), mainThread);
     MethodInfo* entryPoint = startupClass->findMethodWithNameAndDescriptor("main", "([Ljava/lang/String;)V");
 
     if (entryPoint == nullptr)
