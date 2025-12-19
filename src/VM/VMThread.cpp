@@ -14,8 +14,8 @@
  */
 
 #include "VMThread.h"
-
 #include "JavaHeap.h"
+#include "VM.h"
 
 #include <stack>
 
@@ -211,6 +211,54 @@ StackFrame* VMThread::getTopFrameNonNative()
     }
 
     return nullptr;
+}
+
+void VMThread::executeLoop()
+{
+    const std::size_t stackSize = m_stack.frames.size();
+    const std::size_t depth = stackSize == 0 ? 0 : stackSize-1;
+    while (m_stack.frames.size() > depth)
+    {
+        uint8_t opcode = readUnsignedByte();
+        // printf("Running instruction with opcode: 0x%0x \n", opcode);
+
+        bool found = false;
+
+        for (const Instruction& instruction : VM::getInstructions()) {
+            if (((u1)instruction.opcode) == opcode)
+            {
+                found = true;
+                // printf("%s\n", instruction.name.data());
+                uint8_t* args = 0;
+                if (instruction.args > 0) {
+                    args = (uint8_t*)Platform::allocateMemory(instruction.args, 0);
+                    for (u2 currentArg = 0; currentArg < instruction.args; ++currentArg)
+                    {
+                        args[currentArg] = readUnsignedByte();
+                    }
+                }
+                if (instruction.instructionFunction != nullptr) {
+                    InstructionInput input = {};
+                    input.args = args;
+                    input.argsCount = instruction.args;
+                    input.arg = instruction.arg;
+                    input.thread = this;
+                    instruction.instructionFunction(input);
+                }
+                break;
+            }
+        }
+
+        if (found)[[likely]]
+        {
+            continue;
+        } else [[unlikely]] {
+            printf("\n");
+            char buffer[200];
+            snprintf(buffer, 200, "Unrecognized opcode detected: 0x%0x", opcode);
+            internalError(buffer, 78);
+        }
+    }
 }
 
 void VMThread::returnVar(const Variable returnValue)

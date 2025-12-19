@@ -8,7 +8,6 @@
 #include "JavaHeap.h"
 #include "VMThread.h"
 #include "Instruction.h"
-
 #include "Instructions/ComparisonInstructions.h"
 #include "Instructions/ConstantInstructions.h"
 #include "Instructions/ControlInstructions.h"
@@ -39,7 +38,6 @@ public:
                              VMThread* thread);
     void runMain();
     void shutdown();
-    void executeLoop(VMThread* thread);
     static void checkType(Variable var, VariableType type, VMThread* thread);
 
     VMThread* getVMThreadByObjectRef(const u4 objectReference)
@@ -58,10 +56,22 @@ public:
     static VM* create(Configuration config);
     static VM* get();
     JavaHeap* getHeap();
-
+    static constexpr std::array<Instruction, 138> getInstructions()
+    {
+        return m_instructions;
+    }
 private:
     static VM *m_vm;
     void initSystemClass(ClassInfo* class_info, VMThread* vm_thread);
+    ClassLoader m_bootstrapClassLoader;
+    JavaHeap m_heap;
+    VMThread m_mainThread{"main", 200};
+    Configuration m_configuration;
+    void initStaticFields(ClassInfo* class_info, VMThread* thread);
+    void runStaticInitializer(ClassInfo* classInfo, VMThread* thread);
+    u4 createThreadObject(VMThread* thread, u4 threadGroupReference);
+    u4 createThreadGroupObject(VMThread* thread);
+    void createArgsArray(const VMThread* thread);
     static constexpr std::array<Instruction, 138> m_instructions{
         {
             // Constants
@@ -214,13 +224,4 @@ private:
             {i_ifnonnull, 0, "ifnonnull", 0, ifnonnull},
         }
     };
-    ClassLoader m_bootstrapClassLoader;
-    JavaHeap m_heap;
-    VMThread m_mainThread{"main", 200};
-    Configuration m_configuration;
-    void initStaticFields(ClassInfo* class_info, VMThread* thread);
-    void runStaticInitializer(ClassInfo* classInfo, VMThread* thread);
-    u4 createThreadObject(VMThread* thread, u4 threadGroupReference);
-    u4 createThreadGroupObject(VMThread* thread);
-    void createArgsArray(const VMThread* thread);
 };

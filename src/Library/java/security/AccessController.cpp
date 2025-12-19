@@ -26,7 +26,7 @@ void lib_java_security_AccessController_doPriviliged(const NativeArgs& args)
     args.thread->pushStackFrameWithoutParams(classInfo, methodInfo);
     args.thread->m_currentFrame->localVariables[0] = objectVar;
 
-    VM::get()->executeLoop(args.thread);
+    args.thread->executeLoop();
 }
 
 void lib_java_security_AccessController_doPriviliged_PriviligedExceptionAction(const NativeArgs& args)
@@ -42,7 +42,7 @@ void lib_java_security_AccessController_doPriviliged_PriviligedExceptionAction(c
     args.thread->pushStackFrameWithoutParams(classInfo, methodInfo);
     args.thread->m_currentFrame->localVariables[0] = objectVar;
 
-    VM::get()->executeLoop(args.thread);
+    args.thread->executeLoop();
 }
 
 void lib_java_security_AccessController_getStackAccessControlContext(const NativeArgs& args)

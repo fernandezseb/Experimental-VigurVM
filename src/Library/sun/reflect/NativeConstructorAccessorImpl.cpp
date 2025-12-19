@@ -41,7 +41,7 @@ JCALL void lib_sun_reflect_NativeConstructorAccessorImpl_newInstance0(const Nati
     args.thread->m_currentFrame->localVariables[0] = Variable{VariableType_REFERENCE, objectRef};
     // TODO: Implement passing of n arguments to constructor
 
-    VM::get()->executeLoop(args.thread);
+    args.thread->executeLoop();
 
     args.thread->returnVar(Variable{VariableType_REFERENCE,  objectRef});
 

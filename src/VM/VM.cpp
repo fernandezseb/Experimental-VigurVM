@@ -278,54 +278,6 @@ void VM::updateVariableFromVariable(Variable* variable, std::string_view descrip
     }
 }
 
-void VM::executeLoop(VMThread* thread)
-{
-    const std::size_t stackSize = thread->m_stack.frames.size();
-    const std::size_t depth = stackSize == 0 ? 0 : stackSize-1;
-    while (thread->m_stack.frames.size() > depth)
-    {
-        uint8_t opcode = thread->readUnsignedByte();
-        // printf("Running instruction with opcode: 0x%0x \n", opcode);
-
-        bool found = false;
-
-        for (const Instruction& instruction : m_instructions) {
-            if (((u1)instruction.opcode) == opcode)
-            {
-                found = true;
-                // printf("%s\n", instruction.name.data());
-                uint8_t* args = 0;
-                if (instruction.args > 0) {
-                    args = (uint8_t*)Platform::allocateMemory(instruction.args, 0);
-                    for (u2 currentArg = 0; currentArg < instruction.args; ++currentArg)
-                    {
-                        args[currentArg] = thread->readUnsignedByte();
-                    }
-                }
-                if (instruction.instructionFunction != nullptr) {
-                    InstructionInput input = {};
-                    input.args = args;
-                    input.argsCount = instruction.args;
-                    input.arg = instruction.arg;
-                    input.thread = thread;
-                    instruction.instructionFunction(input);
-                }
-                break;
-            }
-        }
-
-        if (found)[[likely]]
-        {
-            continue;
-        } else [[unlikely]] {
-            printf("\n");
-            char buffer[200];
-            snprintf(buffer, 200, "Unrecognized opcode detected: 0x%0x", opcode);
-            thread->internalError(buffer, 78);
-        }
-    }
-}
-
 void VM::runStaticInitializer(ClassInfo* classInfo, VMThread* thread)
 {
     MethodInfo* entryPoint = classInfo->findMethodWithNameAndDescriptor("<clinit>", "()V");
@@ -339,7 +291,7 @@ void VM::runStaticInitializer(ClassInfo* classInfo, VMThread* thread)
     thread->pushStackFrameWithoutParams(classInfo, entryPoint);
 
     // printf("Executing static initializers...\n");
-    executeLoop(thread);
+    thread->executeLoop();
 }
 
 ClassInfo* VM::getClass(std::string_view className, VMThread* thread)
@@ -456,7 +408,7 @@ void VM::runMain()
     createArgsArray(mainThread);
 
     printf("> Executing main method...\n");
-    executeLoop(mainThread);
+    mainThread->executeLoop();
     // Object* object = heap.getObject(3);
     printf("> Done executing\n");
 }
@@ -472,7 +424,7 @@ void VM::initSystemClass(ClassInfo* systemClass, VMThread* thread)
     thread->pushStackFrameSpecial(systemClass, initMethod, nullptr);
 
     printf("> Executing System init method...\n");
-    executeLoop(thread);
+    thread->executeLoop();
     printf("> Done executing System init method\n");
 }
 

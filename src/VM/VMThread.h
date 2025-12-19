@@ -4,6 +4,9 @@
 #include "JavaHeap.h"
 #include "JavaStack.h"
 #include "Data/Class.h"
+#include "Instruction.h"
+
+#include <array>
 
 class VMThread
 {
@@ -39,4 +42,5 @@ public:
     i4 readSignedInt();
 
     StackFrame* getTopFrameNonNative();
+    void executeLoop();
 };

@@ -65,7 +65,7 @@ static void setProperty(const NativeArgs& args, Variable propertiesObjectRef, Cl
     args.thread->m_currentFrame->localVariables[0] = propertiesObjectRef;
     args.thread->m_currentFrame->localVariables[1] = Variable{VariableType_REFERENCE,VM::get()->getHeap()->createString(key)};
     args.thread->m_currentFrame->localVariables[2] = Variable{VariableType_REFERENCE,VM::get()->getHeap()->createString(value)};
-    VM::get()->executeLoop(args.thread);
+    args.thread->executeLoop();
 }
 
 JCALL void lib_java_lang_System_initProperties(const NativeArgs& args)
