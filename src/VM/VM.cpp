@@ -89,7 +89,7 @@ u4 VM::createThreadGroupObject(VMThread* thread)
     const u4 threadGroupReference = m_heap.createObject(threadGroupClass);
     const Object* threadGroupObject = m_heap.getObject(threadGroupReference);
 
-    FieldData* maxPrioField = threadGroupObject->getField("maxPriority", "I", &m_heap);
+    FieldData* maxPrioField = threadGroupObject->getField("maxPriority", "I");
     maxPrioField->data = 10;
 
 
@@ -125,10 +125,10 @@ u4 VM::createThreadObject(VMThread* thread, const u4 threadGroupReference)
     const u4 objectReference = m_heap.createObject(threadClass);
     const Object* threadObject = m_heap.getObject(objectReference);
 
-    FieldData* groupField = threadObject->getField("group", "Ljava/lang/ThreadGroup;", &m_heap);
+    FieldData* groupField = threadObject->getField("group", "Ljava/lang/ThreadGroup;");
     groupField->data = threadGroupReference;
 
-    FieldData* priorityField = threadObject->getField("priority", "I", &m_heap);
+    FieldData* priorityField = threadObject->getField("priority", "I");
     priorityField->data = thread->priority;
 
     return objectReference;
@@ -193,6 +193,11 @@ u1 VM::getDescriptorVarCategory(std::string_view descriptor) noexcept
         return 2;
     }
     return 1;
+}
+
+JavaHeap* VM::getHeap()
+{
+    return &m_heap;
 }
 
 void VM::initStaticFields(ClassInfo* class_info, [[maybe_unused]] VMThread* thread)
@@ -357,7 +362,7 @@ ClassInfo* VM::getClass(std::string_view className, VMThread* thread)
     return classInfo;
 }
 
-void VM::executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* methodInfo, JavaHeap* heap, VMThread* thread)
+void VM::executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* methodInfo, VMThread* thread)
 {
     const std::string_view className = targetClass->getName();
     // printf("Running native code of method: %s.%s\n", className.data(), methodInfo->name.data());
@@ -370,7 +375,6 @@ void VM::executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* met
     if (impl != nullptr)
     {
         NativeArgs nativeArgs{};
-        nativeArgs.heap = heap;
         nativeArgs.thread = thread;
         impl(nativeArgs);
     }

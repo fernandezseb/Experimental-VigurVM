@@ -44,7 +44,7 @@ JCALL void lib_sun_misc_Unsafe_arrayBaseOffset(const NativeArgs& args)
 JCALL void lib_sun_misc_Unsafe_arrayIndexScale(const NativeArgs& args)
 {
     const Variable classObjectRef = args.thread->m_currentFrame->localVariables[1];
-    const ClassObject* classObject = args.heap->getClassObject(classObjectRef.data);
+    const ClassObject* classObject = VM::get()->getHeap()->getClassObject(classObjectRef.data);
     u4 length = 4;
     if (classObject->name[1] == 'C')
     {
@@ -65,11 +65,11 @@ JCALL void lib_sun_misc_Unsafe_addressSize(const NativeArgs& args)
 JCALL void lib_sun_misc_Unsafe_objectFieldOffset(const NativeArgs& args)
 {
     const Variable fieldObjectRef = args.thread->m_currentFrame->localVariables[1];
-    const Object* fieldObject = args.heap->getObject(fieldObjectRef.data);
-    const FieldData* slotField = fieldObject->getField("slot", "I", args.heap);
+    const Object* fieldObject = VM::get()->getHeap()->getObject(fieldObjectRef.data);
+    const FieldData* slotField = fieldObject->getField("slot", "I");
     const u4 slot = slotField->data;
-    const FieldData* classField = fieldObject->getField("clazz", "Ljava/lang/Class;", args.heap);
-    ClassObject* classObject = args.heap->getClassObject(classField->data);
+    const FieldData* classField = fieldObject->getField("clazz", "Ljava/lang/Class;");
+    ClassObject* classObject = VM::get()->getHeap()->getClassObject(classField->data);
     u4 index = 0;
     // Ignore static fields
     for (u4 currentField = 0; currentField < slot; ++currentField)
@@ -88,7 +88,7 @@ JCALL void lib_sun_misc_Unsafe_objectFieldOffset(const NativeArgs& args)
 JCALL void lib_sun_misc_Unsafe_compareAndSwapObject(const NativeArgs& args)
 {
     const Variable oObjectRef = args.thread->m_currentFrame->localVariables[1];
-    const Object* oObject = args.heap->getObject(oObjectRef.data);
+    const Object* oObject = VM::get()->getHeap()->getObject(oObjectRef.data);
     const u8 offsetVar = ((static_cast<u8>(args.thread->m_currentFrame->localVariables[2].data) << 32) | static_cast<u8>(args.thread->m_currentFrame->localVariables[3].data));
     const Variable expectedObjectRef = args.thread->m_currentFrame->localVariables[4];
     const Variable xObjectRef = args.thread->m_currentFrame->localVariables[5];
@@ -112,7 +112,7 @@ JCALL void lib_sun_misc_Unsafe_compareAndSwapObject(const NativeArgs& args)
 JCALL void lib_sun_misc_Unsafe_compareAndSwapInt(const NativeArgs& args)
 {
     const Variable oObjectRef = args.thread->m_currentFrame->localVariables[1];
-    const Object* oObject = args.heap->getObject(oObjectRef.data);
+    const Object* oObject = VM::get()->getHeap()->getObject(oObjectRef.data);
     const u8 offsetVar = ((static_cast<u8>(args.thread->m_currentFrame->localVariables[2].data) << 32) | static_cast<u8>(args.thread->m_currentFrame->localVariables[3].data));
     const Variable expectedIntVar = args.thread->m_currentFrame->localVariables[4];
     const Variable xIntVar = args.thread->m_currentFrame->localVariables[5];
@@ -137,7 +137,7 @@ JCALL void lib_sun_misc_Unsafe_getIntVolatile(const NativeArgs& args)
 {
     constexpr u4 baseOffset = offsetof(Object, fields);
     const Variable oObjectRef = args.thread->m_currentFrame->localVariables[1];
-    const Object* oObject = args.heap->getObject(oObjectRef.data);
+    const Object* oObject = VM::get()->getHeap()->getObject(oObjectRef.data);
     const u8 offset = ((static_cast<u8>(args.thread->m_currentFrame->localVariables[2].data) << 32) | static_cast<u8>(args.thread->m_currentFrame->localVariables[3].data));
     const u4 fieldOffset = (offset-baseOffset)/sizeof(FieldData);
     const FieldData fieldData = oObject->fields[fieldOffset];

@@ -38,8 +38,8 @@ JCALL void lib_java_lang_System_arraycopy(const NativeArgs& args)
     const Variable dstPosVar = currentFrame->localVariables[3];
     const Variable lengthVar = currentFrame->localVariables[4];
 
-    const Array* srcArray = args.heap->getArray(srcObjectRef.data);
-    const Array* dstArray = args.heap->getArray(dstObjectRef.data);
+    const Array* srcArray = VM::get()->getHeap()->getArray(srcObjectRef.data);
+    const Array* dstArray = VM::get()->getHeap()->getArray(dstObjectRef.data);
 
     // TODO: De-duplicate this code
     u1 bytes = 4;
@@ -63,15 +63,15 @@ static void setProperty(const NativeArgs& args, Variable propertiesObjectRef, Cl
 {
     args.thread->pushStackFrameWithoutParams(classInfo, methodInfo);
     args.thread->m_currentFrame->localVariables[0] = propertiesObjectRef;
-    args.thread->m_currentFrame->localVariables[1] = Variable{VariableType_REFERENCE,args.heap->createString(key)};
-    args.thread->m_currentFrame->localVariables[2] = Variable{VariableType_REFERENCE,args.heap->createString(value)};
+    args.thread->m_currentFrame->localVariables[1] = Variable{VariableType_REFERENCE,VM::get()->getHeap()->createString(key)};
+    args.thread->m_currentFrame->localVariables[2] = Variable{VariableType_REFERENCE,VM::get()->getHeap()->createString(value)};
     VM::get()->executeLoop(args.thread);
 }
 
 JCALL void lib_java_lang_System_initProperties(const NativeArgs& args)
 {
     const Variable propertiesObjectRef = args.thread->m_currentFrame->localVariables[0];
-    const Object* properties = args.heap->getObject(propertiesObjectRef.data);
+    const Object* properties = VM::get()->getHeap()->getObject(propertiesObjectRef.data);
     const MethodInfo* entryPoint = properties->classInfo->findMethodWithNameAndDescriptor("setProperty", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Object;");
 
     setProperty(args, propertiesObjectRef, properties->classInfo, entryPoint, "file.encoding", "Cp1252");

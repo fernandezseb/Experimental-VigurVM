@@ -18,7 +18,7 @@
 JCALL void lib_sun_misc_Signal_findSignal(const NativeArgs& args)
 {
     const Object* sigNameObject = args.getObject(0);
-    const std::u16string_view sigName = args.heap->getStringContent(sigNameObject);
+    const std::u16string_view sigName = VM::get()->getHeap()->getStringContent(sigNameObject);
     const i4 signal = -1; // TODO: Implement signals on supported OS's
     const u4 signalUnsigned = static_cast<u4>(signal);
     args.thread->returnVar(Variable{VariableType_INT, signalUnsigned});

@@ -17,25 +17,25 @@
 
 JCALL void lib_sun_reflect_NativeConstructorAccessorImpl_newInstance0(const NativeArgs& args)
 {
-    const Object* constructor = args.heap->getObject(args.thread->m_currentFrame->localVariables[0].data);
+    const Object* constructor = VM::get()->getHeap()->getObject(args.thread->m_currentFrame->localVariables[0].data);
 
-    const FieldData* slotField = constructor->getField("slot", "I", args.heap);
+    const FieldData* slotField = constructor->getField("slot", "I");
 
     // Set the class field
-    const FieldData* classField = constructor->getField("clazz", "Ljava/lang/Class;", args.heap);
-    const ClassObject* classObject = args.heap->getClassObject(classField->data);
+    const FieldData* classField = constructor->getField("clazz", "Ljava/lang/Class;");
+    const ClassObject* classObject = VM::get()->getHeap()->getClassObject(classField->data);
 
     // Set the modifiers field
-    const FieldData* modifiersField = constructor->getField("modifiers", "I", args.heap);
+    const FieldData* modifiersField = constructor->getField("modifiers", "I");
 
     // Set the parameterTypes field
-    const FieldData* parameterTypes = constructor->getField("parameterTypes", "[Ljava/lang/Class;", args.heap);
+    const FieldData* parameterTypes = constructor->getField("parameterTypes", "[Ljava/lang/Class;");
 
 
     const MethodInfo* constructorMethod = classObject->classClassInfo->methods[slotField->data];
 
 
-    const u4 objectRef = args.heap->createObject(classObject->classClassInfo);
+    const u4 objectRef = VM::get()->getHeap()->createObject(classObject->classClassInfo);
 
     args.thread->pushStackFrameWithoutParams(classObject->classClassInfo, constructorMethod);
     args.thread->m_currentFrame->localVariables[0] = Variable{VariableType_REFERENCE, objectRef};

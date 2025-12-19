@@ -404,7 +404,7 @@ void JavaHeap::printStringPool()
     }
 }
 
-FieldData* Object::getField(const char* name, const char* descriptor, JavaHeap* heap) const
+FieldData* Object::getField(const char* name, const char* descriptor) const
 {
     bool found = false;
     for (u2 currentField = 0; currentField < fieldsCount; ++currentField)
@@ -420,19 +420,19 @@ FieldData* Object::getField(const char* name, const char* descriptor, JavaHeap* 
     }
     if (!found && superClassObject != 0)
     {
-        return heap->getObject(superClassObject)->getField(name, descriptor, heap);
+        return VM::get()->getHeap()->getObject(superClassObject)->getField(name, descriptor);
     }
     fprintf(stderr, "Error: Field not resolved!");
     Platform::exitProgram(23);
     return nullptr;
 }
 
-const Object* Object::getObject(const u4 fieldIndex, JavaHeap* heap) const
+const Object* Object::getObject(const u4 fieldIndex) const
 {
-    return heap->getObject(fields[fieldIndex].data);
+    return VM::get()->getHeap()->getObject(fields[fieldIndex].data);
 }
 
-const i8 Object::getLong(u4 fieldIndex, JavaHeap* heap) const
+const i8 Object::getLong(u4 fieldIndex) const
 {
     const FieldData fieldData = fields[fieldIndex];
     const u4 highBytes = fieldData.highBytes;

@@ -34,20 +34,20 @@ JCALL void lib_java_lang_Object_getClass(const NativeArgs& args)
 {
     // TODO: Implement getClass for arrays as well
     const StackFrame* currentFrame = args.thread->m_currentFrame;
-    const Reference* reference = args.heap->getReference(currentFrame->localVariables[0].data);
+    const Reference* reference = VM::get()->getHeap()->getReference(currentFrame->localVariables[0].data);
 
     if (reference->type == OBJECT)
     {
-        const Object* object = args.heap->getObject(currentFrame->localVariables[0].data);
-        const u4 classObject = args.heap->createClassObject(object->classInfo, object->classInfo->getName());
+        const Object* object = VM::get()->getHeap()->getObject(currentFrame->localVariables[0].data);
+        const u4 classObject = VM::get()->getHeap()->createClassObject(object->classInfo, object->classInfo->getName());
         args.thread->returnVar(Variable{VariableType_REFERENCE, classObject});
     } else if (reference->type == ARRAY)
     {
-        const Array* array = args.heap->getArray(currentFrame->localVariables[0].data);
+        const Array* array = VM::get()->getHeap()->getArray(currentFrame->localVariables[0].data);
         printf("brol");
         std::string *name = new std::string(array->descriptor);
         name->insert(0, "[");
-        const u4 classObject = args.heap->createClassObject(nullptr, name->c_str());
+        const u4 classObject = VM::get()->getHeap()->createClassObject(nullptr, name->c_str());
         args.thread->returnVar(Variable{VariableType_REFERENCE, classObject});
     } else
     {
@@ -57,12 +57,12 @@ JCALL void lib_java_lang_Object_getClass(const NativeArgs& args)
 
 JCALL void lib_java_lang_Object_clone(const NativeArgs& args)
 {
-    const Reference* reference = args.heap->getReference(args.thread->m_currentFrame->localVariables[0].data);
+    const Reference* reference = VM::get()->getHeap()->getReference(args.thread->m_currentFrame->localVariables[0].data);
     if (reference->type == ARRAY)
     {
         const Array* array = reference->getArray();
-        const u4 cloneRef = args.heap->createArray(array->arrayType, array->length, array->descriptor);
-        const Array* clone = args.heap->getArray(cloneRef);
+        const u4 cloneRef = VM::get()->getHeap()->createArray(array->arrayType, array->length, array->descriptor);
+        const Array* clone = VM::get()->getHeap()->getArray(cloneRef);
         // TODO: Do the copy of the data
         u4* newArrayData = reinterpret_cast<u4*>(clone->data);
         u4* oldArrayData = reinterpret_cast<u4*>(array->data);

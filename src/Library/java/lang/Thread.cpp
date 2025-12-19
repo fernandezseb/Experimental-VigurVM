@@ -16,13 +16,12 @@
 #include "Thread.h"
 
 [[nodiscard]] static const Object* getThisObjectReference(
-    VMThread* thread,
-    const JavaHeap* heap)
+    VMThread* thread)
 {
     const StackFrame* currentFrame = thread->m_currentFrame;
     const Variable var = currentFrame->localVariables[0];
     VM::get()->checkType(var, VariableType_REFERENCE, thread);
-    return heap->getObject(var.data);
+    return VM::get()->getHeap()->getObject(var.data);
 }
 
 JCALL void lib_java_lang_Thread_registerNatives(const NativeArgs& args)
@@ -41,12 +40,12 @@ JCALL void lib_java_lang_Thread_currentThread(const NativeArgs& args)
 
 JCALL void lib_java_lang_Thread_setPriority0(const NativeArgs& args)
 {
-    const Object* threadObject = getThisObjectReference(args.thread, args.heap);
+    const Object* threadObject = getThisObjectReference(args.thread);
     const StackFrame* currentFrame = args.thread->m_currentFrame;
     const Variable argument = currentFrame->localVariables[1];
     VM::get()->checkType(argument, VariableType_INT, args.thread);
 
-    FieldData* field = threadObject->getField("priority", "I", args.heap);
+    FieldData* field = threadObject->getField("priority", "I");
     field->data = argument.data;
 }
 
@@ -70,8 +69,8 @@ JCALL void lib_java_lang_Thread_isAlive(const NativeArgs& args)
 
 JCALL void lib_java_lang_Thread_start0(const NativeArgs& args)
 {
-    const Object* threadObject = getThisObjectReference(args.thread, args.heap);
-    const FieldData* runnableField = threadObject->getField("target", "Ljava/lang/Runnable;", args.heap);
+    const Object* threadObject = getThisObjectReference(args.thread);
+    const FieldData* runnableField = threadObject->getField("target", "Ljava/lang/Runnable;");
     if (runnableField->data != 0)
     {
         args.thread->internalError("Running of Runnables, not implemented yet", 45);

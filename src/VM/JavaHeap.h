@@ -65,9 +65,9 @@ public:
     // In ClassObjects, this is the classInfo of java/lang/Class
     ClassInfo* classInfo{nullptr};
     u4 superClassObject{0};
-    FieldData* getField(const char* name, const char* descriptor, JavaHeap* heap) const;
-    [[nodiscard]] const Object* getObject(u4 fieldIndex, JavaHeap* heap) const;
-    [[nodiscard]] const i8 getLong(u4 fieldIndex, JavaHeap* heap) const;
+    FieldData* getField(const char* name, const char* descriptor) const;
+    [[nodiscard]] const Object* getObject(u4 fieldIndex) const;
+    [[nodiscard]] const i8 getLong(u4 fieldIndex) const;
 };
 
 class ClassObject : public Object

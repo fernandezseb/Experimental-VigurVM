@@ -17,13 +17,13 @@
 
 JCALL void lib_sun_reflect_Reflection_getCallerClass(const NativeArgs& args) {
     ClassInfo* previousClass = args.thread->m_stack.frames[args.thread->m_stack.frames.size()-2].previousClass;
-    const u4 ref = args.heap->createClassObject(previousClass, previousClass->getName());
+    const u4 ref = VM::get()->getHeap()->createClassObject(previousClass, previousClass->getName());
     const Variable classRef{VariableType_REFERENCE, ref};
     args.thread->returnVar(classRef);
 }
 
 JCALL void lib_sun_reflect_Reflection_getClassAccessFlags(const NativeArgs& args)
 {
-    const ClassObject* classObject = args.heap->getClassObject(args.thread->m_currentFrame->localVariables[0].data);
+    const ClassObject* classObject = VM::get()->getHeap()->getClassObject(args.thread->m_currentFrame->localVariables[0].data);
     args.thread->returnVar(Variable{VariableType_INT, classObject->classClassInfo->accessFlags});
 }

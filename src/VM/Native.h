@@ -7,7 +7,6 @@
 
 struct NativeArgs
 {
-    JavaHeap* heap;
     VMThread* thread;
 
     [[nodiscard]] const Object* getObject(const int argIndex) const
@@ -15,7 +14,7 @@ struct NativeArgs
         const StackFrame* currentFrame = thread->m_currentFrame;
         const Variable var = currentFrame->localVariables[argIndex];
         VM::get()->checkType(var, VariableType_REFERENCE, thread);
-        return heap->getObject(var.data);
+        return VM::get()->getHeap()->getObject(var.data);
     }
 
     [[nodiscard]] const Object* getThisObjectReference() const
@@ -36,7 +35,7 @@ struct NativeArgs
         const StackFrame* currentFrame = thread->m_currentFrame;
         const Variable arrayVar = currentFrame->localVariables[argIndex];
         VM::get()->checkType(arrayVar, VariableType_REFERENCE, thread);
-        const Array* array = heap->getArray(arrayVar.data);
+        const Array* array = VM::get()->getHeap()->getArray(arrayVar.data);
         return array;
     }
 };

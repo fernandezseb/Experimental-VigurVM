@@ -23,9 +23,9 @@ JCALL void lib_vigur_lang_System_registerNatives(const NativeArgs& args)
 JCALL void lib_vigur_lang_System_printLnString(const NativeArgs& args)
 {
     const Variable strVar = args.thread->m_currentFrame->localVariables[0];
-    const Object* obj = args.heap->getObject(strVar.data);
-    const FieldData* charArrRef = obj->getField("value", "[C", args.heap);
-    const Array* charArr = args.heap->getArray(charArrRef->data);
+    const Object* obj = VM::get()->getHeap()->getObject(strVar.data);
+    const FieldData* charArrRef = obj->getField("value", "[C");
+    const Array* charArr = VM::get()->getHeap()->getArray(charArrRef->data);
     // TODO: Convert UTF-16 to UTF-8
     Platform::print(reinterpret_cast<const char*>(charArr->data), charArr->length*2);
     Platform::print("\n", 1);

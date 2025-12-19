@@ -117,7 +117,7 @@ void getfield(const InstructionInput& input)
     else
     {
         const Object* object = input.heap->getChildObject(referencePointer.data, targetClass);
-        FieldData* field = object->getField(fieldName.data(), fieldDescr.data(), input.heap);
+        FieldData* field = object->getField(fieldName.data(), fieldDescr.data());
         if (field == 0)
         {
             input.thread->internalError("Error: Field not found in object!");
@@ -152,7 +152,7 @@ void putfield(const InstructionInput& input)
 
     const Object* targetObject = input.heap->getChildObject(referencePointer.data, targetClass);
 
-    FieldData* fieldData = targetObject->getField(fieldName.data(), fieldDescr.data(), input.heap);
+    FieldData* fieldData = targetObject->getField(fieldName.data(), fieldDescr.data());
 
     // TODO: Check for type descriptor
     fieldData->data = targetValue.data;
@@ -254,7 +254,7 @@ static void invokeVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread
 
     if (targetMethod->isNative())
     {
-        VM->executeNativeMethod(targetClass, targetMethod, heap, thread);
+        VM->executeNativeMethod(targetClass, targetMethod, thread);
         thread->popFrame();
     }
 }
@@ -344,7 +344,7 @@ void invokespecial(const InstructionInput& input)
 
     if (methodInfo->isNative())
     {
-        VM::get()->executeNativeMethod(targetClassInfo, methodInfo, input.heap, input.thread);
+        VM::get()->executeNativeMethod(targetClassInfo, methodInfo, input.thread);
         input.thread->popFrame();
     }
 
@@ -395,7 +395,7 @@ void invokestatic(const InstructionInput& input)
             }
         }
 
-        VM::get()->executeNativeMethod(targetClass, methodInfo, input.heap, input.thread);
+        VM::get()->executeNativeMethod(targetClass, methodInfo, input.thread);
         input.thread->popFrame();
     } else
     {

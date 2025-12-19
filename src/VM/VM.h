@@ -35,7 +35,7 @@ public:
     [[nodiscard]] static u1 getDescriptorVarCategory(std::string_view descriptor) noexcept;
     void start(std::string_view commandLineName);
     ClassInfo* getClass(std::string_view className, VMThread* thread);
-    void executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* methodInfo, JavaHeap* heap,
+    void executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* methodInfo,
                              VMThread* thread);
     void runMain();
     void shutdown();
@@ -57,6 +57,7 @@ public:
     std::string userDir;
     static VM* create(Configuration config);
     static VM* get();
+    JavaHeap* getHeap();
 
 private:
     static VM *m_vm;
