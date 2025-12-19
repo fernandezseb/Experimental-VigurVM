@@ -29,7 +29,7 @@ public:
     void pushNativeStackFrame(ClassInfo* classInfo, const MethodInfo* methodInfo, size_t argumentsSize);
     void popFrame();
     void pushStackFrameStatic(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame);
-    void pushStackFrameSpecial(ClassInfo* classInfo, const MethodInfo* methodInfo, StackFrame* previousFrame, JavaHeap* heap);
+    void pushStackFrameSpecial(ClassInfo* classInfo, const MethodInfo* methodInfo, StackFrame* previousFrame);
     void returnVar(Variable returnValue);
     void returnVar(Variable highByte, Variable lowByte);
     void internalError(std::string_view error, i4 errorCode) const;

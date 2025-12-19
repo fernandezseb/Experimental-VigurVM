@@ -96,8 +96,7 @@ void VMThread::popFrame()
 }
 
 
-void VMThread::pushStackFrameSpecial(ClassInfo* classInfo, const MethodInfo* methodInfo, StackFrame* previousFrame,
-    [[maybe_unused]] JavaHeap* heap)
+void VMThread::pushStackFrameSpecial(ClassInfo* classInfo, const MethodInfo* methodInfo, StackFrame* previousFrame)
 {
     std::deque<Variable> arguments;
     if (previousFrame != nullptr)

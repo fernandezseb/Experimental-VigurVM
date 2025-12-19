@@ -85,7 +85,7 @@ void sipush(const InstructionInput& input)
     input.thread->m_currentFrame->operands.push_back(variable);
 }
 
-void loadConstant(VMThread* thread, const u4 index, JavaHeap* heap)
+void loadConstant(VMThread* thread, const u4 index)
 {
     const ConstantPoolItem* cpItem = thread->m_currentFrame->constantPool->constants[index - 1];
     if (cpItem->getType() == CT_INTEGER)
@@ -104,7 +104,7 @@ void loadConstant(VMThread* thread, const u4 index, JavaHeap* heap)
     {
         const auto* stringInfo = static_cast<const CPStringInfo*>(cpItem);
         const std::string_view utf8String = thread->m_currentClass->constantPool->getString(stringInfo->stringIndex);
-        const uint32_t strObjectId = heap->createString(utf8String.data());
+        const uint32_t strObjectId = VM::get()->getHeap()->createString(utf8String.data());
         const Variable strVar{VariableType_REFERENCE, strObjectId};
         thread->m_currentFrame->operands.push_back(strVar);
     }
@@ -114,7 +114,7 @@ void loadConstant(VMThread* thread, const u4 index, JavaHeap* heap)
         std::string_view className = thread->m_currentClass->constantPool->getString(classInfo->nameIndex);
         ClassInfo* classInfoPtr{nullptr};
         classInfoPtr = VM::get()->getClass(className.data(), thread);
-        const u4 classObjectRef =  heap->createClassObject(classInfoPtr, className);
+        const u4 classObjectRef =  VM::get()->getHeap()->createClassObject(classInfoPtr, className);
         const Variable classObjectVar{VariableType_REFERENCE, classObjectRef};
         thread->m_currentFrame->operands.push_back(classObjectVar);
     }
@@ -151,13 +151,13 @@ void loadConstant2(const VMThread* thread, const u4 index)
 void ldc(const InstructionInput& input)
 {
     const u1 index = input.args[0];
-    loadConstant(input.thread, index, input.heap);
+    loadConstant(input.thread, index);
 }
 
 void ldc_w(const InstructionInput& input)
 {
     const u2 index = (input.args[0] << 8) | input.args[1];
-    loadConstant(input.thread, index, input.heap);
+    loadConstant(input.thread, index);
 }
 
 void ldc2_w(const InstructionInput& input)

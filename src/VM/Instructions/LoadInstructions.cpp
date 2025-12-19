@@ -100,7 +100,7 @@ void iaload(const InstructionInput& input)
     const Variable index = input.thread->m_currentFrame->popOperand();
     const Variable arrayRef = input.thread->m_currentFrame->popOperand();
 
-    const Array* array = input.heap->getArray(arrayRef.data);
+    const Array* array = VM::get()->getHeap()->getArray(arrayRef.data);
     const i4* intArray = (i4*) array->data;
 
     const i4 data = intArray[index.data];
@@ -114,7 +114,7 @@ void aaload(const InstructionInput& input)
     const Variable index = input.thread->m_currentFrame->popOperand();
     const Variable arrayRef = input.thread->m_currentFrame->popOperand();
 
-    const Array* array = input.heap->getArray(arrayRef.data);
+    const Array* array = VM::get()->getHeap()->getArray(arrayRef.data);
     const u4* referenceArray = (u4*) array->data;
 
     const u4 data = referenceArray[index.data];
@@ -128,7 +128,7 @@ void baload(const InstructionInput& input)
     const Variable index = input.thread->m_currentFrame->popOperand();
     const Variable arrayRef = input.thread->m_currentFrame->popOperand();
 
-    const Array* array = input.heap->getArray(arrayRef.data);
+    const Array* array = VM::get()->getHeap()->getArray(arrayRef.data);
     const i4* intArray = (i4*) array->data;
 
     const i4 data = intArray[index.data];
@@ -143,7 +143,7 @@ void caload(const InstructionInput& input)
     const Variable index = input.thread->m_currentFrame->popOperand();
     const Variable arrayRef = input.thread->m_currentFrame->popOperand();
 
-    const Array* array = input.heap->getArray(arrayRef.data);
+    const Array* array = VM::get()->getHeap()->getArray(arrayRef.data);
     const u2* intArray = reinterpret_cast<u2*>(array->data);
 
     const i4 indexSigned = static_cast<i4>(index.data);

@@ -68,7 +68,7 @@ void iastore(const InstructionInput& input)
     const Variable index = input.thread->m_currentFrame->popOperand();
     const Variable arrayref = input.thread->m_currentFrame->popOperand();
 
-    const Array* array = input.heap->getArray(arrayref.data);
+    const Array* array = VM::get()->getHeap()->getArray(arrayref.data);
     i4* intArray = reinterpret_cast<i4*>(array->data);
     intArray[index.data] = *reinterpret_cast<i4*>(&value.data);
 }
@@ -84,7 +84,7 @@ void aastore(const InstructionInput& input)
     VM::checkType(index, VariableType_INT, input.thread);
     VM::checkType(arrayRef, VariableType_REFERENCE, input.thread);
 
-    const Array* arrayArr = input.heap->getArray(arrayRef.data);
+    const Array* arrayArr = VM::get()->getHeap()->getArray(arrayRef.data);
 
     if (arrayArr->arrayType != AT_REFERENCE)
     {
@@ -102,7 +102,7 @@ void bastore(const InstructionInput& input)
     const Variable index = input.thread->m_currentFrame->popOperand();
     const Variable arrayref = input.thread->m_currentFrame->popOperand();
 
-    const Array* array = input.heap->getArray(arrayref.data);
+    const Array* array = VM::get()->getHeap()->getArray(arrayref.data);
     i1* byteArray = reinterpret_cast<i1*>(array->data);
     byteArray[index.data] = static_cast<i1>(*reinterpret_cast<i4*>(&value.data));
 }
@@ -115,7 +115,7 @@ void castore(const InstructionInput& input)
     const Variable index = currentFrame->popOperand();
     const Variable arrayref = currentFrame->popOperand();
 
-    const Array* array = input.heap->getArray(arrayref.data);
+    const Array* array = VM::get()->getHeap()->getArray(arrayref.data);
 
     u2* charArray = reinterpret_cast<u2*>(array->data);
     charArray[index.data] = castToU2<u4>(value.data); // XXX

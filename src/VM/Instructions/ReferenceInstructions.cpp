@@ -116,7 +116,7 @@ void getfield(const InstructionInput& input)
     }
     else
     {
-        const Object* object = input.heap->getChildObject(referencePointer.data, targetClass);
+        const Object* object = VM::get()->getHeap()->getChildObject(referencePointer.data, targetClass);
         FieldData* field = object->getField(fieldName.data(), fieldDescr.data());
         if (field == 0)
         {
@@ -150,7 +150,7 @@ void putfield(const InstructionInput& input)
     }
     Variable referencePointer = input.thread->m_currentFrame->popOperand();
 
-    const Object* targetObject = input.heap->getChildObject(referencePointer.data, targetClass);
+    const Object* targetObject = VM::get()->getHeap()->getChildObject(referencePointer.data, targetClass);
 
     FieldData* fieldData = targetObject->getField(fieldName.data(), fieldDescr.data());
 
@@ -164,7 +164,7 @@ void putfield(const InstructionInput& input)
     }
 }
 
-static void invokeVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread* thread, VM* VM, JavaHeap* heap) {
+static void invokeVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread* thread, VM* VM) {
     StackFrame* topFrame = thread->m_currentFrame;
     std::deque<Variable> arguments;
 
@@ -194,7 +194,7 @@ static void invokeVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread
         }
 
         // Look for method based on the object
-        const Reference* reference = heap->getReference(ref.data);
+        const Reference* reference = VM::get()->getHeap()->getReference(ref.data);
         if (reference->type == OBJECT || reference->type == CLASSOBJECT) {
             const Object* object = reference->getObject();
             targetClass = object->classInfo;
@@ -320,7 +320,7 @@ void invokevirtual(const InstructionInput& input)
     }
     // END BROL
 
-    invokeVirtual(targetClassInfo, targetMethod, input.thread, VM::get(), input.heap);
+    invokeVirtual(targetClassInfo, targetMethod, input.thread, VM::get());
     // printf("> Created new stack frame for virtual call on: %s.%s()\n", className.data(), methodName.data());
 }
 
@@ -340,7 +340,7 @@ void invokespecial(const InstructionInput& input)
     // TODO: Check correct parsing of descriptors with subclasses
 
     // TODO: Check argument types
-    input.thread->pushStackFrameSpecial(targetClassInfo, methodInfo, topFrame, input.heap);
+    input.thread->pushStackFrameSpecial(targetClassInfo, methodInfo, topFrame);
 
     if (methodInfo->isNative())
     {
@@ -417,7 +417,7 @@ void invokeinterface(const InstructionInput& input) {
         topFrame->constantPool->getString(nameAndTypeInfo->nameIndex).data(),
         topFrame->constantPool->getString(nameAndTypeInfo->descriptorIndex).data());
 
-    invokeVirtual(targetClass, methodInfo, input.thread, VM::get(), input.heap);
+    invokeVirtual(targetClass, methodInfo, input.thread, VM::get());
     // printf("> Created new stack frame for virtual call on: %s.%s()\n", input.thread->m_currentFrame->className.data(), input.thread->m_currentFrame->methodName.data());
 }
 
@@ -441,7 +441,7 @@ void newInstruction(const InstructionInput& input)
         }
     }
 
-    const uint32_t reference = input.heap->createObject(targetClass);
+    const uint32_t reference = VM::get()->getHeap()->createObject(targetClass);
     const Variable variable{VariableType_REFERENCE, reference};
 
     topFrame->operands.push_back(variable);
@@ -456,7 +456,7 @@ void newarray(const InstructionInput& input)
     VM::get()->checkType(countVar, VariableType_INT, input.thread);
 
     // TODO: Fix by putting the correct descriptor based on the type
-    const uint32_t reference = input.heap->createArray(type, countVar.data, "");
+    const uint32_t reference = VM::get()->getHeap()->createArray(type, countVar.data, "");
     const Variable variable{VariableType_REFERENCE, reference};
 
     input.thread->m_currentFrame->operands.push_back(variable);
@@ -481,7 +481,7 @@ void anewarray(const InstructionInput& input)
     std::string *str = new std::string(className);
     str->insert(0, "L");
     str->push_back(';');
-    const uint32_t reference = input.heap->createArray(AT_REFERENCE, size, *str);
+    const uint32_t reference = VM::get()->getHeap()->createArray(AT_REFERENCE, size, *str);
     const Variable variable{VariableType_REFERENCE, reference};
 
     topFrame->operands.push_back(variable);
@@ -491,7 +491,7 @@ void arraylength(const InstructionInput& input)
 {
     const Variable arrayRef = input.thread->m_currentFrame->popOperand();
     VM::get()->checkType(arrayRef, VariableType_REFERENCE, input.thread);
-    const Array* array = input.heap->getArray(arrayRef.data);
+    const Array* array = VM::get()->getHeap()->getArray(arrayRef.data);
 
     const Variable lengthVar{VariableType_INT, static_cast<uint32_t>(array->length)};
     input.thread->m_currentFrame->operands.push_back(lengthVar);
@@ -500,7 +500,7 @@ void arraylength(const InstructionInput& input)
 void athrow(const InstructionInput& input)
 {
     const Variable throwableRef = input.thread->m_currentFrame->popOperand();
-    const Object* throwable = input.heap->getObject(throwableRef.data);
+    const Object* throwable = VM::get()->getHeap()->getObject(throwableRef.data);
 
     while(!input.thread->m_stack.frames.empty()) {
         const AttributeCode* codeAttribute = input.thread->m_currentMethod->code;
@@ -540,7 +540,7 @@ void athrow(const InstructionInput& input)
     input.thread->m_name.data(),
     throwable->classInfo->getName().data());
     printf("String pool:\n");
-    input.heap->printStringPool();
+    VM::get()->getHeap()->printStringPool();
     input.thread->internalError("Unhandled exception");
     printf("");
 }
@@ -566,7 +566,7 @@ void instanceof(const InstructionInput& input)
         return;
     }
 
-    const Reference* reference = input.heap->getReference(operand.data);
+    const Reference* reference = VM::get()->getHeap()->getReference(operand.data);
 
     if (reference->type == OBJECT || reference->type == CLASSOBJECT)
     {
@@ -607,7 +607,7 @@ void instanceof(const InstructionInput& input)
                     {
                         break;
                     }
-                    object = input.heap->getObject(object->superClassObject);
+                    object = VM::get()->getHeap()->getObject(object->superClassObject);
                     if (object != nullptr)
                     {
                         objectClassName = object->classInfo->getName();

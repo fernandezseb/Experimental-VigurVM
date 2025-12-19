@@ -307,7 +307,6 @@ void VM::executeLoop(VMThread* thread)
                     input.args = args;
                     input.argsCount = instruction.args;
                     input.arg = instruction.arg;
-                    input.heap = &m_heap;
                     input.thread = thread;
                     instruction.instructionFunction(input);
                 }
@@ -470,7 +469,7 @@ void VM::initSystemClass(ClassInfo* systemClass, VMThread* thread)
     thread->m_currentClass = systemClass;
     thread->m_currentMethod = initMethod;
 
-    thread->pushStackFrameSpecial(systemClass, initMethod, nullptr, &m_heap);
+    thread->pushStackFrameSpecial(systemClass, initMethod, nullptr);
 
     printf("> Executing System init method...\n");
     executeLoop(thread);
