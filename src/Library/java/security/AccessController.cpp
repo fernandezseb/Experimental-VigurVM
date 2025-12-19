@@ -15,7 +15,7 @@
 
 #include "AccessController.h"
 
-void lib_java_security_AccessController_doPriviliged(const NativeArgs& args)
+JCALL void lib_java_security_AccessController_doPriviliged(const NativeArgs& args)
 {
     const StackFrame* currentFrame = args.thread->m_currentFrame;
     const Variable objectVar = currentFrame->localVariables[0];
@@ -29,7 +29,7 @@ void lib_java_security_AccessController_doPriviliged(const NativeArgs& args)
     args.thread->executeLoop();
 }
 
-void lib_java_security_AccessController_doPriviliged_PriviligedExceptionAction(const NativeArgs& args)
+JCALL void lib_java_security_AccessController_doPriviliged_PriviligedExceptionAction(const NativeArgs& args)
 {
     // TODO: Catch checked exceptions and throw a PrivilegedActionException
     // when exception handling is properly implemented
@@ -45,7 +45,7 @@ void lib_java_security_AccessController_doPriviliged_PriviligedExceptionAction(c
     args.thread->executeLoop();
 }
 
-void lib_java_security_AccessController_getStackAccessControlContext(const NativeArgs& args)
+JCALL void lib_java_security_AccessController_getStackAccessControlContext(const NativeArgs& args)
 {
     args.thread->returnVar(Variable{VariableType_REFERENCE, 0});
 }

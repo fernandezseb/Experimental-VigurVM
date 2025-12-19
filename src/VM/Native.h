@@ -17,9 +17,22 @@ struct NativeArgs
         return VM::get()->getHeap()->getObject(var.data);
     }
 
+    [[nodiscard]] const ClassObject* getClassObject(const int argIndex) const
+    {
+        const StackFrame* currentFrame = thread->m_currentFrame;
+        const Variable var = currentFrame->localVariables[argIndex];
+        VM::get()->checkType(var, VariableType_REFERENCE, thread);
+        return VM::get()->getHeap()->getClassObject(var.data);
+    }
+
     [[nodiscard]] const Object* getThisObjectReference() const
     {
         return getObject(0);
+    }
+
+    [[nodiscard]] const ClassObject* getThisClassObjectReference() const
+    {
+        return getClassObject(0);
     }
 
     [[nodiscard]] i4 getInt(const int argIndex) const

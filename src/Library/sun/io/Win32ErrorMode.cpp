@@ -16,7 +16,7 @@
 #include "Win32ErrorMode.h"
 #include "Platform.h"
 
-void lib_sun_io_Win32ErrorMode_setErrorMode(const NativeArgs& args)
+JCALL void lib_sun_io_Win32ErrorMode_setErrorMode(const NativeArgs& args)
 {
     const Variable lowBytes = args.thread->m_currentFrame->localVariables[1];
     const Variable highBytes = args.thread->m_currentFrame->localVariables[0];
