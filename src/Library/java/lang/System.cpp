@@ -89,21 +89,21 @@ JCALL void lib_java_lang_System_initProperties(const NativeArgs& args)
 
 JCALL void lib_java_lang_System_setIn0(const NativeArgs& args)
 {
-    const ClassInfo* classInfo = VM::get()->getClass("java/lang/System", args.thread);
+    const ClassInfo* classInfo = args.thread->getClass("java/lang/System");
     const FieldInfo* field = classInfo->findField("in", "Ljava/io/InputStream;");
     field->staticData->data = args.thread->m_currentFrame->localVariables[0].data;
 }
 
 JCALL void lib_java_lang_System_setOut0(const NativeArgs& args)
 {
-    const ClassInfo* classInfo = VM::get()->getClass("java/lang/System", args.thread);
+    const ClassInfo* classInfo = args.thread->getClass("java/lang/System");
     const FieldInfo* field = classInfo->findField("out", "Ljava/io/PrintStream;");
     field->staticData->data = args.thread->m_currentFrame->localVariables[0].data;
 }
 
 JCALL void lib_java_lang_System_setErr0(const NativeArgs& args)
 {
-    const ClassInfo* classInfo = VM::get()->getClass("java/lang/System", args.thread);
+    const ClassInfo* classInfo = args.thread->getClass("java/lang/System");
     const FieldInfo* field = classInfo->findField("err", "Ljava/io/PrintStream;");
     field->staticData->data = args.thread->m_currentFrame->localVariables[0].data;
 }

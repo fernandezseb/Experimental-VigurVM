@@ -113,7 +113,7 @@ void loadConstant(VMThread* thread, const u4 index)
         const auto* classInfo = static_cast<const CPClassInfo*>(cpItem);
         std::string_view className = thread->m_currentClass->constantPool->getString(classInfo->nameIndex);
         ClassInfo* classInfoPtr{nullptr};
-        classInfoPtr = VM::get()->getClass(className.data(), thread);
+        classInfoPtr = thread->getClass(className.data());
         const u4 classObjectRef =  VM::get()->getHeap()->createClassObject(classInfoPtr, className);
         const Variable classObjectVar{VariableType_REFERENCE, classObjectRef};
         thread->m_currentFrame->operands.push_back(classObjectVar);

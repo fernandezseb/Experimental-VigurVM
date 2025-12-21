@@ -21,6 +21,75 @@
 
 static constexpr std::string_view NoNonNativeStackFrameFound{"Can't return to previous frame because there is no previous non-native frame"};
 
+ClassInfo* VMThread::getClass(std::string_view className)
+{
+    if (className.starts_with("["))
+    {
+        return nullptr;
+    }
+    ClassInfo* classInfo = VM::get()->getHeap()->getClassByName(className);
+    if (classInfo == nullptr) {
+        Memory *memory = new Memory(MIB(1), MIB(30));
+        // printf("Loading class %s...\n", className.data());
+        classInfo = VM::get()->getClassLoader().readClass(className.data(), memory, VM::get()->getConfiguration().m_classPath.data());
+        initStaticFields(classInfo);
+        VM::get()->getHeap()->addClassInfo(classInfo);
+        runStaticInitializer(classInfo);
+        return classInfo;
+    }
+    return classInfo;
+}
+
+void VMThread::initStaticFields(ClassInfo* class_info)
+{
+    u2 staticFieldsCount = 0;
+    for (u2 currentField = 0; currentField < class_info->fieldsCount; ++currentField)
+    {
+        FieldInfo* field = class_info->fields[currentField];
+        if (field->isStatic())
+        {
+            const VariableType type = fromDescriptor(class_info->constantPool->getString(class_info->fields[currentField]->descriptorIndex));
+            const u1 varCount = getCategoryFromVariableType(type);
+            staticFieldsCount += varCount;
+        }
+    }
+
+    class_info->staticFieldsCount = staticFieldsCount;
+    const auto variablesMemory = (Variable*) class_info->memory->alloc(sizeof(Variable) * staticFieldsCount);
+    class_info->staticFields = std::span(variablesMemory, staticFieldsCount);
+
+    u2 currentStaticField = 0;
+    for (u2 currentField = 0; currentField < class_info->fieldsCount; ++currentField)
+    {
+        FieldInfo* field = class_info->fields[currentField];
+        if (field->isStatic())
+        {
+            std::vector<Variable> variables = VM::createVariableForDescriptor(class_info->constantPool->getString(field->descriptorIndex));
+            for (Variable variable : variables) {
+                class_info->staticFields[currentStaticField++] = variable;
+            }
+            const std::size_t index = currentStaticField-variables.size();
+            field->staticData = &class_info->staticFields[index];
+        }
+    }
+}
+
+void VMThread::runStaticInitializer(ClassInfo* classInfo)
+{
+    MethodInfo* entryPoint = classInfo->findMethodWithNameAndDescriptor("<clinit>", "()V");
+
+    if (entryPoint == nullptr)
+    {
+        // No static initializers for this class
+        return;
+    }
+
+    pushStackFrameWithoutParams(classInfo, entryPoint);
+
+    // printf("Executing static initializers...\n");
+    executeLoop();
+}
+
 void VMThread::pushStackFrameWithoutParams(ClassInfo* classInfo, const MethodInfo* methodInfo)
 {
     StackFrame stackFrame;

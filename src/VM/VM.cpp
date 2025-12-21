@@ -21,7 +21,6 @@
 #include "Library/Builtin.h"
 #include "physfs.h"
 
-#include <stack>
 #include <string>
 #include <variant>
 
@@ -54,38 +53,41 @@ void VM::start(std::string_view commandLineName)
     userDir = commandLineName.substr(0, backSlash < forwardSlash ? backSlash : forwardSlash);
     PHYSFS_addToSearchPath(userDir.c_str(), 1);
 
-    registerBuiltinRegisterNatives();
-    getClass("java/lang/OutOfMemoryError", &m_mainThread);
-    getClass("java/lang/VirtualMachineError", &m_mainThread);
-    getClass("java/lang/Object", &m_mainThread);
-    getClass("java/lang/Number", &m_mainThread);
-    ClassInfo* classInfo = getClass("java/lang/Class", &m_mainThread);
-    m_heap.setClassInfo(classInfo);
-    getClass("java/lang/String", &m_mainThread);
-    ClassInfo* systemClass = getClass("java/lang/System", &m_mainThread);
-    getClass("java/lang/Thread", &m_mainThread);
-    getClass("java/lang/ThreadGroup", &m_mainThread);
-    getClass("java/lang/reflect/Field", &m_mainThread);
-    getClass("java/lang/reflect/AccessibleObject", &m_mainThread);
-    getClass("java/lang/reflect/Executable", &m_mainThread);
-    getClass("java/lang/reflect/Constructor", &m_mainThread);
-    getClass("java/io/PrintStream", &m_mainThread);
-    getClass("java/io/FilterOutputStream", &m_mainThread);
-    getClass("java/io/OutputStream", &m_mainThread);
-    getClass("java/util/Properties", &m_mainThread);
+    m_threads.emplace_back("main", 200);
+    VMThread* mainThread = &m_threads[0];
 
-    const u4 threadGroupReference = createThreadGroupObject(&m_mainThread);
-    m_mainThread.threadObject = createThreadObject(&m_mainThread, threadGroupReference);
+    registerBuiltinRegisterNatives();
+    mainThread->getClass("java/lang/OutOfMemoryError");
+    mainThread->getClass("java/lang/VirtualMachineError");
+    mainThread->getClass("java/lang/Object");
+    mainThread->getClass("java/lang/Number");
+    ClassInfo* classInfo = mainThread->getClass("java/lang/Class");
+    m_heap.setClassInfo(classInfo);
+    mainThread->getClass("java/lang/String");
+    ClassInfo* systemClass = mainThread->getClass("java/lang/System");
+    mainThread->getClass("java/lang/Thread");
+    mainThread->getClass("java/lang/ThreadGroup");
+    mainThread->getClass("java/lang/reflect/Field");
+    mainThread->getClass("java/lang/reflect/AccessibleObject");
+    mainThread->getClass("java/lang/reflect/Executable");
+    mainThread->getClass("java/lang/reflect/Constructor");
+    mainThread->getClass("java/io/PrintStream");
+    mainThread->getClass("java/io/FilterOutputStream");
+    mainThread->getClass("java/io/OutputStream");
+    mainThread->getClass("java/util/Properties");
+
+    const u4 threadGroupReference = createThreadGroupObject(mainThread);
+    mainThread->threadObject = createThreadObject(mainThread, threadGroupReference);
 
     if (!m_configuration.m_disableSystemInit)
     {
-        initSystemClass(systemClass, &m_mainThread);
+        initSystemClass(systemClass, mainThread);
     }
 }
 
 u4 VM::createThreadGroupObject(VMThread* thread)
 {
-    ClassInfo* threadGroupClass = getClass("java/lang/ThreadGroup", thread);
+    ClassInfo* threadGroupClass = thread->getClass("java/lang/ThreadGroup");
     const u4 threadGroupReference = m_heap.createObject(threadGroupClass);
     const Object* threadGroupObject = m_heap.getObject(threadGroupReference);
 
@@ -113,7 +115,7 @@ bool VM::isSubclass(VMThread* thread, const ClassInfo* targetClass, ClassInfo* s
         }
 
         CPClassInfo* classInfo = currentClass->constantPool->getClassInfo(currentClass->superClass);
-        currentClass = getClass(currentClass->constantPool->getString(classInfo->nameIndex), thread);
+        currentClass = thread->getClass(currentClass->constantPool->getString(classInfo->nameIndex));
     }
 
     return false;
@@ -121,7 +123,7 @@ bool VM::isSubclass(VMThread* thread, const ClassInfo* targetClass, ClassInfo* s
 
 u4 VM::createThreadObject(VMThread* thread, const u4 threadGroupReference)
 {
-    ClassInfo* threadClass = getClass("java/lang/Thread", thread);
+    ClassInfo* threadClass = thread->getClass("java/lang/Thread");
     const u4 objectReference = m_heap.createObject(threadClass);
     const Object* threadObject = m_heap.getObject(objectReference);
 
@@ -200,38 +202,6 @@ JavaHeap* VM::getHeap()
     return &m_heap;
 }
 
-void VM::initStaticFields(ClassInfo* class_info, [[maybe_unused]] VMThread* thread)
-{
-    u2 staticFieldsCount = 0;
-    for (u2 currentField = 0; currentField < class_info->fieldsCount; ++currentField)
-    {
-        FieldInfo* field = class_info->fields[currentField];
-        if (field->isStatic())
-        {
-            const u1 varCount = getDescriptorVarCategory(class_info->constantPool->getString(class_info->fields[currentField]->descriptorIndex));
-            staticFieldsCount += varCount;
-        }
-    }
-
-    class_info->staticFieldsCount = staticFieldsCount;
-    const auto variablesMemory = (Variable*) class_info->memory->alloc(sizeof(Variable) * staticFieldsCount);
-    class_info->staticFields = std::span(variablesMemory, staticFieldsCount);
-
-    u2 currentStaticField = 0;
-    for (u2 currentField = 0; currentField < class_info->fieldsCount; ++currentField)
-    {
-        FieldInfo* field = class_info->fields[currentField];
-        if (field->isStatic())
-        {
-            std::vector<Variable> variables = createVariableForDescriptor(class_info->constantPool->getString(field->descriptorIndex));
-            for (Variable variable : variables) {
-                class_info->staticFields[currentStaticField++] = variable;
-            }
-            const std::size_t index = currentStaticField-variables.size();
-            field->staticData = &class_info->staticFields[index];
-        }
-    }
-}
 
 void VM::updateVariableFromVariable(Variable* variable, std::string_view descriptor, Variable operand, Variable operand2, VMThread* thread)
 {
@@ -276,41 +246,6 @@ void VM::updateVariableFromVariable(Variable* variable, std::string_view descrip
         snprintf(buffer, 200, "Error: Setting of variable of type with descriptor: %s not implemented yet!\n", descriptor.data());
         thread->internalError(buffer, 5);
     }
-}
-
-void VM::runStaticInitializer(ClassInfo* classInfo, VMThread* thread)
-{
-    MethodInfo* entryPoint = classInfo->findMethodWithNameAndDescriptor("<clinit>", "()V");
-
-    if (entryPoint == nullptr)
-    {
-        // No static initializers for this class
-        return;
-    }
-
-    thread->pushStackFrameWithoutParams(classInfo, entryPoint);
-
-    // printf("Executing static initializers...\n");
-    thread->executeLoop();
-}
-
-ClassInfo* VM::getClass(std::string_view className, VMThread* thread)
-{
-    if (className.starts_with("["))
-    {
-        return nullptr;
-    }
-    ClassInfo* classInfo = m_heap.getClassByName(className);
-    if (classInfo == nullptr) {
-        Memory *memory = new Memory(MIB(1), MIB(30));
-        // printf("Loading class %s...\n", className.data());
-        classInfo = m_bootstrapClassLoader.readClass(className.data(), memory, m_configuration.m_classPath.data());
-        initStaticFields(classInfo, thread);
-        m_heap.addClassInfo(classInfo);
-        runStaticInitializer(classInfo, thread);
-        return classInfo;
-    }
-    return classInfo;
 }
 
 void VM::executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* methodInfo, VMThread* thread)
@@ -363,7 +298,7 @@ FieldInfo* VM::findField(ClassInfo* classInfo, const char* name, const char* des
         {
             CPClassInfo* cpClassInfo = currentClass->constantPool->getClassInfo(currentClass->superClass);
             std::string_view superClassName =  currentClass->constantPool->getString(cpClassInfo->nameIndex);
-            ClassInfo* superClass =  getClass(superClassName, thread);
+            ClassInfo* superClass =  thread->getClass(superClassName);
             targetField = superClass->findField(name, descriptor);
             if (targetField != nullptr)
             {
@@ -383,14 +318,14 @@ FieldInfo* VM::findField(ClassInfo* classInfo, const char* name, const char* des
 
 void VM::runMain()
 {
-    VMThread* mainThread = &m_mainThread;
+    VMThread* mainThread = getCurrentVMThread();
     if (m_configuration.m_mainClassName.empty())
     {
         fprintf(stderr, "Error: Class name of starting class not defined..\n");
         Platform::exitProgram(6);
     }
 
-    ClassInfo* startupClass = getClass(m_configuration.m_mainClassName.data(), mainThread);
+    ClassInfo* startupClass = mainThread->getClass(m_configuration.m_mainClassName.data());
     MethodInfo* entryPoint = startupClass->findMethodWithNameAndDescriptor("main", "([Ljava/lang/String;)V");
 
     if (entryPoint == nullptr)
@@ -440,5 +375,31 @@ void VM::checkType(const Variable var, const VariableType type, VMThread* thread
     {
         thread->internalError("Error: Type mismatch", ErrorCode::TYPE_MISMATCH);
     }
+}
+
+VMThread* VM::getVMThreadByObjectRef(const u4 objectReference)
+{
+    for (VMThread& thread : m_threads)
+    {
+        if (thread.threadObject == objectReference)
+        {
+            return &thread;
+        }
+    }
+
+    return nullptr;
+}
+
+VMThread* VM::getCurrentVMThread()
+{
+    for (VMThread& thread : m_threads)
+    {
+        if (thread.m_pthreadId == std::this_thread::get_id())
+        {
+            return &thread;
+        }
+    }
+
+    return nullptr;
 }
 

@@ -33,23 +33,14 @@ public:
     static std::vector<Variable> createVariableForDescriptor(std::string_view descriptor);
     [[nodiscard]] static u1 getDescriptorVarCategory(std::string_view descriptor) noexcept;
     void start(std::string_view commandLineName);
-    ClassInfo* getClass(std::string_view className, VMThread* thread);
     void executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* methodInfo,
                              VMThread* thread);
     void runMain();
     void shutdown();
     static void checkType(Variable var, VariableType type, VMThread* thread);
 
-    VMThread* getVMThreadByObjectRef(const u4 objectReference)
-    {
-        if (m_mainThread.threadObject == objectReference)
-        {
-            return &m_mainThread;
-        }
-
-        return nullptr;
-    }
-
+    VMThread* getVMThreadByObjectRef(u4 objectReference);
+    VMThread* getCurrentVMThread();
     bool isSubclass(VMThread* thread, const ClassInfo* targetClass, ClassInfo* subClass);
     FieldInfo* findField(ClassInfo* classInfo, const char* name, const char* descriptor, VMThread* thread);
     std::string userDir;
@@ -60,15 +51,21 @@ public:
     {
         return m_instructions;
     }
+    Configuration& getConfiguration()
+    {
+        return m_configuration;
+    }
+    ClassLoader& getClassLoader()
+    {
+        return m_bootstrapClassLoader;
+    }
 private:
     static VM *m_vm;
     void initSystemClass(ClassInfo* class_info, VMThread* vm_thread);
     ClassLoader m_bootstrapClassLoader;
     JavaHeap m_heap;
-    VMThread m_mainThread{"main", 200};
+    std::vector<VMThread> m_threads;
     Configuration m_configuration;
-    void initStaticFields(ClassInfo* class_info, VMThread* thread);
-    void runStaticInitializer(ClassInfo* classInfo, VMThread* thread);
     u4 createThreadObject(VMThread* thread, u4 threadGroupReference);
     u4 createThreadGroupObject(VMThread* thread);
     void createArgsArray(const VMThread* thread);

@@ -7,6 +7,7 @@
 #include "Instruction.h"
 
 #include <array>
+#include <thread>
 
 class VMThread
 {
@@ -23,11 +24,14 @@ public:
     u4 threadObject{0};
     i1 priority{5};
     bool alive{false};
+    std::thread::id m_pthreadId;
 
     explicit VMThread(const std::string_view name, const size_t frameSize) noexcept
         : m_stack(frameSize), m_name(name)
     {
+        m_pthreadId = std::this_thread::get_id();
     }
+    ClassInfo* getClass(std::string_view className);
     void pushStackFrameWithoutParams(ClassInfo* classInfo, const MethodInfo* methodInfo);
     void pushNativeStackFrame(ClassInfo* classInfo, const MethodInfo* methodInfo, size_t argumentsSize);
     void popFrame();
@@ -43,4 +47,7 @@ public:
 
     StackFrame* getTopFrameNonNative();
     void executeLoop();
+private:
+    void initStaticFields(ClassInfo* class_info);
+    void runStaticInitializer(ClassInfo* classInfo);
 };

@@ -44,7 +44,7 @@ void getstatic(const InstructionInput& input)
     const CPClassInfo* classInfo =  input.thread->m_currentFrame->constantPool->getClassInfo(fieldRef->classIndex);
     const CPNameAndTypeInfo* nameAndType = input.thread->m_currentFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
     const std::string_view className = input.thread->m_currentFrame->constantPool->getString(classInfo->nameIndex);
-    ClassInfo* targetClass = VM::get()->getClass(className.data(), input.thread);
+    ClassInfo* targetClass = input.thread->getClass(className.data());
     const std::string_view fieldName = input.thread->m_currentFrame->constantPool->getString(nameAndType->nameIndex);
     const FieldInfo* targetField = VM::get()->findField(targetClass,
         fieldName.data(),
@@ -71,7 +71,7 @@ void putstatic(const InstructionInput& input)
     CPClassInfo* classInfo =  input.thread->m_currentFrame->constantPool->getClassInfo(fieldRef->classIndex);
     CPNameAndTypeInfo* nameAndType = input.thread->m_currentFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
     const std::string_view className = input.thread->m_currentFrame->constantPool->getString(classInfo->nameIndex);
-    ClassInfo* targetClass = VM::get()->getClass(className.data(), input.thread);
+    ClassInfo* targetClass = input.thread->getClass(className.data());
     FieldInfo* targetField = VM::get()->findField(targetClass,
         input.thread->m_currentFrame->constantPool->getString(nameAndType->nameIndex).data(),
         input.thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex).data(),
@@ -96,7 +96,7 @@ void getfield(const InstructionInput& input)
     CPNameAndTypeInfo* nameAndType = input.thread->m_currentFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
 
     const std::string_view className = input.thread->m_currentFrame->constantPool->getString(cpClassInfo->nameIndex);
-    ClassInfo* targetClass = VM::get()->getClass(className.data(), input.thread);
+    ClassInfo* targetClass = input.thread->getClass(className.data());
     const std::string_view fieldName = input.thread->m_currentFrame->constantPool->getString(nameAndType->nameIndex);
     const std::string_view fieldDescr = input.thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex);
 
@@ -138,7 +138,7 @@ void putfield(const InstructionInput& input)
     CPNameAndTypeInfo* nameAndType = input.thread->m_currentFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
 
     const std::string_view className = input.thread->m_currentFrame->constantPool->getString(cpClassInfo->nameIndex);
-    ClassInfo* targetClass = VM::get()->getClass(className.data(), input.thread);
+    ClassInfo* targetClass = input.thread->getClass(className.data());
     const std::string_view fieldName = input.thread->m_currentFrame->constantPool->getString(nameAndType->nameIndex);
     const std::string_view fieldDescr = input.thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex);
 
@@ -210,7 +210,7 @@ static void invokeVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread
                 while (currentClass->superClass != 0) {
                     CPClassInfo* ci = currentClass->constantPool->getClassInfo(currentClass->superClass);
                     [[maybe_unused]] const std::string_view superClass = currentClass->constantPool->getString(ci->nameIndex);
-                    currentClass = VM->getClass(superClass.data(), thread);
+                    currentClass = thread->getClass(superClass.data());
                     if (currentClass != nullptr) {
                         foundMethod = currentClass->findMethodWithNameAndDescriptor(methodInfo->name.data(),
                     classInfo->constantPool->getString(methodInfo->descriptorIndex).data());
@@ -272,10 +272,10 @@ void invokevirtual(const InstructionInput& input)
     ClassInfo* targetClassInfo = nullptr;
     if (className.starts_with("["))
     {
-        targetClassInfo = VM::get()->getClass("java/lang/Object", input.thread);
+        targetClassInfo = input.thread->getClass("java/lang/Object");
 
     } else {
-        targetClassInfo = VM::get()->getClass(className.data(), input.thread);
+        targetClassInfo = input.thread->getClass(className.data());
     }
     if (targetClassInfo == nullptr)
     {
@@ -299,7 +299,7 @@ void invokevirtual(const InstructionInput& input)
         while (currentClass->superClass != 0) {
             CPClassInfo* ci = currentClass->constantPool->getClassInfo(currentClass->superClass);
             [[maybe_unused]] const std::string_view superClass = currentClass->constantPool->getString(ci->nameIndex);
-            currentClass = VM::get()->getClass(superClass.data(), input.thread);
+            currentClass = input.thread->getClass(superClass.data());
             if (currentClass != nullptr) {
                 foundMethod = currentClass->findMethodWithNameAndDescriptor(methodName.data(),
             methodDescriptor.data());
@@ -334,7 +334,7 @@ void invokespecial(const InstructionInput& input)
     const std::string_view methodName = topFrame->constantPool->getString(nameAndTypeInfo->nameIndex);
     const std::string_view methodDescriptor = topFrame->constantPool->getString(nameAndTypeInfo->descriptorIndex);
     const std::string_view className = topFrame->constantPool->getString(cpClassInfo->nameIndex);
-    ClassInfo* targetClassInfo = VM::get()->getClass(className.data(), input.thread);
+    ClassInfo* targetClassInfo = input.thread->getClass(className.data());
     const MethodInfo* methodInfo = targetClassInfo->findMethodWithNameAndDescriptor(methodName.data(), methodDescriptor.data());
     // TODO: Implement argument passing (including subclass argument)
     // TODO: Check correct parsing of descriptors with subclasses
@@ -358,7 +358,7 @@ void invokestatic(const InstructionInput& input)
     CPMethodRef* methodRef = topFrame->constantPool->getMethodRef(index);
     CPClassInfo* targetClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
     CPNameAndTypeInfo* nameAndTypeInfo = topFrame->constantPool->getNameAndTypeInfo(methodRef->nameAndTypeIndex);
-    ClassInfo* targetClass = VM::get()->getClass(topFrame->constantPool->getString(targetClassInfo->nameIndex).data(), input.thread);
+    ClassInfo* targetClass = input.thread->getClass(topFrame->constantPool->getString(targetClassInfo->nameIndex).data());
     MethodInfo* methodInfo = targetClass->findMethodWithNameAndDescriptor(
         topFrame->constantPool->getString(nameAndTypeInfo->nameIndex).data(),
         topFrame->constantPool->getString(nameAndTypeInfo->descriptorIndex).data());
@@ -412,7 +412,7 @@ void invokeinterface(const InstructionInput& input) {
     CPInterfaceRef* interfaceMethodRef =  input.thread->m_currentClass->constantPool->getInterfaceMethodRef(index);
     CPClassInfo* targetClassInfo = topFrame->constantPool->getClassInfo(interfaceMethodRef->classIndex);
     CPNameAndTypeInfo* nameAndTypeInfo = topFrame->constantPool->getNameAndTypeInfo(interfaceMethodRef->nameAndTypeIndex);
-    ClassInfo* targetClass = VM::get()->getClass(topFrame->constantPool->getString(targetClassInfo->nameIndex).data(), input.thread);
+    ClassInfo* targetClass = input.thread->getClass(topFrame->constantPool->getString(targetClassInfo->nameIndex).data());
     MethodInfo* methodInfo = targetClass->findMethodWithNameAndDescriptor(
         topFrame->constantPool->getString(nameAndTypeInfo->nameIndex).data(),
         topFrame->constantPool->getString(nameAndTypeInfo->descriptorIndex).data());
@@ -426,7 +426,7 @@ void newInstruction(const InstructionInput& input)
     StackFrame* topFrame = input.thread->m_currentFrame;
     uint16_t index = readShort(input.thread);
     CPClassInfo* cpClasInfo = topFrame->constantPool->getClassInfo(index);
-    ClassInfo* targetClass = VM::get()->getClass(topFrame->constantPool->getString(cpClasInfo->nameIndex).data(), input.thread);
+    ClassInfo* targetClass = input.thread->getClass(topFrame->constantPool->getString(cpClasInfo->nameIndex).data());
 
     // Check if we are not in java/lang/Object, because that class doesn't have a superClas
     if (targetClass->superClass != 0)
@@ -435,7 +435,7 @@ void newInstruction(const InstructionInput& input)
         targetClass->constantPool->getClassInfo(targetClass->superClass)->nameIndex);
         while (superClassName != "java/lang/Object")
         {
-            ClassInfo* superClass = VM::get()->getClass(superClassName.data(), input.thread);
+            ClassInfo* superClass = input.thread->getClass(superClassName.data());
             superClassName = superClass->constantPool->getString(
                 superClass->constantPool->getClassInfo(superClass->superClass)->nameIndex);
         }
@@ -469,7 +469,7 @@ void anewarray(const InstructionInput& input)
     CPClassInfo* cpclassInfo = topFrame->constantPool->getClassInfo(index);
     const char* className = topFrame->constantPool->getString(cpclassInfo->nameIndex).data();
     // TODO: Is this needed? This loads the class eagerly
-    [[maybe_unused]] ClassInfo* classInfo = VM::get()->getClass(className, input.thread);
+    [[maybe_unused]] ClassInfo* classInfo = input.thread->getClass(className);
 
     const int32_t size = std::bit_cast<i4>(topFrame->popOperand().data);
 
@@ -519,7 +519,7 @@ void athrow(const InstructionInput& input)
             {
                 const CPClassInfo* catchType = input.thread->m_currentClass->constantPool->getClassInfo(handler.catchType);
                 const std::string_view catchTypeName = input.thread->m_currentClass->constantPool->getString(catchType->nameIndex);
-                const ClassInfo* catchTypeClass = VM::get()->getClass(catchTypeName, input.thread);
+                const ClassInfo* catchTypeClass = input.thread->getClass(catchTypeName);
                 if (VM::get()->isSubclass(input.thread, catchTypeClass, throwable->classInfo))
                 {
                     input.thread->m_pc = handler.handlerPc;
@@ -579,7 +579,7 @@ void instanceof(const InstructionInput& input)
         {
             std::string_view objectClassName = classInfo->getName();
 
-            const ClassInfo* targetClassInfo = VM::get()->getClass(name.data(), input.thread);
+            const ClassInfo* targetClassInfo = input.thread->getClass(name.data());
             if (targetClassInfo->isInterface())
             {
                 for (const uint16_t interfaceIndex : classInfo->interfaces)
