@@ -25,7 +25,7 @@ void iload(const InstructionInput& input)
 {
     const u1 index = input.args[0];
     const Variable var = input.thread->m_currentFrame->localVariables[index];
-    VM::checkType(var, VariableType_INT, input.thread);
+    var.checkType(VariableType_INT);
 
     input.thread->m_currentFrame->operands.push_back(var);
 }
@@ -34,10 +34,10 @@ void lload(const InstructionInput& input)
 {
     const u1 index = input.args[0];
     const Variable highBytes = input.thread->m_currentFrame->localVariables[index];
-    VM::checkType(highBytes, VariableType_LONG, input.thread);
+    highBytes.checkType( VariableType_LONG);
 
     const Variable lowBytes = input.thread->m_currentFrame->localVariables[index+1];
-    VM::checkType(lowBytes, VariableType_LONG, input.thread);
+    lowBytes.checkType(VariableType_LONG);
 
     input.thread->m_currentFrame->operands.push_back(highBytes);
     input.thread->m_currentFrame->operands.push_back(lowBytes);
@@ -47,7 +47,7 @@ void fload(const InstructionInput& input)
 {
     const u1 index = input.args[0];
     const Variable var = input.thread->m_currentFrame->localVariables[index];
-    VM::checkType(var, VariableType_FLOAT, input.thread);
+    var.checkType(VariableType_FLOAT);
 
     input.thread->m_currentFrame->operands.push_back(var);
 }
@@ -55,14 +55,14 @@ void fload(const InstructionInput& input)
 void aload(const InstructionInput& input) {
     const u1 index = input.args[0];
     const Variable var = input.thread->m_currentFrame->localVariables[index];
-    VM::checkType(var, VariableType_REFERENCE, input.thread);
+    var.checkType(VariableType_REFERENCE);
     input.thread->m_currentFrame->operands.push_back(var);
 }
 
 void aload_i(const InstructionInput& input)
 {
     const Variable var = input.thread->m_currentFrame->localVariables[input.arg];
-    VM::checkType(var, VariableType_REFERENCE, input.thread);
+    var.checkType(VariableType_REFERENCE);
 
     input.thread->m_currentFrame->operands.push_back(var);
 }
@@ -70,7 +70,7 @@ void aload_i(const InstructionInput& input)
 void iload_i(const InstructionInput& input)
 {
     const Variable var = input.thread->m_currentFrame->localVariables[input.arg];
-    VM::checkType(var, VariableType_INT, input.thread);
+    var.checkType(VariableType_INT);
 
     input.thread->m_currentFrame->operands.push_back(var);
 }
@@ -78,10 +78,10 @@ void iload_i(const InstructionInput& input)
 void lload_i(const InstructionInput& input)
 {
     const Variable highBytes = input.thread->m_currentFrame->localVariables[input.arg];
-    VM::checkType(highBytes, VariableType_LONG, input.thread);
+    highBytes.checkType(VariableType_LONG);
 
     const Variable lowBytes = input.thread->m_currentFrame->localVariables[input.arg+1];
-    VM::checkType(lowBytes, VariableType_LONG, input.thread);
+    lowBytes.checkType(VariableType_LONG);
 
     input.thread->m_currentFrame->operands.push_back(highBytes);
     input.thread->m_currentFrame->operands.push_back(lowBytes);
@@ -90,7 +90,7 @@ void lload_i(const InstructionInput& input)
 void fload_i(const InstructionInput& input)
 {
     const Variable var = input.thread->m_currentFrame->localVariables[input.arg];
-    VM::checkType(var, VariableType_FLOAT, input.thread);
+    var.checkType(VariableType_FLOAT);
 
     input.thread->m_currentFrame->operands.push_back(var);
 }

@@ -98,29 +98,6 @@ u4 VM::createThreadGroupObject(VMThread* thread)
     return threadGroupReference;
 }
 
-bool VM::isSubclass(VMThread* thread, const ClassInfo* targetClass, ClassInfo* subClass)
-{
-    ClassInfo* currentClass = subClass;
-
-    while (currentClass != nullptr)
-    {
-        if (currentClass->getName() == targetClass->getName())
-        {
-            return true;
-        }
-
-        if (currentClass->superClass == 0)
-        {
-            return false;
-        }
-
-        CPClassInfo* classInfo = currentClass->constantPool->getClassInfo(currentClass->superClass);
-        currentClass = thread->getClass(currentClass->constantPool->getString(classInfo->nameIndex));
-    }
-
-    return false;
-}
-
 u4 VM::createThreadObject(VMThread* thread, const u4 threadGroupReference)
 {
     ClassInfo* threadClass = thread->getClass("java/lang/Thread");
@@ -187,15 +164,6 @@ std::vector<Variable> VM::createVariableForDescriptor(std::string_view descripto
     return variables;
 }
 
-u1 VM::getDescriptorVarCategory(std::string_view descriptor) noexcept
-{
-    // Longs and doubles use two
-    if (descriptor[0] == 'J' || descriptor[0] == 'D')
-    {
-        return 2;
-    }
-    return 1;
-}
 
 JavaHeap* VM::getHeap()
 {
@@ -207,37 +175,37 @@ void VM::updateVariableFromVariable(Variable* variable, std::string_view descrip
 {
     if (descriptor ==  "I")
     {
-        checkType(*variable, VariableType_INT, thread);
-        checkType(operand, VariableType_INT, thread);
+        variable->checkType(VariableType_INT);
+        operand.checkType(VariableType_INT);
 
         variable->data = operand.data;
     } else if (descriptor ==  "C")
     {
-        checkType(*variable, VariableType_INT, thread);
+        variable->checkType(VariableType_INT);
         // checkType(operand, VariableType_CHAR, thread);
 
         variable->data = operand.data;
     } else if (descriptor ==  "Z")
     {
-        checkType(*variable, VariableType_INT, thread);
+        variable->checkType(VariableType_INT);
 
         variable->data = operand.data;
     } else if (descriptor[0] == '[' || descriptor[0] == 'L') {
 
-        checkType(*variable, VariableType_REFERENCE, thread);
-        checkType(operand, VariableType_REFERENCE, thread);
+        variable->checkType(VariableType_REFERENCE);
+        operand.checkType(VariableType_REFERENCE);
 
         variable->data = operand.data;
     } else if (descriptor[0] == 'J')
     {
-        checkType(*variable, VariableType_LONG, thread);
-        checkType(operand, VariableType_LONG, thread);
+        variable->checkType(VariableType_LONG);
+        operand.checkType(VariableType_LONG);
         variable[0].data = operand2.data;
         variable[1].data = operand.data;
     } else if (descriptor[0] == 'D')
     {
-        checkType(*variable, VariableType_DOUBLE, thread);
-        checkType(operand, VariableType_DOUBLE, thread);
+        variable->checkType(VariableType_DOUBLE);
+        operand.checkType(VariableType_DOUBLE);
         variable[0].data = operand2.data;
         variable[1].data = operand.data;
     } else
@@ -245,30 +213,6 @@ void VM::updateVariableFromVariable(Variable* variable, std::string_view descrip
         char buffer[200];
         snprintf(buffer, 200, "Error: Setting of variable of type with descriptor: %s not implemented yet!\n", descriptor.data());
         thread->internalError(buffer, 5);
-    }
-}
-
-void VM::executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* methodInfo, VMThread* thread)
-{
-    const std::string_view className = targetClass->getName();
-    // printf("Running native code of method: %s.%s\n", className.data(), methodInfo->name.data());
-    const std::string_view description = targetClass->constantPool->getString(methodInfo->descriptorIndex);
-    const std::string_view methodName = methodInfo->name;
-    std::string fullName = std::string{className};
-    fullName += "/";
-    fullName += methodName;
-    nativeImplementation impl = findNativeMethod(fullName.c_str(), description.data());
-    if (impl != nullptr)
-    {
-        NativeArgs nativeArgs{};
-        nativeArgs.thread = thread;
-        impl(nativeArgs);
-    }
-    else
-    {
-        char errorString[400];
-        snprintf(errorString, 400, "Can't find native method %s %s", fullName.c_str(), description.data());
-        thread->internalError(errorString, NATIVE_METHOD_NOT_FOUND);
     }
 }
 
@@ -285,35 +229,6 @@ void VM::createArgsArray(const VMThread* thread)
     }
     thread->m_currentFrame->localVariables[0] = Variable{VariableType_REFERENCE, arrayRef};
 
-}
-
-FieldInfo* VM::findField(ClassInfo* classInfo, const char* name, const char* descriptor, VMThread* thread)
-{
-    FieldInfo* targetField = classInfo->findField(name, descriptor);
-    if (targetField == nullptr)
-    {
-        ClassInfo* currentClass = classInfo;
-
-        while(currentClass != nullptr && currentClass->superClass != 0)
-        {
-            CPClassInfo* cpClassInfo = currentClass->constantPool->getClassInfo(currentClass->superClass);
-            std::string_view superClassName =  currentClass->constantPool->getString(cpClassInfo->nameIndex);
-            ClassInfo* superClass =  thread->getClass(superClassName);
-            targetField = superClass->findField(name, descriptor);
-            if (targetField != nullptr)
-            {
-                break;
-            }
-            currentClass = superClass;
-        }
-
-        if (targetField == nullptr)
-        {
-            thread->internalError("Static field not found");
-        }
-    }
-
-    return targetField;
 }
 
 void VM::runMain()
@@ -342,10 +257,10 @@ void VM::runMain()
 
     createArgsArray(mainThread);
 
-    printf("> Executing main method...\n");
+    // printf("> Executing main method...\n");
     mainThread->executeLoop();
     // Object* object = heap.getObject(3);
-    printf("> Done executing\n");
+    // printf("> Done executing\n");
 }
 
 void VM::initSystemClass(ClassInfo* systemClass, VMThread* thread)
@@ -358,23 +273,15 @@ void VM::initSystemClass(ClassInfo* systemClass, VMThread* thread)
 
     thread->pushStackFrameSpecial(systemClass, initMethod, nullptr);
 
-    printf("> Executing System init method...\n");
+    // printf("> Executing System init method...\n");
     thread->executeLoop();
-    printf("> Done executing System init method\n");
+    // printf("> Done executing System init method\n");
 }
 
 void VM::shutdown()
 {
     PHYSFS_deinit();
     Platform::cleanup();
-}
-
-void VM::checkType(const Variable var, const VariableType type, VMThread* thread)
-{
-    if (var.type != type)
-    {
-        thread->internalError("Error: Type mismatch", ErrorCode::TYPE_MISMATCH);
-    }
 }
 
 VMThread* VM::getVMThreadByObjectRef(const u4 objectReference)

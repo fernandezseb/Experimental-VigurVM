@@ -13,7 +13,7 @@ struct NativeArgs
     {
         const StackFrame* currentFrame = thread->m_currentFrame;
         const Variable var = currentFrame->localVariables[argIndex];
-        VM::get()->checkType(var, VariableType_REFERENCE, thread);
+        var.checkType(VariableType_REFERENCE);
         return VM::get()->getHeap()->getObject(var.data);
     }
 
@@ -21,7 +21,7 @@ struct NativeArgs
     {
         const StackFrame* currentFrame = thread->m_currentFrame;
         const Variable var = currentFrame->localVariables[argIndex];
-        VM::get()->checkType(var, VariableType_REFERENCE, thread);
+        var.checkType(VariableType_REFERENCE);
         return VM::get()->getHeap()->getClassObject(var.data);
     }
 
@@ -39,7 +39,7 @@ struct NativeArgs
     {
         const StackFrame* currentFrame = thread->m_currentFrame;
         const Variable intVar = currentFrame->localVariables[argIndex];
-        VM::get()->checkType(intVar, VariableType_INT, thread);
+        intVar.checkType(VariableType_INT);
         return static_cast<i4>(intVar.data);
     }
 
@@ -47,7 +47,7 @@ struct NativeArgs
     {
         const StackFrame* currentFrame = thread->m_currentFrame;
         const Variable arrayVar = currentFrame->localVariables[argIndex];
-        VM::get()->checkType(arrayVar, VariableType_REFERENCE, thread);
+        arrayVar.checkType(VariableType_REFERENCE);
         const Array* array = VM::get()->getHeap()->getArray(arrayVar.data);
         return array;
     }

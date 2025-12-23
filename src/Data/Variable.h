@@ -20,9 +20,9 @@ enum VariableType
     VariableType_DOUBLE
 };
 
-VariableType fromDescriptor(std::string_view descriptor);
-
-u1 getCategoryFromVariableType(const VariableType type);
+[[nodiscard]] VariableType fromDescriptor(std::string_view descriptor) noexcept;
+[[nodiscard]] u1 getCategoryFromVariableType(VariableType type) noexcept;
+[[nodiscard]] u1 getDescriptorVarCategory(std::string_view descriptor) noexcept;
 
 enum ArrayType : char {
     AT_BOOLEAN = 4,
@@ -62,4 +62,6 @@ struct Variable
 
         return 1;
     }
+
+    void checkType(VariableType type) const;
 };

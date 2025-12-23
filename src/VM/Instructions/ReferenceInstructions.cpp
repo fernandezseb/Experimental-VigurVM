@@ -46,12 +46,11 @@ void getstatic(const InstructionInput& input)
     const std::string_view className = input.thread->m_currentFrame->constantPool->getString(classInfo->nameIndex);
     ClassInfo* targetClass = input.thread->getClass(className.data());
     const std::string_view fieldName = input.thread->m_currentFrame->constantPool->getString(nameAndType->nameIndex);
-    const FieldInfo* targetField = VM::get()->findField(targetClass,
+    const FieldInfo* targetField = input.thread->findField(targetClass,
         fieldName.data(),
-        input.thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex).data(),
-        input.thread);
+        input.thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex).data());
     const std::string_view descriptor = input.thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex);
-    const u1 varCount = VM::getDescriptorVarCategory(descriptor);
+    const u1 varCount = getDescriptorVarCategory(descriptor);
     // TODO: Check type
     const Variable *vars = targetField->staticData;
     for (u1 currentVar = 0; currentVar < varCount; ++currentVar)
@@ -72,12 +71,11 @@ void putstatic(const InstructionInput& input)
     CPNameAndTypeInfo* nameAndType = input.thread->m_currentFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
     const std::string_view className = input.thread->m_currentFrame->constantPool->getString(classInfo->nameIndex);
     ClassInfo* targetClass = input.thread->getClass(className.data());
-    FieldInfo* targetField = VM::get()->findField(targetClass,
+    FieldInfo* targetField = input.thread->findField(targetClass,
         input.thread->m_currentFrame->constantPool->getString(nameAndType->nameIndex).data(),
-        input.thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex).data(),
-        input.thread);
+        input.thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex).data());
     const std::string_view descriptor = input.thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex);
-    const u1 varCount = VM::getDescriptorVarCategory(descriptor);
+    const u1 varCount = getDescriptorVarCategory(descriptor);
     // With cat 2 vars, var should be the LSB
     Variable var = input.thread->m_currentFrame->popOperand();
     Variable var2{VariableType_UNDEFINED};
@@ -254,7 +252,7 @@ static void invokeVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread
 
     if (targetMethod->isNative())
     {
-        VM->executeNativeMethod(targetClass, targetMethod, thread);
+        thread->executeNativeMethod(targetClass, targetMethod);
         thread->popFrame();
     }
 }
@@ -344,7 +342,7 @@ void invokespecial(const InstructionInput& input)
 
     if (methodInfo->isNative())
     {
-        VM::get()->executeNativeMethod(targetClassInfo, methodInfo, input.thread);
+        input.thread->executeNativeMethod(targetClassInfo, methodInfo);
         input.thread->popFrame();
     }
 
@@ -395,7 +393,7 @@ void invokestatic(const InstructionInput& input)
             }
         }
 
-        VM::get()->executeNativeMethod(targetClass, methodInfo, input.thread);
+        input.thread->executeNativeMethod(targetClass, methodInfo);
         input.thread->popFrame();
     } else
     {
@@ -453,7 +451,7 @@ void newarray(const InstructionInput& input)
     const ArrayType type = (ArrayType) typeArg;
 
     const Variable countVar = input.thread->m_currentFrame->popOperand();
-    VM::get()->checkType(countVar, VariableType_INT, input.thread);
+    countVar.checkType(VariableType_INT);
 
     // TODO: Fix by putting the correct descriptor based on the type
     const uint32_t reference = VM::get()->getHeap()->createArray(type, countVar.data, "");
@@ -490,7 +488,7 @@ void anewarray(const InstructionInput& input)
 void arraylength(const InstructionInput& input)
 {
     const Variable arrayRef = input.thread->m_currentFrame->popOperand();
-    VM::get()->checkType(arrayRef, VariableType_REFERENCE, input.thread);
+    arrayRef.checkType(VariableType_REFERENCE);
     const Array* array = VM::get()->getHeap()->getArray(arrayRef.data);
 
     const Variable lengthVar{VariableType_INT, static_cast<uint32_t>(array->length)};
@@ -520,7 +518,7 @@ void athrow(const InstructionInput& input)
                 const CPClassInfo* catchType = input.thread->m_currentClass->constantPool->getClassInfo(handler.catchType);
                 const std::string_view catchTypeName = input.thread->m_currentClass->constantPool->getString(catchType->nameIndex);
                 const ClassInfo* catchTypeClass = input.thread->getClass(catchTypeName);
-                if (VM::get()->isSubclass(input.thread, catchTypeClass, throwable->classInfo))
+                if (input.thread->isSubclass(catchTypeClass, throwable->classInfo))
                 {
                     input.thread->m_pc = handler.handlerPc;
                     input.thread->m_currentFrame->operands.clear();
@@ -556,7 +554,7 @@ void instanceof(const InstructionInput& input)
     const std::string_view name =  input.thread->m_currentClass->constantPool->getString(cpClassInfo->nameIndex);
 
     const Variable operand = input.thread->m_currentFrame->popOperand();
-    VM::get()->checkType(operand, VariableType_REFERENCE, input.thread);
+    operand.checkType(VariableType_REFERENCE);
 
     i4 returnVal = 0;
 

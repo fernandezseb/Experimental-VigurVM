@@ -34,7 +34,7 @@ JCALL void lib_java_lang_Thread_setPriority0(const NativeArgs& args)
     const Object* threadObject = args.getThisObjectReference();
     const StackFrame* currentFrame = args.thread->m_currentFrame;
     const Variable argument = currentFrame->localVariables[1];
-    VM::get()->checkType(argument, VariableType_INT, args.thread);
+    argument.checkType(VariableType_INT);
 
     FieldData* field = threadObject->getField("priority", "I");
     field->data = argument.data;
@@ -44,7 +44,7 @@ JCALL void lib_java_lang_Thread_isAlive(const NativeArgs& args)
 {
     const StackFrame* currentFrame = args.thread->m_currentFrame;
     const Variable var = currentFrame->localVariables[0];
-    VM::get()->checkType(var, VariableType_REFERENCE, args.thread);
+    var.checkType(VariableType_REFERENCE);
     const u4 objectReference = var.data;
     const VMThread* vmThread =  VM::get()->getVMThreadByObjectRef(objectReference);
 

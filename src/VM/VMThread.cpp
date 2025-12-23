@@ -13,9 +13,11 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "Error.h"
 #include "VMThread.h"
 #include "JavaHeap.h"
 #include "VM.h"
+#include "Library/Builtin.h"
 
 #include <stack>
 
@@ -38,6 +40,82 @@ ClassInfo* VMThread::getClass(std::string_view className)
         return classInfo;
     }
     return classInfo;
+}
+
+void VMThread::executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* methodInfo)
+{
+    const std::string_view className = targetClass->getName();
+    // printf("Running native code of method: %s.%s\n", className.data(), methodInfo->name.data());
+    const std::string_view description = targetClass->constantPool->getString(methodInfo->descriptorIndex);
+    const std::string_view methodName = methodInfo->name;
+    std::string fullName = std::string{className};
+    fullName += "/";
+    fullName += methodName;
+    nativeImplementation impl = findNativeMethod(fullName.c_str(), description.data());
+    if (impl != nullptr)
+    {
+        NativeArgs nativeArgs{};
+        nativeArgs.thread = this;
+        impl(nativeArgs);
+    }
+    else
+    {
+        char errorString[400];
+        snprintf(errorString, 400, "Can't find native method %s %s", fullName.c_str(), description.data());
+        internalError(errorString, NATIVE_METHOD_NOT_FOUND);
+    }
+}
+
+bool VMThread::isSubclass(const ClassInfo* targetClass, ClassInfo* subClass)
+{
+    ClassInfo* currentClass = subClass;
+
+    while (currentClass != nullptr)
+    {
+        if (currentClass->getName() == targetClass->getName())
+        {
+            return true;
+        }
+
+        if (currentClass->superClass == 0)
+        {
+            return false;
+        }
+
+        CPClassInfo* classInfo = currentClass->constantPool->getClassInfo(currentClass->superClass);
+        currentClass = getClass(currentClass->constantPool->getString(classInfo->nameIndex));
+    }
+
+    return false;
+}
+
+FieldInfo* VMThread::findField(ClassInfo* classInfo, const char* name, const char* descriptor)
+{
+    FieldInfo* targetField = classInfo->findField(name, descriptor);
+    if (targetField == nullptr)
+    {
+        ClassInfo* currentClass = classInfo;
+
+        while(currentClass != nullptr && currentClass->superClass != 0)
+        {
+            CPClassInfo* cpClassInfo = currentClass->constantPool->getClassInfo(currentClass->superClass);
+            std::string_view superClassName =  currentClass->constantPool->getString(cpClassInfo->nameIndex);
+            ClassInfo* superClass =  getClass(superClassName);
+            targetField = superClass->findField(name, descriptor);
+            if (targetField != nullptr)
+            {
+                break;
+            }
+            currentClass = superClass;
+        }
+
+        if (targetField == nullptr)
+        {
+            internalError("Static field not found");
+        }
+    }
+
+    return targetField;
 }
 
 void VMThread::initStaticFields(ClassInfo* class_info)

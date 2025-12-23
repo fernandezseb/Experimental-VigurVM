@@ -22,7 +22,7 @@
 void istore(const InstructionInput& input)
 {
     const Variable refVar = input.thread->m_currentFrame->popOperand();
-    VM::get()->checkType(refVar, VariableType_INT, input.thread);
+    refVar.checkType(VariableType_INT);
     const u1 index = input.args[0];
     input.thread->m_currentFrame->localVariables[index] = refVar;
 }
@@ -44,7 +44,7 @@ void astore(const InstructionInput& input)
 void istore_i(const InstructionInput& input)
 {
     const Variable refVar = input.thread->m_currentFrame->popOperand();
-    VM::checkType(refVar, VariableType_INT, input.thread);
+    refVar.checkType(VariableType_INT);
     input.thread->m_currentFrame->localVariables[input.arg] = refVar;
 }
 
@@ -80,9 +80,9 @@ void aastore(const InstructionInput& input)
     const Variable index = currentFrame->popOperand();
     const Variable arrayRef = currentFrame->popOperand();
 
-    VM::checkType(value, VariableType_REFERENCE, input.thread);
-    VM::checkType(index, VariableType_INT, input.thread);
-    VM::checkType(arrayRef, VariableType_REFERENCE, input.thread);
+    value.checkType(VariableType_REFERENCE);
+    index.checkType(VariableType_INT);
+    arrayRef.checkType(VariableType_REFERENCE);
 
     const Array* arrayArr = VM::get()->getHeap()->getArray(arrayRef.data);
 

@@ -31,18 +31,12 @@ public:
     void updateVariableFromVariable(Variable* variable, std::string_view descriptor, Variable operand,
                                     Variable operand2, VMThread* thread);
     static std::vector<Variable> createVariableForDescriptor(std::string_view descriptor);
-    [[nodiscard]] static u1 getDescriptorVarCategory(std::string_view descriptor) noexcept;
     void start(std::string_view commandLineName);
-    void executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* methodInfo,
-                             VMThread* thread);
     void runMain();
     void shutdown();
-    static void checkType(Variable var, VariableType type, VMThread* thread);
 
     VMThread* getVMThreadByObjectRef(u4 objectReference);
     VMThread* getCurrentVMThread();
-    bool isSubclass(VMThread* thread, const ClassInfo* targetClass, ClassInfo* subClass);
-    FieldInfo* findField(ClassInfo* classInfo, const char* name, const char* descriptor, VMThread* thread);
     std::string userDir;
     static VM* create(Configuration config);
     static VM* get();

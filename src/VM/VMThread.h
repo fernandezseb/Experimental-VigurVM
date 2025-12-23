@@ -32,6 +32,9 @@ public:
         m_pthreadId = std::this_thread::get_id();
     }
     ClassInfo* getClass(std::string_view className);
+    void executeNativeMethod(const ClassInfo* targetClass, const MethodInfo* methodInfo);
+    bool isSubclass(const ClassInfo* targetClass, ClassInfo* subClass);
+    FieldInfo* findField(ClassInfo* classInfo, const char* name, const char* descriptor);
     void pushStackFrameWithoutParams(ClassInfo* classInfo, const MethodInfo* methodInfo);
     void pushNativeStackFrame(ClassInfo* classInfo, const MethodInfo* methodInfo, size_t argumentsSize);
     void popFrame();

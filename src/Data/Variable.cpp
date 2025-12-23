@@ -2,11 +2,13 @@
 
 #include "Variable.h"
 
+#include "VM/VM.h"
+#include "Error.h"
 #include "Platform.h"
 
 #include <utility>
 
-u1 getCategoryFromVariableType(const VariableType type)
+u1 getCategoryFromVariableType(const VariableType type) noexcept
 {
     if (type == VariableType_DOUBLE || type == VariableType_LONG)
     {
@@ -16,7 +18,27 @@ u1 getCategoryFromVariableType(const VariableType type)
     return 1;
 }
 
-VariableType fromDescriptor(const std::string_view descriptor)
+u1 getDescriptorVarCategory(const std::string_view descriptor) noexcept
+{
+    {
+        // Longs and doubles use two
+        if (descriptor[0] == 'J' || descriptor[0] == 'D')
+        {
+            return 2;
+        }
+        return 1;
+    }
+}
+
+void Variable::checkType(const VariableType expectedType) const
+{
+    if (this->type != expectedType)
+    {
+        VM::get()->getCurrentVMThread()->internalError("Error: Type mismatch", ErrorCode::TYPE_MISMATCH);
+    }
+}
+
+VariableType fromDescriptor(const std::string_view descriptor) noexcept
 {
     if (descriptor == "I")
     {

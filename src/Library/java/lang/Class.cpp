@@ -96,7 +96,7 @@ JCALL void lib_java_lang_Class_forName0(const NativeArgs& args)
 {
     const StackFrame* currentFrame = args.thread->m_currentFrame;
     const Variable var = currentFrame->localVariables[0];
-    VM::get()->checkType(var, VariableType_REFERENCE, args.thread);
+    var.checkType(VariableType_REFERENCE);
     // TODO: Allocate this string on the memory collected heap
     const std::u16string_view className = VM::get()->getHeap()->getStringContent(var.data);
     std::u16string canonicalClassName(className);
@@ -106,7 +106,7 @@ JCALL void lib_java_lang_Class_forName0(const NativeArgs& args)
 
     // TODO: Check initialize bool
     const Variable var2 = currentFrame->localVariables[1];
-    VM::get()->checkType(var2, VariableType_INT, args.thread);
+    var2.checkType(VariableType_INT);
     if (var2.data == 0u)
     {
         args.thread->internalError("Loading class without initialization is not implemente yet", 44);
@@ -114,7 +114,7 @@ JCALL void lib_java_lang_Class_forName0(const NativeArgs& args)
 
     // TODO: Use custom classloader if defined
     const Variable var3 = currentFrame->localVariables[2];
-    VM::get()->checkType(var3, VariableType_REFERENCE, args.thread);
+    var3.checkType(VariableType_REFERENCE);
     if (var3.data != 0u)
     {
         args.thread->internalError("Use of custom classloader not implemented yet", -3);
@@ -230,11 +230,11 @@ JCALL void lib_java_lang_Class_isAssignableFrom(const NativeArgs& args)
 
     const StackFrame* currentFrame = args.thread->m_currentFrame;
     const Variable var = currentFrame->localVariables[1];
-    VM::get()->checkType(var, VariableType_REFERENCE, args.thread);
+    var.checkType(VariableType_REFERENCE);
     const ClassObject* clsClassObject =  VM::get()->getHeap()->getClassObject(var.data);
 
     // TODO: Add type conversion checking
-    const u4 result = VM::get()->isSubclass(args.thread, thisClassObject->classClassInfo, clsClassObject->classClassInfo);
+    const u4 result = args.thread->isSubclass(thisClassObject->classClassInfo, clsClassObject->classClassInfo);
 
     args.thread->returnVar(Variable{VariableType_INT, result});
 }

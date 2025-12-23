@@ -34,7 +34,7 @@ JCALL void lib_java_lang_ClassLoader_findBuiltinLib(const NativeArgs& args)
     VMThread* thread = args.thread;
     const StackFrame* currentFrame = thread->m_currentFrame;
     const Variable var = currentFrame->localVariables[0];
-    VM::get()->checkType(var, VariableType_REFERENCE, thread);
+    var.checkType(VariableType_REFERENCE);
     args.thread->returnVar(Variable{VariableType_REFERENCE, var.data});
 }
 
