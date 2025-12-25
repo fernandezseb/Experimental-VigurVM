@@ -364,6 +364,7 @@ void VMThread::executeLoop()
 {
     const std::size_t stackSize = m_stack.frames.size();
     const std::size_t depth = stackSize == 0 ? 0 : stackSize-1;
+    uint8_t args[10];
     while (m_stack.frames.size() > depth)
     {
         uint8_t opcode = readUnsignedByte();
@@ -376,9 +377,7 @@ void VMThread::executeLoop()
             {
                 found = true;
                 // printf("%s\n", instruction.name.data());
-                uint8_t* args = 0;
                 if (instruction.args > 0) {
-                    args = (uint8_t*)Platform::allocateMemory(instruction.args, 0);
                     for (u2 currentArg = 0; currentArg < instruction.args; ++currentArg)
                     {
                         args[currentArg] = readUnsignedByte();

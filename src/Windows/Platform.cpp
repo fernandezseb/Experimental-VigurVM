@@ -20,6 +20,9 @@
 #include "CoreUtils.h"
 #include "Error.h"
 
+static long allocatedMemory = 0;
+static long allocations = 0;
+
 void Platform::initialize()
 {
 	HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -60,6 +63,8 @@ void* Platform::allocateMemory(const size_t size, const size_t baseAddress)
 		size, 
 		MEM_COMMIT, 
 		PAGE_READWRITE);
+	allocatedMemory += size;
+	allocations++;
 	if (addr == nullptr)
 	{
 		printf("ERROR allocating memory! \n");
@@ -97,4 +102,6 @@ void Platform::WinAPISetErrorMode(uint32_t errorMode)
 
 void Platform::cleanup()
 {
+	printf("Total allocated memory: %ld\n", allocatedMemory);
+	printf("Total allocations count: %ld\n", allocations);
 }

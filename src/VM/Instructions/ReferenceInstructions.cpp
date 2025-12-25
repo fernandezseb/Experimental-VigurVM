@@ -476,10 +476,10 @@ void anewarray(const InstructionInput& input)
         input.thread->internalError("Error: Can't create an array with negative size");
     }
 
-    std::string *str = new std::string(className);
-    str->insert(0, "L");
-    str->push_back(';');
-    const uint32_t reference = VM::get()->getHeap()->createArray(AT_REFERENCE, size, *str);
+    std::string str = std::string(className);
+    str.insert(0, "L");
+    str.push_back(';');
+    const uint32_t reference = VM::get()->getHeap()->createArray(AT_REFERENCE, size, str);
     const Variable variable{VariableType_REFERENCE, reference};
 
     topFrame->operands.push_back(variable);

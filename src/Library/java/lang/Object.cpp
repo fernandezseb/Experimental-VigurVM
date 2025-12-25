@@ -45,9 +45,9 @@ JCALL void lib_java_lang_Object_getClass(const NativeArgs& args)
     {
         const Array* array = VM::get()->getHeap()->getArray(currentFrame->localVariables[0].data);
         printf("brol");
-        std::string *name = new std::string(array->descriptor);
-        name->insert(0, "[");
-        const u4 classObject = VM::get()->getHeap()->createClassObject(nullptr, name->c_str());
+        std::string name = std::string(array->descriptor);
+        name.insert(0, "[");
+        const u4 classObject = VM::get()->getHeap()->createClassObject(nullptr, name.c_str());
         args.thread->returnVar(Variable{VariableType_REFERENCE, classObject});
     } else
     {
