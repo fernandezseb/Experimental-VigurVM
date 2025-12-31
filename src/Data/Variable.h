@@ -70,34 +70,34 @@ struct vdata
     {
     }
 
-    explicit constexpr vdata(const VariableType type, const vint data) noexcept
+    explicit vdata(const VariableType type, const vint data) noexcept
         : type(type), value(data)
     {
         checkType(VariableType_INT);
     }
 
-    explicit constexpr vdata(const VariableType type, const vlong data) noexcept
+    explicit vdata(const VariableType type, const vlong data) noexcept
         : type(type)
     {
         checkType(VariableType_LONG);
         value.j = data;
     }
 
-    explicit constexpr vdata(const VariableType type, const vreference data) noexcept
+    explicit vdata(const VariableType type, const vreference data) noexcept
         : type(type)
     {
         checkType(VariableType_REFERENCE);
         value.l = data;
     }
 
-    explicit constexpr vdata(const VariableType type, const vfloat data) noexcept
+    explicit vdata(const VariableType type, const vfloat data) noexcept
         : type(type)
     {
         checkType(VariableType_FLOAT);
         value.f = data;
     }
 
-    explicit constexpr vdata(const VariableType type, const vdouble data) noexcept
+    explicit vdata(const VariableType type, const vdouble data) noexcept
         : type(type)
     {
         checkType(VariableType_DOUBLE);
