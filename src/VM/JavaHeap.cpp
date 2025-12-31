@@ -92,8 +92,7 @@ u4 JavaHeap::createObject(ClassInfo* classInfo)
             const std::string_view descriptorText = classInfo->constantPool->getString(fieldInfo->descriptorIndex);
             const VariableType type = fromDescriptor(descriptorText);
             data.dataSize = getCategoryFromVariableType(type);
-            data.highBytes = 0;
-            data.lowBytes = 0;
+            data.value.j = 0;
             data.type = type;
             object->fields[fieldsCount++] = data;
         }
@@ -157,8 +156,7 @@ u4 JavaHeap::createClassObject(ClassInfo* classInfo, std::string_view name)
             const std::string_view descriptorText = classClassInfo->constantPool->getString(fieldInfo->descriptorIndex);
             const VariableType type = fromDescriptor(descriptorText);
             data.dataSize = getCategoryFromVariableType(type);
-            data.highBytes = 0;
-            data.lowBytes = 0;
+            data.value.j = 0;
             data.type = type;
             object->fields[fieldsCount++] = data;
         }
@@ -199,7 +197,7 @@ u4 JavaHeap::createString(const char* utf8String) {
         free((void*)u16String.data());
     }
 
-    strObject->fields[0].data = arrId;
+    strObject->fields[0].value.l = arrId;
     strObject->fields[0].type = VariableType_REFERENCE;
 
     return strObjectId;
@@ -230,7 +228,7 @@ Reference* JavaHeap::getReference(u4 id) const
     return objects[id];
 }
 
-ClassObject* JavaHeap::getClassObject(uint32_t id) const
+ClassObject* JavaHeap::getClassObject(vreference id) const
 {
     if (id == 0)
     {
@@ -289,7 +287,7 @@ u4 JavaHeap::getString(const char* utf8String) const
             const Object* obj = static_cast<const Object*>(ref);
             if (obj->classInfo->getName() == std::string_view{"java/lang/String"})
             {
-                const u4 charArrRef =  obj->fields[0].data;
+                const vreference charArrRef =  obj->fields[0].value.l;
                 if (charArrRef == 0)
                 {
                     printf("WARN: String contains null reference to characters");
@@ -335,7 +333,7 @@ std::u16string_view JavaHeap::getStringContent(const Object* stringObject) const
         Platform::exitProgram(3);
     }
 
-    const u4 arrayRefId = stringObject->fields[0].data;
+    const u4 arrayRefId = stringObject->fields[0].value.l;
     const Array* array = getArray(arrayRefId);
 
     char16_t* charArray = reinterpret_cast<char16_t*>(array->data);
@@ -391,7 +389,7 @@ void JavaHeap::printStringPool()
             if (obj->classInfo->getName() == std::string_view{"java/lang/String"})
             {
                 printf("|%d|", currentObj);
-                u4 charArrRef =  obj->fields[0].data;
+                u4 charArrRef =  obj->fields[0].value.l;
                 const Array* arr = getArray(charArrRef);
                 for (u4 currentIndex = 0; currentIndex < arr->length; ++currentIndex)
                 {
@@ -429,15 +427,13 @@ FieldData* Object::getField(const char* name, const char* descriptor) const
 
 const Object* Object::getObject(const u4 fieldIndex) const
 {
-    return VM::get()->getHeap()->getObject(fields[fieldIndex].data);
+    return VM::get()->getHeap()->getObject(fields[fieldIndex].value.l);
 }
 
 const i8 Object::getLong(u4 fieldIndex) const
 {
     const FieldData fieldData = fields[fieldIndex];
-    const u4 highBytes = fieldData.highBytes;
-    const u4 lowBytes = fieldData.lowBytes;
-    const i8 longValue = ((i8)highBytes << 32) + (i8)lowBytes;
+    const vlong longValue = fieldData.value.j;
     return longValue;
 }
 

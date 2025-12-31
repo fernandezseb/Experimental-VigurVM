@@ -18,25 +18,18 @@
 
 JCALL void lib_java_lang_Double_doubleToRawLongBits(const NativeArgs& args)
 {
-    const Variable highByte = args.thread->m_currentFrame->localVariables[1];
-    const Variable lowByte = args.thread->m_currentFrame->localVariables[0];
-    highByte.checkType(VariableType_DOUBLE);
-    lowByte.checkType(VariableType_DOUBLE);
+    const vdata var = args.thread->m_currentFrame->localVariables[0];
+    vdouble d = var.getDouble();
 
     args.thread->returnVar(
-        Variable{VariableType_LONG, highByte.data},
-        Variable{VariableType_LONG, lowByte.data}
+        vdata(VariableType_LONG, std::bit_cast<vlong>(d))
         );
 }
 
 JCALL void lib_java_lang_Double_longBitsToDouble(const NativeArgs& args) {
-    const Variable highByte = args.thread->m_currentFrame->localVariables[1];
-    const Variable lowByte = args.thread->m_currentFrame->localVariables[0];
-    highByte.checkType(VariableType_LONG);
-    lowByte.checkType(VariableType_LONG);
-
+    const vdata var = args.thread->m_currentFrame->localVariables[0];
+    vlong l = var.getLong();
     args.thread->returnVar(
-        Variable{VariableType_DOUBLE, highByte.data},
-        Variable{VariableType_DOUBLE, lowByte.data}
+        vdata{VariableType_DOUBLE, std::bit_cast<vdouble>(l)}
         );
 }

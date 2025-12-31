@@ -12,17 +12,15 @@ struct NativeArgs
     [[nodiscard]] const Object* getObject(const int argIndex) const
     {
         const StackFrame* currentFrame = thread->m_currentFrame;
-        const Variable var = currentFrame->localVariables[argIndex];
-        var.checkType(VariableType_REFERENCE);
-        return VM::get()->getHeap()->getObject(var.data);
+        const vdata var = currentFrame->localVariables[argIndex];
+        return VM::get()->getHeap()->getObject(var.getReference());
     }
 
     [[nodiscard]] const ClassObject* getClassObject(const int argIndex) const
     {
         const StackFrame* currentFrame = thread->m_currentFrame;
-        const Variable var = currentFrame->localVariables[argIndex];
-        var.checkType(VariableType_REFERENCE);
-        return VM::get()->getHeap()->getClassObject(var.data);
+        const vdata var = currentFrame->localVariables[argIndex];
+        return VM::get()->getHeap()->getClassObject(var.getReference());
     }
 
     [[nodiscard]] const Object* getThisObjectReference() const
@@ -38,17 +36,15 @@ struct NativeArgs
     [[nodiscard]] i4 getInt(const int argIndex) const
     {
         const StackFrame* currentFrame = thread->m_currentFrame;
-        const Variable intVar = currentFrame->localVariables[argIndex];
-        intVar.checkType(VariableType_INT);
-        return static_cast<i4>(intVar.data);
+        const vdata intVar = currentFrame->localVariables[argIndex];
+        return intVar.getInt();
     }
 
     [[nodiscard]] const Array* getArray(const int argIndex) const
     {
         const StackFrame* currentFrame = thread->m_currentFrame;
-        const Variable arrayVar = currentFrame->localVariables[argIndex];
-        arrayVar.checkType(VariableType_REFERENCE);
-        const Array* array = VM::get()->getHeap()->getArray(arrayVar.data);
+        const vdata arrayVar = currentFrame->localVariables[argIndex];
+        const Array* array = VM::get()->getHeap()->getArray(arrayVar.getReference());
         return array;
     }
 };

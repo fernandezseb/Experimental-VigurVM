@@ -11,9 +11,9 @@ class ConstantPool;
 
 struct StackFrame {
     // Local variable array
-    std::vector<Variable> localVariables;
+    std::vector<vdata> localVariables;
     // operand stack, where long and double are two values
-    std::vector<Variable> operands;
+    std::vector<vdata> operands;
 
     // reference to runtime constant pool, for the type of the current method
     ConstantPool* constantPool{};
@@ -29,54 +29,53 @@ struct StackFrame {
     std::string_view methodName{};
     bool isNative = false;
 
-    Variable popOperand()
+    vdata popOperand()
     {
         if (operands.empty())
         {
             fprintf(stderr, "Error: No operands on stack found!\n");
             Platform::exitProgram(78);
         }
-        const Variable var = operands.back();
+        const vdata var = operands.back();
         operands.pop_back();
         return var;
     }
 
     i8 popLong()
     {
-        const Variable varlowByte = popOperand();
-        const Variable varHighByte = popOperand();
-
-        const u8 u1 = ((static_cast<u8>(varHighByte.data) << 32) | static_cast<u8>(varlowByte.data));
-        return std::bit_cast<i8>(u1);
+        vdata first = popOperand();
+        vdata second = popOperand();
+        return first.getLong();
     }
 
-    void pushLong(i8 value)
+    void pushLong(vlong value)
     {
-        const auto parts = reinterpret_cast<u4*>(&value);
-        operands.emplace_back(VariableType_LONG, parts[1]);
-        operands.emplace_back(VariableType_LONG, parts[0]);
+        // TODO: Check if we can just push 1 long instead of 2 and still be compatible
+        // You can't because the vars are indexed
+        operands.emplace_back(VariableType_LONG, value);
+        operands.emplace_back(VariableType_LONG, value);
     }
 
     i4 popInt()
     {
-        const Variable var = popOperand();
-        return std::bit_cast<i4>(var.data);
+        const vdata var = popOperand();
+        return var.getInt();
     }
 
-    void pushInt(const i4 value)
+    void pushInt(const vint value)
     {
-        operands.emplace_back(VariableType_INT, std::bit_cast<u4>(value));
+        operands.emplace_back(VariableType_INT, value);
     }
 
     float popFloat()
     {
-        const Variable var = popOperand();
-        return std::bit_cast<float>(var.data);
+        const vdata var = popOperand();
+        return var.getFloat();
     }
 
-    void pushFloat(const float value)
+    void pushFloat(const vfloat value)
     {
-        operands.emplace_back(VariableType_FLOAT, std::bit_cast<u4>(value));
+        operands.emplace_back(VariableType_FLOAT, value);
     }
 
     void pushObject(const u4 objectRef)
@@ -84,7 +83,7 @@ struct StackFrame {
         operands.emplace_back(VariableType_REFERENCE, objectRef);
     }
 
-    [[nodiscard]] Variable peekOperand() const
+    [[nodiscard]] vdata peekOperand() const
     {
         return operands.back();
     }

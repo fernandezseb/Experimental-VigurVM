@@ -23,21 +23,19 @@ JCALL void lib_java_io_FileDescriptor_initIDs(const NativeArgs& args)
 JCALL void lib_java_io_FileDescriptor_set(const NativeArgs& args)
 {
     const StackFrame* currentFrame = args.thread->m_currentFrame;
-    const Variable var = currentFrame->localVariables[0];
+    const vdata var = currentFrame->localVariables[0];
 
     u8 handle = 0u;
-    switch (var.data)
+    switch (var.getInt())
     {
     case 0: // stdin
     case 1: // stdout
     case 2: // stderr
-        handle = var.data;
+        handle = var.getInt();
         break;
     default:
         args.thread->internalError("Filedescriptor not found", 9);
     }
 
-    const auto parts = reinterpret_cast<u4*>(&handle);
-    args.thread->returnVar(Variable{VariableType_LONG, parts[1]});
-    args.thread->returnVar(Variable{VariableType_LONG, parts[0]});
+    args.thread->returnVar(vdata(VariableType_LONG, static_cast<vlong>(handle)));
 }

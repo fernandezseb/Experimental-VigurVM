@@ -32,14 +32,14 @@ JCALL void lib_java_lang_System_registerNatives(const NativeArgs& args)
 JCALL void lib_java_lang_System_arraycopy(const NativeArgs& args)
 {
     const StackFrame* currentFrame = args.thread->m_currentFrame;
-    const Variable srcObjectRef = currentFrame->localVariables[0];
-    const Variable srcPosVar = currentFrame->localVariables[1];
-    const Variable dstObjectRef = currentFrame->localVariables[2];
-    const Variable dstPosVar = currentFrame->localVariables[3];
-    const Variable lengthVar = currentFrame->localVariables[4];
+    const vdata srcObjectRef = currentFrame->localVariables[0];
+    const vdata srcPosVar = currentFrame->localVariables[1];
+    const vdata dstObjectRef = currentFrame->localVariables[2];
+    const vdata dstPosVar = currentFrame->localVariables[3];
+    const vdata lengthVar = currentFrame->localVariables[4];
 
-    const Array* srcArray = VM::get()->getHeap()->getArray(srcObjectRef.data);
-    const Array* dstArray = VM::get()->getHeap()->getArray(dstObjectRef.data);
+    const Array* srcArray = VM::get()->getHeap()->getArray(srcObjectRef.getReference());
+    const Array* dstArray = VM::get()->getHeap()->getArray(dstObjectRef.getReference());
 
     // TODO: De-duplicate this code
     u1 bytes = 4;
@@ -54,24 +54,24 @@ JCALL void lib_java_lang_System_arraycopy(const NativeArgs& args)
 
     // TODO: Do checks before copying
 
-    memcpy(dstArray->data+(dstPosVar.data*bytes),
-        srcArray->data+(srcPosVar.data*bytes),
-        lengthVar.data * bytes);
+    memcpy(dstArray->data+(dstPosVar.getInt()*bytes),
+        srcArray->data+(srcPosVar.getInt()*bytes),
+        lengthVar.getInt() * bytes);
 }
 
-static void setProperty(const NativeArgs& args, Variable propertiesObjectRef, ClassInfo* classInfo, const MethodInfo* methodInfo, const char* key, const char* value)
+static void setProperty(const NativeArgs& args, vdata propertiesObjectRef, ClassInfo* classInfo, const MethodInfo* methodInfo, const char* key, const char* value)
 {
     args.thread->pushStackFrameWithoutParams(classInfo, methodInfo);
     args.thread->m_currentFrame->localVariables[0] = propertiesObjectRef;
-    args.thread->m_currentFrame->localVariables[1] = Variable{VariableType_REFERENCE,VM::get()->getHeap()->createString(key)};
-    args.thread->m_currentFrame->localVariables[2] = Variable{VariableType_REFERENCE,VM::get()->getHeap()->createString(value)};
+    args.thread->m_currentFrame->localVariables[1] = vdata(VariableType_REFERENCE,VM::get()->getHeap()->createString(key));
+    args.thread->m_currentFrame->localVariables[2] = vdata(VariableType_REFERENCE,VM::get()->getHeap()->createString(value));
     args.thread->executeLoop();
 }
 
 JCALL void lib_java_lang_System_initProperties(const NativeArgs& args)
 {
-    const Variable propertiesObjectRef = args.thread->m_currentFrame->localVariables[0];
-    const Object* properties = VM::get()->getHeap()->getObject(propertiesObjectRef.data);
+    const vdata propertiesObjectRef = args.thread->m_currentFrame->localVariables[0];
+    const Object* properties = VM::get()->getHeap()->getObject(propertiesObjectRef.getReference());
     const MethodInfo* entryPoint = properties->classInfo->findMethodWithNameAndDescriptor("setProperty", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Object;");
 
     setProperty(args, propertiesObjectRef, properties->classInfo, entryPoint, "file.encoding", "Cp1252");
@@ -90,35 +90,34 @@ JCALL void lib_java_lang_System_initProperties(const NativeArgs& args)
 JCALL void lib_java_lang_System_setIn0(const NativeArgs& args)
 {
     const ClassInfo* classInfo = args.thread->getClass("java/lang/System");
-    const FieldInfo* field = classInfo->findField("in", "Ljava/io/InputStream;");
-    field->staticData->data = args.thread->m_currentFrame->localVariables[0].data;
+    FieldInfo* field = classInfo->findField("in", "Ljava/io/InputStream;");
+    field->staticData.value.l = args.thread->m_currentFrame->localVariables[0].getReference();
 }
 
 JCALL void lib_java_lang_System_setOut0(const NativeArgs& args)
 {
     const ClassInfo* classInfo = args.thread->getClass("java/lang/System");
-    const FieldInfo* field = classInfo->findField("out", "Ljava/io/PrintStream;");
-    field->staticData->data = args.thread->m_currentFrame->localVariables[0].data;
+    FieldInfo* field = classInfo->findField("out", "Ljava/io/PrintStream;");
+    field->staticData.value.l = args.thread->m_currentFrame->localVariables[0].getReference();
 }
 
 JCALL void lib_java_lang_System_setErr0(const NativeArgs& args)
 {
     const ClassInfo* classInfo = args.thread->getClass("java/lang/System");
-    const FieldInfo* field = classInfo->findField("err", "Ljava/io/PrintStream;");
-    field->staticData->data = args.thread->m_currentFrame->localVariables[0].data;
+    FieldInfo* field = classInfo->findField("err", "Ljava/io/PrintStream;");
+    field->staticData.value.l = args.thread->m_currentFrame->localVariables[0].getReference();
 }
 
 JCALL void lib_java_lang_System_currentTimeMillis(const NativeArgs &args) {
     using namespace std::chrono;
     const u8 millis = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-    const auto parts = reinterpret_cast<const u4*>(&millis);
-    args.thread->returnVar(Variable{VariableType_LONG, parts[1]},
-        Variable{VariableType_LONG, parts[0]});
+    const vlong time = millis;
+    args.thread->returnVar(vdata(VariableType_LONG, time));
     printf("");
 }
 
 JCALL void lib_java_lang_System_mapLibraryName(const NativeArgs &args) {
-    Variable var = args.thread->m_currentFrame->localVariables[0];
+    vdata var = args.thread->m_currentFrame->localVariables[0];
     // TODO: Append '.dll' for Windows
-    args.thread->returnVar(Variable{VariableType_REFERENCE, var.data});
+    args.thread->returnVar(vdata{VariableType_REFERENCE, var.getReference()});
 }

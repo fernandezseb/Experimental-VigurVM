@@ -16,7 +16,7 @@ public:
 	uint16_t descriptorIndex;
 	bool isPrivate;
 	AttributeCollection* attributes;
-	Variable* staticData;
+	vdata staticData;
 
 	[[nodiscard]] bool isStatic() const {
 		return ((accessFlags & ACC_STATIC) != 0);
@@ -79,7 +79,7 @@ public:
 	std::string_view sourceFile;
 	Memory* memory;
 	// Runtime data
-	std::span<Variable> staticFields; // An array of data for all static fields, the field also has a copy of this data (could be 1 or 2 items)
+	std::span<vdata> staticFields; // An array of data for all static fields, the field also has a copy of this data (could be 1 or 2 items)
 	uint16_t staticFieldsCount; // Total amount of static fields
 public:
 	[[nodiscard]] bool isPublic() const {

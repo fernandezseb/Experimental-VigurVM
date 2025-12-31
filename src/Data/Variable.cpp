@@ -30,7 +30,7 @@ u1 getDescriptorVarCategory(const std::string_view descriptor) noexcept
     }
 }
 
-void Variable::checkType(const VariableType expectedType) const
+void vdata::checkType(const VariableType expectedType) const
 {
     if (this->type != expectedType)
     {

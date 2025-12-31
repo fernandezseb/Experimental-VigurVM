@@ -36,11 +36,11 @@ void wide(const InstructionInput& input)
         {
             u2 index = input.thread->readUnsignedShort();
             i2 constant = readShort(input.thread);
-            Variable* var =  &input.thread->m_currentFrame->localVariables[index];
+            vdata* var =  &input.thread->m_currentFrame->localVariables[index];
             // var->data += constData;
-            i4 currentInt = std::bit_cast<i4>(var->data);
+            i4 currentInt = var->getInt();
             currentInt += constant;
-            var->data = std::bit_cast<u4>(currentInt);
+            var->value.i = currentInt;
             printf("");
             break;
         }
@@ -53,8 +53,8 @@ void ifnull(const InstructionInput& input)
 {
     const i2 branchByte = readShort(input.thread);
     // uint8_t byte = thread->currentMethod->code->code[thread->pc-3+branchByte];
-    const Variable ref = input.thread->m_currentFrame->popOperand();
-    if (ref.data == 0) {
+    const vdata ref = input.thread->m_currentFrame->popOperand();
+    if (ref.getReference() == 0u) {
         input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
 }
@@ -63,8 +63,8 @@ void ifnonnull(const InstructionInput& input)
 {
     const i2 branchByte = readShort(input.thread);
     // uint8_t byte = thread->currentMethod->code->code[thread->pc-3+branchByte];
-    const Variable ref = input.thread->m_currentFrame->popOperand();
-    if (ref.data != 0) {
+    const vdata ref = input.thread->m_currentFrame->popOperand();
+    if (ref.getReference() != 0) {
         input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
 }

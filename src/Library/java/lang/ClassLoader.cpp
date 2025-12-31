@@ -33,20 +33,19 @@ JCALL void lib_java_lang_ClassLoader_findBuiltinLib(const NativeArgs& args)
 {
     VMThread* thread = args.thread;
     const StackFrame* currentFrame = thread->m_currentFrame;
-    const Variable var = currentFrame->localVariables[0];
-    var.checkType(VariableType_REFERENCE);
-    args.thread->returnVar(Variable{VariableType_REFERENCE, var.data});
+    const vdata var = currentFrame->localVariables[0];
+    args.thread->returnVar(vdata(VariableType_REFERENCE, var.getReference()));
 }
 
 JCALL void lib_java_lang_ClassLoader$NativeLibrary_load(const NativeArgs& args)
 {
-    Variable builtin = args.thread->m_currentFrame->localVariables[2];
-    if (builtin.data)
+    vdata builtin = args.thread->m_currentFrame->localVariables[2];
+    if (builtin.getInt())
     {
         // TODO: Set the loaded boolean of the NativeLibrary instance to true
         const Object* object = args.getThisObjectReference();
         FieldData& data = object->fields[5];
-        data.data = 1;
+        data.value.i = 1;
         printf("");
     } else
     {

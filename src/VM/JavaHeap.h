@@ -50,12 +50,7 @@ struct FieldData {
     uint16_t nameIndex;
     uint16_t descriptorIndex;
     VariableType type{VariableType_UNDEFINED};
-    union
-    {
-        u4 data;
-        u4 lowBytes;
-    };
-    u4 highBytes;
+    vvalue value;
 };
 
 class Object : public Reference {
@@ -117,7 +112,7 @@ public:
 
     [[nodiscard]] const Object* getObject(uint32_t id) const;
     [[nodiscard]] Reference* getReference(u4 id) const;
-    [[nodiscard]] ClassObject* getClassObject(uint32_t id) const;
+    [[nodiscard]] ClassObject* getClassObject(vreference id) const;
     [[nodiscard]] const Object* getChildObject(uint32_t id, ClassInfo* classInfo);
     [[nodiscard]] const Array* getArray(u4 id) const;
     [[nodiscard]] u4 getString(const char* utf8String) const;

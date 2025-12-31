@@ -20,6 +20,23 @@ enum VariableType
     VariableType_DOUBLE
 };
 
+typedef i4 vint;
+typedef i8 vlong;
+typedef u4 vreference;
+typedef double vdouble;
+typedef float vfloat;
+
+union vvalue
+{
+    vint i;
+    vlong j;
+    vreference l;
+    vdouble d;
+    vfloat f;
+};
+
+
+
 [[nodiscard]] VariableType fromDescriptor(std::string_view descriptor) noexcept;
 [[nodiscard]] u1 getCategoryFromVariableType(VariableType type) noexcept;
 [[nodiscard]] u1 getDescriptorVarCategory(std::string_view descriptor) noexcept;
@@ -38,19 +55,53 @@ enum ArrayType : char {
     AT_END
 };
 
-struct Variable
+struct vdata
 {
     VariableType type;
-    u4 data;
+    vvalue value;
 
-    explicit constexpr Variable(const VariableType type) noexcept
-        : type(type), data(0)
+    explicit constexpr vdata(const VariableType type) noexcept
+        : type(type), value(0)
     {
     }
 
-    explicit constexpr Variable(const VariableType type, const u4 data) noexcept
-        : type(type), data(data)
+    explicit constexpr vdata(const VariableType type, const vvalue value) noexcept
+        : type(type), value(value)
     {
+    }
+
+    explicit constexpr vdata(const VariableType type, const vint data) noexcept
+        : type(type), value(data)
+    {
+        checkType(VariableType_INT);
+    }
+
+    explicit constexpr vdata(const VariableType type, const vlong data) noexcept
+        : type(type)
+    {
+        checkType(VariableType_LONG);
+        value.j = data;
+    }
+
+    explicit constexpr vdata(const VariableType type, const vreference data) noexcept
+        : type(type)
+    {
+        checkType(VariableType_REFERENCE);
+        value.l = data;
+    }
+
+    explicit constexpr vdata(const VariableType type, const vfloat data) noexcept
+        : type(type)
+    {
+        checkType(VariableType_FLOAT);
+        value.f = data;
+    }
+
+    explicit constexpr vdata(const VariableType type, const vdouble data) noexcept
+        : type(type)
+    {
+        checkType(VariableType_DOUBLE);
+        value.f = data;
     }
 
     [[nodiscard]] constexpr u1 getCategory() const noexcept
@@ -61,6 +112,36 @@ struct Variable
         }
 
         return 1;
+    }
+
+    [[nodiscard]] vreference getReference() const noexcept
+    {
+        checkType(VariableType_REFERENCE);
+        return value.l;
+    }
+
+    [[nodiscard]] vint getInt() const noexcept
+    {
+        checkType(VariableType_INT);
+        return value.i;
+    }
+
+    [[nodiscard]] vlong getLong() const noexcept
+    {
+        checkType(VariableType_LONG);
+        return value.j;
+    }
+
+    [[nodiscard]] vdouble getDouble() const noexcept
+    {
+        checkType(VariableType_DOUBLE);
+        return value.d;
+    }
+
+    [[nodiscard]] vfloat getFloat() const noexcept
+    {
+        checkType(VariableType_FLOAT);
+        return value.f;
     }
 
     void checkType(VariableType type) const;

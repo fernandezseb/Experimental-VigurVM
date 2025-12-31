@@ -23,15 +23,11 @@
 
 void i2l(const InstructionInput& input)
 {
-    const Variable valueVar = input.thread->m_currentFrame->popOperand();
-    valueVar.checkType(VariableType_INT);
-    const i4 intValue = std::bit_cast<i4>(valueVar.data);
-    const i8 l = intValue;
-    const u4* bytes = (u4*)(&l);
-    const u4 highByte = bytes[1];
-    const u4 lowByte = bytes[0];
-    input.thread->m_currentFrame->operands.emplace_back(Variable{VariableType_LONG, highByte});
-    input.thread->m_currentFrame->operands.emplace_back(Variable{VariableType_LONG, lowByte});
+    const vdata valueVar = input.thread->m_currentFrame->popOperand();
+    const vint intValue = valueVar.getInt();
+    const vlong l = intValue;
+    input.thread->m_currentFrame->operands.emplace_back(vdata{VariableType_LONG, l});
+    input.thread->m_currentFrame->operands.emplace_back(vdata{VariableType_LONG, l});
 }
 
 void i2f(const InstructionInput& input)

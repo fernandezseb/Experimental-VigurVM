@@ -23,6 +23,7 @@
 
 #include <string>
 #include <variant>
+#include <utility>
 
 VM* VM::m_vm = nullptr;
 
@@ -92,7 +93,7 @@ u4 VM::createThreadGroupObject(VMThread* thread)
     const Object* threadGroupObject = m_heap.getObject(threadGroupReference);
 
     FieldData* maxPrioField = threadGroupObject->getField("maxPriority", "I");
-    maxPrioField->data = 10;
+    maxPrioField->value.i = 10;
 
 
     return threadGroupReference;
@@ -105,63 +106,50 @@ u4 VM::createThreadObject(VMThread* thread, const u4 threadGroupReference)
     const Object* threadObject = m_heap.getObject(objectReference);
 
     FieldData* groupField = threadObject->getField("group", "Ljava/lang/ThreadGroup;");
-    groupField->data = threadGroupReference;
+    groupField->value.l = threadGroupReference;
 
     FieldData* priorityField = threadObject->getField("priority", "I");
-    priorityField->data = thread->priority;
+    priorityField->value.i = thread->priority;
 
     return objectReference;
 }
 
-std::vector<Variable> VM::createVariableForDescriptor(std::string_view descriptor)
+// TODO: Refactor this with simpler creation
+vdata VM::createVariableForDescriptor(std::string_view descriptor)
 {
-    std::vector<Variable> variables;
     if (descriptor == "I")
     {
-        constexpr Variable variable{VariableType_INT};
-        variables.push_back(variable);
+        return vdata(VariableType_INT);
     } else if (descriptor ==  "Z")
     {
-        constexpr Variable variable{VariableType_INT};
-        variables.push_back(variable);
+        return vdata(VariableType_INT);
     } else if (descriptor == "B")
     {
-        constexpr Variable variable{VariableType_INT};
-        variables.push_back(variable);
+        return vdata(VariableType_INT);
     } else if (descriptor == "J")
     {
-        constexpr Variable variableLow{VariableType_LONG};
-        constexpr Variable variableHigh{VariableType_LONG};
-        variables.push_back(variableHigh);
-        variables.push_back(variableLow);
+        return vdata(VariableType_LONG);
     } else if (descriptor ==  "D")
     {
-        constexpr Variable variableLow{VariableType_DOUBLE};
-        constexpr Variable variableHigh{VariableType_DOUBLE};
-        variables.push_back(variableHigh);
-        variables.push_back(variableLow);
+        return vdata(VariableType_DOUBLE);
     } else if (descriptor[0] == '[')
     {
-        constexpr Variable variable{VariableType_REFERENCE};
-        variables.push_back(variable);
+        return vdata(VariableType_REFERENCE);
     } else if (descriptor[0] == 'L')
     {
-        constexpr Variable variable{VariableType_REFERENCE};
-        variables.push_back(variable);
+        return vdata(VariableType_REFERENCE);
     } else if (descriptor[0] == 'F') {
-        constexpr Variable variable{VariableType_FLOAT};
-        variables.push_back(variable);
+        return vdata(VariableType_FLOAT);
     } else if (descriptor[0] == 'C')
     {
-        constexpr Variable variable{VariableType_INT};
-        variables.push_back(variable);
+        return vdata(VariableType_INT);
     }
     else
     {
         fprintf(stderr, "Error: Couldn't construct data for descriptor type: %s\n", descriptor.data());
         Platform::exitProgram(7);
+        std::unreachable();
     }
-    return variables;
 }
 
 
@@ -171,43 +159,41 @@ JavaHeap* VM::getHeap()
 }
 
 
-void VM::updateVariableFromVariable(Variable* variable, std::string_view descriptor, Variable operand, Variable operand2, VMThread* thread)
+void VM::updateVariableFromVariable(vdata* variable, std::string_view descriptor, vdata operand, VMThread* thread)
 {
     if (descriptor ==  "I")
     {
         variable->checkType(VariableType_INT);
         operand.checkType(VariableType_INT);
 
-        variable->data = operand.data;
+        variable->value.i = operand.value.i;
     } else if (descriptor ==  "C")
     {
         variable->checkType(VariableType_INT);
-        // checkType(operand, VariableType_CHAR, thread);
+        // checkType(operand, VariableType_CHAR, thread); TODO: Enable
 
-        variable->data = operand.data;
+        variable->value.i = operand.value.i;
     } else if (descriptor ==  "Z")
     {
         variable->checkType(VariableType_INT);
 
-        variable->data = operand.data;
+        variable->value.i = operand.value.i;
     } else if (descriptor[0] == '[' || descriptor[0] == 'L') {
 
         variable->checkType(VariableType_REFERENCE);
         operand.checkType(VariableType_REFERENCE);
 
-        variable->data = operand.data;
+        variable->value.l = operand.value.l;
     } else if (descriptor[0] == 'J')
     {
         variable->checkType(VariableType_LONG);
         operand.checkType(VariableType_LONG);
-        variable[0].data = operand2.data;
-        variable[1].data = operand.data;
+        variable->value.j = operand.value.j;
     } else if (descriptor[0] == 'D')
     {
         variable->checkType(VariableType_DOUBLE);
         operand.checkType(VariableType_DOUBLE);
-        variable[0].data = operand2.data;
-        variable[1].data = operand.data;
+        variable->value.d = operand.value.d;
     } else
     {
         char buffer[200];
@@ -227,7 +213,7 @@ void VM::createArgsArray(const VMThread* thread)
         const u4 stringRef = m_heap.createString(arg.data());
         arrayData[currentArg++] = stringRef;
     }
-    thread->m_currentFrame->localVariables[0] = Variable{VariableType_REFERENCE, arrayRef};
+    thread->m_currentFrame->localVariables[0] = vdata{VariableType_REFERENCE, arrayRef};
 
 }
 
@@ -284,7 +270,7 @@ void VM::shutdown()
     Platform::cleanup();
 }
 
-VMThread* VM::getVMThreadByObjectRef(const u4 objectReference)
+VMThread* VM::getVMThreadByObjectRef(const vreference objectReference)
 {
     for (VMThread& thread : m_threads)
     {

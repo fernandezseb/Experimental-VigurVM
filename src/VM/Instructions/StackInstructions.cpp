@@ -31,14 +31,14 @@ void pop2(const InstructionInput& input)
 
 void dup(const InstructionInput& input)
 {
-    const Variable top = input.thread->m_currentFrame->popOperand();
+    const vdata top = input.thread->m_currentFrame->popOperand();
     input.thread->m_currentFrame->operands.push_back(top);
     input.thread->m_currentFrame->operands.push_back(top);
 }
 
 void dup_x1(const InstructionInput& input) {
-    const Variable value1 = input.thread->m_currentFrame->popOperand();
-    const Variable value2 = input.thread->m_currentFrame->popOperand();
+    const vdata value1 = input.thread->m_currentFrame->popOperand();
+    const vdata value2 = input.thread->m_currentFrame->popOperand();
     input.thread->m_currentFrame->operands.push_back(value1);
     input.thread->m_currentFrame->operands.push_back(value2);
     input.thread->m_currentFrame->operands.push_back(value1);
@@ -46,8 +46,8 @@ void dup_x1(const InstructionInput& input) {
 
 void dup2(const InstructionInput& input)
 {
-    const Variable value1 = input.thread->m_currentFrame->popOperand();
-    const Variable value2 = input.thread->m_currentFrame->popOperand();
+    const vdata value1 = input.thread->m_currentFrame->popOperand();
+    const vdata value2 = input.thread->m_currentFrame->popOperand();
     input.thread->m_currentFrame->operands.push_back(value2);
     input.thread->m_currentFrame->operands.push_back(value1);
     input.thread->m_currentFrame->operands.push_back(value2);

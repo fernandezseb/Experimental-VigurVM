@@ -28,9 +28,8 @@ class VM
 {
 public:
     explicit VM(Configuration configuration) noexcept;
-    void updateVariableFromVariable(Variable* variable, std::string_view descriptor, Variable operand,
-                                    Variable operand2, VMThread* thread);
-    static std::vector<Variable> createVariableForDescriptor(std::string_view descriptor);
+    void updateVariableFromVariable(vdata* variable, std::string_view descriptor, vdata operand, VMThread* thread);
+    static vdata createVariableForDescriptor(std::string_view descriptor);
     void start(std::string_view commandLineName);
     void runMain();
     void shutdown();

@@ -33,19 +33,19 @@ JCALL void lib_java_lang_Thread_setPriority0(const NativeArgs& args)
 {
     const Object* threadObject = args.getThisObjectReference();
     const StackFrame* currentFrame = args.thread->m_currentFrame;
-    const Variable argument = currentFrame->localVariables[1];
+    const vdata argument = currentFrame->localVariables[1];
     argument.checkType(VariableType_INT);
 
     FieldData* field = threadObject->getField("priority", "I");
-    field->data = argument.data;
+    field->value.i = argument.getInt();
 }
 
 JCALL void lib_java_lang_Thread_isAlive(const NativeArgs& args)
 {
     const StackFrame* currentFrame = args.thread->m_currentFrame;
-    const Variable var = currentFrame->localVariables[0];
+    const vdata var = currentFrame->localVariables[0];
     var.checkType(VariableType_REFERENCE);
-    const u4 objectReference = var.data;
+    const vreference objectReference = var.getReference();
     const VMThread* vmThread =  VM::get()->getVMThreadByObjectRef(objectReference);
 
     bool alive = false;
@@ -62,7 +62,7 @@ JCALL void lib_java_lang_Thread_start0(const NativeArgs& args)
 {
     const Object* threadObject = args.getThisObjectReference();
     const FieldData* runnableField = threadObject->getField("target", "Ljava/lang/Runnable;");
-    if (runnableField->data != 0)
+    if (runnableField->value.l != 0)
     {
         args.thread->internalError("Running of Runnables, not implemented yet", 45);
     } else

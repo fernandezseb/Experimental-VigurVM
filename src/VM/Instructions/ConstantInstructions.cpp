@@ -28,60 +28,56 @@ void nop(const InstructionInput& input)
 
 void aconst_null(const InstructionInput& input)
 {
-    constexpr Variable reference{VariableType_REFERENCE};
+    constexpr vdata reference{VariableType_REFERENCE};
     input.thread->m_currentFrame->operands.push_back(reference);
 }
 
 void iconst_i(const InstructionInput& input)
 {
-    const Variable variable{VariableType_INT,
-        std::bit_cast<u4>(static_cast<int32_t>(input.arg))};
+    const vdata variable{VariableType_INT,
+        static_cast<int32_t>(input.arg)};
     input.thread->m_currentFrame->operands.push_back(variable);
 }
 
 void lconst_i(const InstructionInput& input)
 {
-    constexpr Variable variableHigh{VariableType_LONG};
-    const Variable variableLow{VariableType_LONG,
-        std::bit_cast<u4>(static_cast<int32_t>(input.arg))};
-    input.thread->m_currentFrame->operands.push_back(variableHigh);
-    input.thread->m_currentFrame->operands.push_back(variableLow);
+    const vdata variable(VariableType_LONG,
+        static_cast<vlong>(input.arg));
+    input.thread->m_currentFrame->operands.push_back(variable);
+    input.thread->m_currentFrame->operands.push_back(variable);
 }
 
 void fconst_i(const InstructionInput& input)
 {
     const float f = input.arg;
-    const Variable variable{VariableType_FLOAT, std::bit_cast<u4>(f)};
+    const vdata variable(VariableType_FLOAT, static_cast<vfloat>(f));
     input.thread->m_currentFrame->operands.push_back(variable);
 }
 
 void dconst_i(const InstructionInput& input)
 {
     const double d = input.arg;
-    const u4 lowBytes =  castToU4(*std::bit_cast<u8*>(&d));
-    const u4 highBytes = (*(std::bit_cast<u8*>)(&(d)) >> 32);
 
     // /uint64_t bytes = ((uint64_t)highBytes << 32) + (uint64_t)lowBytes;
     // The value is double back = *reinterpret_cast<double*> (&bytes);
-    const Variable variableHigh{VariableType_DOUBLE, highBytes};
-    const Variable variableLow{VariableType_DOUBLE, lowBytes};
-    input.thread->m_currentFrame->operands.push_back(variableHigh);
-    input.thread->m_currentFrame->operands.push_back(variableLow);
+    const vdata variable(VariableType_DOUBLE, static_cast<vdouble>(d));
+    input.thread->m_currentFrame->operands.push_back(variable);
+    input.thread->m_currentFrame->operands.push_back(variable);
 }
 
 void bipush(const InstructionInput& input)
 {
     const i1 byte = std::bit_cast<u1>(input.args[0]);
-    const i4 intVal = byte;
-    const Variable variable{VariableType_INT, static_cast<u4>(intVal)};
+    const vint intVal = byte;
+    const vdata variable{VariableType_INT, intVal};
     input.thread->m_currentFrame->operands.push_back(variable);
 }
 
 void sipush(const InstructionInput& input)
 {
     const i2 shortValue = (input.args[0] << 8) | input.args[1];
-    const i4 intValue = shortValue;
-    const Variable variable{VariableType_INT, static_cast<uint32_t>(intValue)};
+    const vint intValue = shortValue;
+    const vdata variable{VariableType_INT, intValue};
     input.thread->m_currentFrame->operands.push_back(variable);
 }
 
@@ -91,21 +87,21 @@ void loadConstant(VMThread* thread, const u4 index)
     if (cpItem->getType() == CT_INTEGER)
     {
         const auto* integerInfo = static_cast<const CPIntegerInfo*>(cpItem);
-        const Variable var{VariableType_INT, integerInfo->bytes};
+        const vdata var{VariableType_INT, static_cast<vint>(integerInfo->bytes)};
         thread->m_currentFrame->operands.push_back(var);
     }
     else if (cpItem->getType() == CT_FLOAT)
     {
         const auto* floatInfo = static_cast<const CPFloatInfo*>(cpItem);
-        const Variable var{VariableType_FLOAT, floatInfo->bytes};
+        const vdata var{VariableType_FLOAT, std::bit_cast<vfloat>(floatInfo->bytes)};
         thread->m_currentFrame->operands.push_back(var);
     }
     else if (cpItem->getType() == CT_STRING)
     {
         const auto* stringInfo = static_cast<const CPStringInfo*>(cpItem);
         const std::string_view utf8String = thread->m_currentClass->constantPool->getString(stringInfo->stringIndex);
-        const uint32_t strObjectId = VM::get()->getHeap()->createString(utf8String.data());
-        const Variable strVar{VariableType_REFERENCE, strObjectId};
+        const vreference strObjectId = VM::get()->getHeap()->createString(utf8String.data());
+        const vdata strVar{VariableType_REFERENCE, strObjectId};
         thread->m_currentFrame->operands.push_back(strVar);
     }
     else if (cpItem->getType() == CT_CLASS)
@@ -114,8 +110,8 @@ void loadConstant(VMThread* thread, const u4 index)
         std::string_view className = thread->m_currentClass->constantPool->getString(classInfo->nameIndex);
         ClassInfo* classInfoPtr{nullptr};
         classInfoPtr = thread->getClass(className.data());
-        const u4 classObjectRef =  VM::get()->getHeap()->createClassObject(classInfoPtr, className);
-        const Variable classObjectVar{VariableType_REFERENCE, classObjectRef};
+        const vreference classObjectRef =  VM::get()->getHeap()->createClassObject(classInfoPtr, className);
+        const vdata classObjectVar{VariableType_REFERENCE, classObjectRef};
         thread->m_currentFrame->operands.push_back(classObjectVar);
     }
     else
@@ -131,20 +127,21 @@ void loadConstant2(const VMThread* thread, const u4 index)
     const ConstantPoolItem* cpItem = thread->m_currentFrame->constantPool->constants[index-1];
     if (cpItem->getType() == CT_LONG)
     {
-        const CPLongInfo* integerInfo = (CPLongInfo*) cpItem;
-        const Variable highVar{VariableType_LONG, integerInfo->highBytes};
-        thread->m_currentFrame->operands.push_back(highVar);
-        const Variable lowVar{VariableType_LONG, integerInfo->lowBytes};
-        thread->m_currentFrame->operands.push_back(lowVar);
+        // XXX: XXX
+        const CPLongInfo* integerInfo = (CPLongInfo*) cpItem;// TODO: Construct the long from the two parts
+        const uint64_t bytes = ((uint64_t)integerInfo->highBytes << 32) + (uint64_t)integerInfo->lowBytes;
+        const vlong longValue = std::bit_cast<vlong>(bytes);
+        thread->m_currentFrame->operands.emplace_back(VariableType_LONG, longValue);
+        thread->m_currentFrame->operands.emplace_back(VariableType_LONG, longValue);
     }
     else if (cpItem->getType() == CT_DOUBLE)
     {
+        // XXX: XXX This is nonsense
         const CPDoubleInfo* integerInfo = (CPDoubleInfo*) cpItem;
-        const Variable highVar{VariableType_DOUBLE, integerInfo->highBytes};
-        thread->m_currentFrame->operands.push_back(highVar);
-        const Variable lowVar{VariableType_DOUBLE, integerInfo->lowBytes};
-
-        thread->m_currentFrame->operands.push_back(lowVar);
+        const uint64_t bytes = ((uint64_t)integerInfo->highBytes << 32) + (uint64_t)integerInfo->lowBytes;
+        const vdouble doubleValue = std::bit_cast<vdouble>(bytes);
+        thread->m_currentFrame->operands.emplace_back(VariableType_DOUBLE, doubleValue);
+        thread->m_currentFrame->operands.emplace_back(VariableType_DOUBLE, doubleValue);
     }
 }
 
