@@ -120,7 +120,7 @@ JCALL void lib_java_lang_Class_forName0(const NativeArgs& args)
 
     const char* utf8ClassName = u16StringToU8String(canonicalClassName);
     ClassInfo* classInfo = args.thread->getClass(utf8ClassName);
-    const u4 classObjectRef = VM::get()->getHeap()->createClassObject(classInfo, utf8ClassName);
+    const vreference classObjectRef = VM::get()->getHeap()->createClassObject(classInfo, utf8ClassName);
     free((void*)utf8ClassName);
     args.thread->returnVar(vdata{VariableType_REFERENCE, classObjectRef});
 }
@@ -132,7 +132,7 @@ JCALL void lib_java_lang_Class_getDeclaredFields0(const NativeArgs& args)
     // TODO: Use publicOnlyBooleanVar
     [[maybe_unused]] const vdata publicOnlyBooleanVar  = currentFrame->localVariables[1];
     const u4 arraySize = classObject->classClassInfo->fieldsCount;
-    const u4 arrayObject =  VM::get()->getHeap()->createArray(AT_REFERENCE, arraySize, "Ljava/lang/reflect/Field;");
+    const vreference arrayObject =  VM::get()->getHeap()->createArray(AT_REFERENCE, arraySize, "Ljava/lang/reflect/Field;");
 
     const Array* fieldsArray = VM::get()->getHeap()->getArray(arrayObject);
     ClassInfo* fieldClass = args.thread->getClass("java/lang/reflect/Field");
@@ -163,7 +163,7 @@ JCALL void lib_java_lang_Class_getDeclaredFields0(const NativeArgs& args)
         modifiersField->value.i = static_cast<vint>(fieldInfo->accessFlags);
 
         FieldData* typeField = fieldObject->getField("type", "Ljava/lang/Class;");
-        const u4 classObjectRef = VM::get()->getHeap()->createClassObject(nullptr, getTypeAsString(fieldType));
+        const vreference classObjectRef = VM::get()->getHeap()->createClassObject(nullptr, getTypeAsString(fieldType));
         typeField->value.l = classObjectRef;
 
 
@@ -177,49 +177,49 @@ JCALL void lib_java_lang_Class_getDeclaredFields0(const NativeArgs& args)
 JCALL void lib_java_lang_Class_isPrimitive(const NativeArgs& args)
 {
     const ClassObject* classObject = args.getThisClassObjectReference();
-    u4 result = 0;
+    vint result = 0;
 
     if (classObject->name == "int")
     {
-        result = 1u;
+        result = 1;
     }
 
     if (classObject->name == "byte")
     {
-        result = 1u;
+        result = 1;
     }
 
     if (classObject->name == "short")
     {
-        result = 1u;
+        result = 1;
     }
 
     if (classObject->name == "float")
     {
-        result = 1u;
+        result = 1;
     }
 
     if (classObject->name == "long")
     {
-        result = 1u;
+        result = 1;
     }
 
     if (classObject->name == "double")
     {
-        result = 1u;
+        result = 1;
     }
 
     if (classObject->name == "char")
     {
-        result = 1u;
+        result = 1;
     }
 
     if (classObject->name == "boolean")
     {
-        result = 1u;
+        result = 1;
     }
 
-    args.thread->returnVar(vdata{VariableType_INT, static_cast<vint>(result)});
+    args.thread->returnVar(vdata{VariableType_INT, result});
 }
 
 JCALL void lib_java_lang_Class_isAssignableFrom(const NativeArgs& args)
@@ -232,7 +232,7 @@ JCALL void lib_java_lang_Class_isAssignableFrom(const NativeArgs& args)
     const ClassObject* clsClassObject =  VM::get()->getHeap()->getClassObject(var.getReference());
 
     // TODO: Add type conversion checking
-    const u4 result = args.thread->isSubclass(thisClassObject->classClassInfo, clsClassObject->classClassInfo);
+    const vint result = args.thread->isSubclass(thisClassObject->classClassInfo, clsClassObject->classClassInfo);
 
     args.thread->returnVar(vdata{VariableType_INT, static_cast<vint>(result)});
 }
@@ -240,12 +240,12 @@ JCALL void lib_java_lang_Class_isAssignableFrom(const NativeArgs& args)
 JCALL void lib_java_lang_Class_isInterface(const NativeArgs& args)
 {
     const ClassObject* classObject = VM::get()->getHeap()->getClassObject(args.thread->m_currentFrame->localVariables[0].getReference());
-    u4 result = 0;
+    vint result = 0;
     if (classObject->classClassInfo->isInterface())
     {
         result = 1;
     }
-    args.thread->returnVar(vdata{VariableType_INT, static_cast<vint>(result)});
+    args.thread->returnVar(vdata{VariableType_INT, result});
 }
 
 JCALL void lib_java_lang_Class_getDeclaredConstructors0(const NativeArgs& args)
@@ -255,7 +255,7 @@ JCALL void lib_java_lang_Class_getDeclaredConstructors0(const NativeArgs& args)
     // TODO: Use publicOnlyBooleanVar
     [[maybe_unused]] const vdata publicOnlyBooleanVar  = currentFrame->localVariables[1];
     const u4 arraySize = classObject->classClassInfo->methods.size();
-    const u4 arrayObject =  VM::get()->getHeap()->createArray(AT_REFERENCE, 1, "Ljava/lang/reflect/Constructor,");
+    const vreference arrayObject =  VM::get()->getHeap()->createArray(AT_REFERENCE, 1, "Ljava/lang/reflect/Constructor,");
 
     const Array* constructorsArray = VM::get()->getHeap()->getArray(arrayObject);
 

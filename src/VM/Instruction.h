@@ -6,8 +6,8 @@
 #include <string>
 
 class VM;
-class VMThread;
 class JavaHeap;
+class VMThread;
 
 struct InstructionInput
 {

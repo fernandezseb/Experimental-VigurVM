@@ -41,10 +41,10 @@ struct StackFrame {
         return var;
     }
 
-    i8 popLong()
+    vlong popLong()
     {
         vdata first = popOperand();
-        vdata second = popOperand();
+        [[maybe_unused]] vdata second = popOperand();
         return first.getLong();
     }
 
@@ -56,7 +56,7 @@ struct StackFrame {
         operands.emplace_back(VariableType_LONG, value);
     }
 
-    i4 popInt()
+    vint popInt()
     {
         const vdata var = popOperand();
         return var.getInt();
@@ -67,7 +67,7 @@ struct StackFrame {
         operands.emplace_back(VariableType_INT, value);
     }
 
-    float popFloat()
+    vfloat popFloat()
     {
         const vdata var = popOperand();
         return var.getFloat();

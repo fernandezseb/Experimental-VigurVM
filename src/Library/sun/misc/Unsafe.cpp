@@ -172,7 +172,7 @@ JCALL void lib_sun_misc_Unsafe_putLong(const NativeArgs& args)
 
 JCALL void lib_sun_misc_Unsafe_getByte(const NativeArgs& args)
 {
-    const vlong addr = args.thread->m_currentFrame->localVariables[1].getLong();
+    const u8 addr = args.thread->m_currentFrame->localVariables[1].getLong();
     const auto memLocation = reinterpret_cast<i1*>(addr);
 
     const i1 val = *memLocation;

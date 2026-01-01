@@ -23,9 +23,9 @@
 
 void lcmp(const InstructionInput& input)
 {
-    i8 var2 = input.thread->m_currentFrame->popLong();
-    i8 var1 = input.thread->m_currentFrame->popLong();
-    i4 result = 0;
+    const vlong var2 = input.thread->m_currentFrame->popLong();
+    const vlong var1 = input.thread->m_currentFrame->popLong();
+    vint result = 0;
     if (var1 > var2)
     {
         result = 1;
@@ -49,7 +49,7 @@ void fcmpl(const InstructionInput& input)
     const auto f2 = var2.getFloat();
     const auto f1 = var1.getFloat();
 
-    i4 result = 0;
+    vint result = 0;
 
     if (f1 > f2)
     {
@@ -72,13 +72,10 @@ void fcmpl(const InstructionInput& input)
 
 void fcmpg(const InstructionInput& input)
 {
-    const vdata var2 = input.thread->m_currentFrame->popOperand();
-    const vdata var1 = input.thread->m_currentFrame->popOperand();
+    const vfloat f2 = input.thread->m_currentFrame->popFloat();
+    const vfloat f1 = input.thread->m_currentFrame->popFloat();
 
-    const auto f2 = var2.getFloat();
-    const auto f1 = var1.getFloat();
-
-    i4 result = 0;
+    vint result = 0;
 
     if (f1 > f2)
     {
@@ -94,7 +91,7 @@ void fcmpg(const InstructionInput& input)
         result = 0;
     }
 
-    input.thread->m_currentFrame->operands.emplace_back(vdata{VariableType_INT, result});
+    input.thread->m_currentFrame->operands.emplace_back(VariableType_INT, result);
 }
 
 void ifeq(const InstructionInput& input)
@@ -240,8 +237,8 @@ void if_icmpge(const InstructionInput& input)
 
     const i2 branchByte = (byte1 << 8) | byte2;
 
-    vdata var2 = input.thread->m_currentFrame->popOperand();
-    vdata var1 = input.thread->m_currentFrame->popOperand();
+    const vdata var2 = input.thread->m_currentFrame->popOperand();
+    const vdata var1 = input.thread->m_currentFrame->popOperand();
 
     if (var1.getInt() >= var2.getInt())
     {
@@ -256,8 +253,8 @@ void if_icmpgt(const InstructionInput& input)
 
     const i2 branchByte = (byte1 << 8) | byte2;
 
-    vdata var2 = input.thread->m_currentFrame->popOperand();
-    vdata var1 = input.thread->m_currentFrame->popOperand();
+    const vdata var2 = input.thread->m_currentFrame->popOperand();
+    const vdata var1 = input.thread->m_currentFrame->popOperand();
 
     if (var1.getInt() > var2.getInt())
     {

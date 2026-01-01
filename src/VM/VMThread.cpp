@@ -337,6 +337,14 @@ u2 VMThread::readUnsignedShort()
     return shortCombined;
 }
 
+i2 VMThread::readSignedShort()
+{
+    const u1* code = m_currentMethod->code->code;
+    const u1 buffer[2] = {code[m_pc++], code[m_pc++]};
+    const i2 value = static_cast<i2>(buffer[1]) | static_cast<i2>(buffer[0]) << 8;
+    return value;
+}
+
 i4 VMThread::readSignedInt()
 {
     const u1* code = m_currentMethod->code->code;

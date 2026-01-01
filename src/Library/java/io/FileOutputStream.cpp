@@ -38,7 +38,7 @@ JCALL void lib_java_io_FileOutputStream_writeBytes(const NativeArgs& args) {
     // Get the file handle
     const Object* thisObject = args.getThisObjectReference();
     const Object* descriptorObject = thisObject->getObject(0);
-    const i8 handle = descriptorObject->getLong(1);
+    const vlong handle = descriptorObject->getLong(1);
 
     // TODO: Implement correct handle determination
     if (handle == 1)

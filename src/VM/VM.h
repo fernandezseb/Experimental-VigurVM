@@ -34,7 +34,7 @@ public:
     void runMain();
     void shutdown();
 
-    VMThread* getVMThreadByObjectRef(u4 objectReference);
+    VMThread* getVMThreadByObjectRef(vreference objectReference);
     VMThread* getCurrentVMThread();
     std::string userDir;
     static VM* create(Configuration config);
@@ -59,8 +59,8 @@ private:
     JavaHeap m_heap;
     std::vector<VMThread> m_threads;
     Configuration m_configuration;
-    u4 createThreadObject(VMThread* thread, u4 threadGroupReference);
-    u4 createThreadGroupObject(VMThread* thread);
+    vreference createThreadObject(VMThread* thread, vreference threadGroupReference);
+    vreference createThreadGroupObject(VMThread* thread);
     void createArgsArray(const VMThread* thread);
     static constexpr std::array<Instruction, 138> m_instructions{
         {

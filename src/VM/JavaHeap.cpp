@@ -26,7 +26,7 @@ JavaHeap::JavaHeap()
     objects.push_back(0);
 }
 
-u4 JavaHeap::createArray(ArrayType type, uint64_t size, std::string_view descriptor)
+vreference JavaHeap::createArray(ArrayType type, uint64_t size, std::string_view descriptor)
 {
     Array* array = static_cast<Array*>(Platform::allocateMemory(sizeof(Array), 0));
     array->length = size;
@@ -56,7 +56,7 @@ u4 JavaHeap::createArray(ArrayType type, uint64_t size, std::string_view descrip
     return castToU4<std::size_t>(objects.size()-1);
 }
 
-u4 JavaHeap::createObject(ClassInfo* classInfo)
+vreference JavaHeap::createObject(ClassInfo* classInfo)
 {
     void* objectMemory = Platform::allocateMemory(sizeof(Object), 0);
     const auto object = new (objectMemory) Object;
@@ -112,7 +112,7 @@ u4 JavaHeap::createObject(ClassInfo* classInfo)
 }
 
 // TODO: De-duplicate code from createObject
-u4 JavaHeap::createClassObject(ClassInfo* classInfo, std::string_view name)
+vreference JavaHeap::createClassObject(ClassInfo* classInfo, std::string_view name)
 {
     const u4 existingClassObject = getClassObjectByName(name);
     if (existingClassObject != 0)
@@ -180,7 +180,7 @@ u4 JavaHeap::createClassObject(ClassInfo* classInfo, std::string_view name)
 }
 
 
-u4 JavaHeap::createString(const char* utf8String) {
+vreference JavaHeap::createString(const char* utf8String) {
     const u4 existingString = getString(utf8String);
     if (existingString != 0) {
         return existingString;
@@ -203,7 +203,7 @@ u4 JavaHeap::createString(const char* utf8String) {
     return strObjectId;
 }
 
-const Object* JavaHeap::getObject(const uint32_t id) const
+const Object* JavaHeap::getObject(const vreference id) const
 {
     if (id == 0)
     {
@@ -217,7 +217,7 @@ const Object* JavaHeap::getObject(const uint32_t id) const
     return objects[id]->getObject();
 }
 
-Reference* JavaHeap::getReference(u4 id) const
+Reference* JavaHeap::getReference(const vreference id) const
 {
     if (id == 0)
     {
@@ -248,7 +248,7 @@ ClassObject* JavaHeap::getClassObject(vreference id) const
     return nullptr;
 }
 
-const Object* JavaHeap::getChildObject(const uint32_t id, ClassInfo* classInfo)
+const Object* JavaHeap::getChildObject(const vreference id, ClassInfo* classInfo)
 {
     const Object* o = getObject(id);
     if (o == nullptr || o->classInfo->getName() != classInfo->getName())
@@ -264,7 +264,7 @@ const Object* JavaHeap::getChildObject(const uint32_t id, ClassInfo* classInfo)
     return o;
 }
 
-const Array* JavaHeap::getArray(const uint32_t id) const
+const Array* JavaHeap::getArray(const vreference id) const
 {
     if (id == 0)
     {
@@ -340,7 +340,7 @@ std::u16string_view JavaHeap::getStringContent(const Object* stringObject) const
     return std::u16string_view{charArray, array->length};
 }
 
-std::u16string_view JavaHeap::getStringContent(const u4 id) const
+std::u16string_view JavaHeap::getStringContent(const vreference id) const
 {
     const Object* stringObject = getObject(id);
     return getStringContent(stringObject);
@@ -381,7 +381,7 @@ ClassInfo* JavaHeap::getClassByName(std::string_view className) const
 
 void JavaHeap::printStringPool()
 {
-    for (uint32_t currentObj = 1; currentObj < objects.size(); ++currentObj)
+    for (vreference currentObj = 1u; currentObj < objects.size(); ++currentObj)
     {
         const Reference* ref = objects[currentObj];
         if (ref->type == ReferenceType::OBJECT) {
@@ -389,9 +389,9 @@ void JavaHeap::printStringPool()
             if (obj->classInfo->getName() == std::string_view{"java/lang/String"})
             {
                 printf("|%d|", currentObj);
-                u4 charArrRef =  obj->fields[0].value.l;
+                vreference charArrRef =  obj->fields[0].value.l;
                 const Array* arr = getArray(charArrRef);
-                for (u4 currentIndex = 0; currentIndex < arr->length; ++currentIndex)
+                for (vreference currentIndex = 0; currentIndex < arr->length; ++currentIndex)
                 {
                     u1 charDowncasted = ((u2*)arr->data)[currentIndex];
                     printf("%c", charDowncasted);
@@ -430,7 +430,7 @@ const Object* Object::getObject(const u4 fieldIndex) const
     return VM::get()->getHeap()->getObject(fields[fieldIndex].value.l);
 }
 
-const i8 Object::getLong(u4 fieldIndex) const
+const vlong Object::getLong(u4 fieldIndex) const
 {
     const FieldData fieldData = fields[fieldIndex];
     const vlong longValue = fieldData.value.j;

@@ -86,10 +86,10 @@ void VM::start(std::string_view commandLineName)
     }
 }
 
-u4 VM::createThreadGroupObject(VMThread* thread)
+vreference VM::createThreadGroupObject(VMThread* thread)
 {
     ClassInfo* threadGroupClass = thread->getClass("java/lang/ThreadGroup");
-    const u4 threadGroupReference = m_heap.createObject(threadGroupClass);
+    const vreference threadGroupReference = m_heap.createObject(threadGroupClass);
     const Object* threadGroupObject = m_heap.getObject(threadGroupReference);
 
     FieldData* maxPrioField = threadGroupObject->getField("maxPriority", "I");
@@ -99,10 +99,10 @@ u4 VM::createThreadGroupObject(VMThread* thread)
     return threadGroupReference;
 }
 
-u4 VM::createThreadObject(VMThread* thread, const u4 threadGroupReference)
+vreference VM::createThreadObject(VMThread* thread, const vreference threadGroupReference)
 {
     ClassInfo* threadClass = thread->getClass("java/lang/Thread");
-    const u4 objectReference = m_heap.createObject(threadClass);
+    const vreference objectReference = m_heap.createObject(threadClass);
     const Object* threadObject = m_heap.getObject(objectReference);
 
     FieldData* groupField = threadObject->getField("group", "Ljava/lang/ThreadGroup;");

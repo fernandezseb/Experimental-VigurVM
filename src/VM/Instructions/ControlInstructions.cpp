@@ -43,7 +43,7 @@ void gotoInstruction(const InstructionInput& input)
 
 void lookupswitch(const InstructionInput& input)
 {
-    const i4 intValue = input.thread->m_currentFrame->popInt();
+    const vint intValue = input.thread->m_currentFrame->popInt();
     const u4 instructionIndex = input.thread->m_pc-1;
 
     while ((input.thread->m_pc % 4) != 0) {
@@ -85,7 +85,7 @@ void ireturnInstruction(const InstructionInput& input)
 void lreturnInstruction(const InstructionInput& input)
 {
     const vdata long1 = input.thread->m_currentFrame->popOperand();
-    const vdata long2 = input.thread->m_currentFrame->popOperand();
+    [[maybe_unused]] const vdata long2 = input.thread->m_currentFrame->popOperand();
     input.thread->popFrame();
     long1.checkType(VariableType_LONG);
     input.thread->returnVar(long1);

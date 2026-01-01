@@ -24,14 +24,6 @@
 #include <string>
 #include <thread>
 
-static u2 readShort(VMThread* thread)
-{
-    uint8_t indexByte1 = thread->m_currentMethod->code->code[thread->m_pc++];
-    uint8_t indexByte2 = thread->m_currentMethod->code->code[thread->m_pc++];
-    uint16_t shortCombined = (indexByte1 << 8) | indexByte2;
-    return shortCombined;
-}
-
 
 [[nodiscard]] static constexpr u2 combineBytes(const u1 byte1, const u1 byte2) {
     return (byte1 << 8) | byte2;
@@ -39,7 +31,7 @@ static u2 readShort(VMThread* thread)
 
 void getstatic(const InstructionInput& input)
 {
-    const uint16_t index = readShort(input.thread);
+    const u2 index = input.thread->readSignedShort();
     const CPFieldRef* fieldRef =  input.thread->m_currentFrame->constantPool->getFieldRef(index);
     const CPClassInfo* classInfo =  input.thread->m_currentFrame->constantPool->getClassInfo(fieldRef->classIndex);
     const CPNameAndTypeInfo* nameAndType = input.thread->m_currentFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
@@ -65,7 +57,7 @@ void getstatic(const InstructionInput& input)
 
 void putstatic(const InstructionInput& input)
 {
-    uint16_t index = readShort(input.thread);
+    const uint16_t index = input.thread->readSignedShort();
     CPFieldRef* fieldRef =  input.thread->m_currentFrame->constantPool->getFieldRef(index);
     CPClassInfo* classInfo =  input.thread->m_currentFrame->constantPool->getClassInfo(fieldRef->classIndex);
     CPNameAndTypeInfo* nameAndType = input.thread->m_currentFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
@@ -88,7 +80,7 @@ void putstatic(const InstructionInput& input)
 
 void getfield(const InstructionInput& input)
 {
-    uint16_t index = readShort(input.thread);
+    uint16_t index = input.thread->readSignedShort();
     CPFieldRef* fieldRef = input.thread->m_currentFrame->constantPool->getFieldRef(index);
     CPClassInfo* cpClassInfo = input.thread->m_currentFrame->constantPool->getClassInfo(fieldRef->classIndex);
     CPNameAndTypeInfo* nameAndType = input.thread->m_currentFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
@@ -130,7 +122,7 @@ void getfield(const InstructionInput& input)
 
 void putfield(const InstructionInput& input)
 {
-    uint16_t index = readShort(input.thread);
+    uint16_t index = input.thread->readSignedShort();
     CPFieldRef* fieldRef = input.thread->m_currentFrame->constantPool->getFieldRef(index);
     CPClassInfo* cpClassInfo = input.thread->m_currentFrame->constantPool->getClassInfo(fieldRef->classIndex);
     CPNameAndTypeInfo* nameAndType = input.thread->m_currentFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
@@ -254,7 +246,7 @@ static void invokeVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread
 void invokevirtual(const InstructionInput& input)
 {
     StackFrame* topFrame = input.thread->m_currentFrame;
-    const u2 index = readShort(input.thread);
+    const u2 index = input.thread->readSignedShort();
     const CPMethodRef* methodRef = topFrame->constantPool->getMethodRef(index);
     const CPClassInfo* cpClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
     const CPNameAndTypeInfo* nameAndTypeInfo = topFrame->constantPool->getNameAndTypeInfo(methodRef->nameAndTypeIndex);
@@ -319,7 +311,7 @@ void invokevirtual(const InstructionInput& input)
 void invokespecial(const InstructionInput& input)
 {
     StackFrame* topFrame = input.thread->m_currentFrame;
-    const uint16_t index = readShort(input.thread);
+    const uint16_t index = input.thread->readSignedShort();
     const CPMethodRef* methodRef = topFrame->constantPool->getMethodRef(index);
     const CPClassInfo* cpClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
     const CPNameAndTypeInfo* nameAndTypeInfo = topFrame->constantPool->getNameAndTypeInfo(methodRef->nameAndTypeIndex);
@@ -346,7 +338,7 @@ void invokespecial(const InstructionInput& input)
 void invokestatic(const InstructionInput& input)
 {
     StackFrame* topFrame = input.thread->m_currentFrame;
-    uint16_t index = readShort(input.thread);
+    const uint16_t index = input.thread->readSignedShort();
     CPMethodRef* methodRef = topFrame->constantPool->getMethodRef(index);
     CPClassInfo* targetClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
     CPNameAndTypeInfo* nameAndTypeInfo = topFrame->constantPool->getNameAndTypeInfo(methodRef->nameAndTypeIndex);
@@ -416,7 +408,7 @@ void invokeinterface(const InstructionInput& input) {
 void newInstruction(const InstructionInput& input)
 {
     StackFrame* topFrame = input.thread->m_currentFrame;
-    uint16_t index = readShort(input.thread);
+    const uint16_t index = input.thread->readSignedShort();
     CPClassInfo* cpClasInfo = topFrame->constantPool->getClassInfo(index);
     ClassInfo* targetClass = input.thread->getClass(topFrame->constantPool->getString(cpClasInfo->nameIndex).data());
 
@@ -456,7 +448,7 @@ void newarray(const InstructionInput& input)
 void anewarray(const InstructionInput& input)
 {
     StackFrame* topFrame = input.thread->m_currentFrame;
-    uint16_t index = readShort(input.thread);
+    u2 index = input.thread->readSignedShort();
     CPClassInfo* cpclassInfo = topFrame->constantPool->getClassInfo(index);
     const char* className = topFrame->constantPool->getString(cpclassInfo->nameIndex).data();
     // TODO: Is this needed? This loads the class eagerly

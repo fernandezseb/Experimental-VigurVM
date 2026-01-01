@@ -49,18 +49,18 @@ void lconst_i(const InstructionInput& input)
 
 void fconst_i(const InstructionInput& input)
 {
-    const float f = input.arg;
-    const vdata variable(VariableType_FLOAT, static_cast<vfloat>(f));
+    const auto f = static_cast<vfloat>(input.arg);
+    const vdata variable(VariableType_FLOAT, f);
     input.thread->m_currentFrame->operands.push_back(variable);
 }
 
 void dconst_i(const InstructionInput& input)
 {
-    const double d = input.arg;
+    const vdouble d = static_cast<vdouble>(input.arg);
 
     // /uint64_t bytes = ((uint64_t)highBytes << 32) + (uint64_t)lowBytes;
     // The value is double back = *reinterpret_cast<double*> (&bytes);
-    const vdata variable(VariableType_DOUBLE, static_cast<vdouble>(d));
+    const vdata variable(VariableType_DOUBLE, d);
     input.thread->m_currentFrame->operands.push_back(variable);
     input.thread->m_currentFrame->operands.push_back(variable);
 }
@@ -76,7 +76,7 @@ void bipush(const InstructionInput& input)
 void sipush(const InstructionInput& input)
 {
     const i2 shortValue = (input.args[0] << 8) | input.args[1];
-    const vint intValue = shortValue;
+    const vint intValue = static_cast<vint>(shortValue);
     const vdata variable{VariableType_INT, intValue};
     input.thread->m_currentFrame->operands.push_back(variable);
 }

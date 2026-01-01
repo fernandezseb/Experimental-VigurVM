@@ -22,31 +22,31 @@
 
 void iadd(const InstructionInput& input)
 {
-    const i4 val2 = input.thread->m_currentFrame->popInt();
-    const i4 val1 = input.thread->m_currentFrame->popInt();
+    const vint val2 = input.thread->m_currentFrame->popInt();
+    const vint val1 = input.thread->m_currentFrame->popInt();
     input.thread->m_currentFrame->pushInt(val1+val2);
 }
 
 void ladd(const InstructionInput& input)
 {
     StackFrame* currentFrame = input.thread->m_currentFrame;
-    const i8 long2 = currentFrame->popLong();
-    const i8 long1 = currentFrame->popLong();
-    const i8 sum = long1 + long2;
+    const vlong long2 = currentFrame->popLong();
+    const vlong long1 = currentFrame->popLong();
+    const vlong sum = long1 + long2;
     input.thread->m_currentFrame->pushLong(sum);
 }
 
 void isub(const InstructionInput& input)
 {
-    const i4 val2 = input.thread->m_currentFrame->popInt();
-    const i4 val1 = input.thread->m_currentFrame->popInt();
+    const vint val2 = input.thread->m_currentFrame->popInt();
+    const vint val1 = input.thread->m_currentFrame->popInt();
     input.thread->m_currentFrame->pushInt(val1-val2);
 }
 
 void imul(const InstructionInput& input)
 {
-    const i4 val2 = input.thread->m_currentFrame->popInt();
-    const i4 val1 = input.thread->m_currentFrame->popInt();
+    const vint val2 = input.thread->m_currentFrame->popInt();
+    const vint val1 = input.thread->m_currentFrame->popInt();
     input.thread->m_currentFrame->pushInt(val1*val2);
 }
 
@@ -62,9 +62,9 @@ void fmul(const InstructionInput& input)
 
 void idiv(const InstructionInput& input)
 {
-    const i4 val2 = input.thread->m_currentFrame->popInt();
-    const i4 val1 = input.thread->m_currentFrame->popInt();
-    const i4 result = val1/val2;
+    const vint val2 = input.thread->m_currentFrame->popInt();
+    const vint val1 = input.thread->m_currentFrame->popInt();
+    const vint result = val1/val2;
     input.thread->m_currentFrame->pushInt(result);
 }
 
@@ -78,25 +78,25 @@ void fdiv(const InstructionInput& input)
 
 void irem(const InstructionInput& input)
 {
-    const i4 val2 = input.thread->m_currentFrame->popInt();
-    const i4 val1 = input.thread->m_currentFrame->popInt();
-    const i4 result = val1%val2;
+    const vint val2 = input.thread->m_currentFrame->popInt();
+    const vint val1 = input.thread->m_currentFrame->popInt();
+    const vint result = val1%val2;
     // TODO: Fix for edge cases
     input.thread->m_currentFrame->pushInt(result);
 }
 
 void ineg(const InstructionInput& input)
 {
-    const i4 val = input.thread->m_currentFrame->popInt();
+    const vint val = input.thread->m_currentFrame->popInt();
     input.thread->m_currentFrame->pushInt(-val);
 }
 
 void lshl(const InstructionInput& input)
 {
     StackFrame* currentFrame = input.thread->m_currentFrame;
-    const i4 int2 = currentFrame->popInt();
-    const i8 long1 = currentFrame->popLong();
-    const i8 result = long1 << (int2 & 0x3f);
+    const vint int2 = currentFrame->popInt();
+    const vlong long1 = currentFrame->popLong();
+    const vlong result = long1 << (int2 & 0x3f);
     input.thread->m_currentFrame->pushLong(result);
 }
 
@@ -146,17 +146,17 @@ void iushr(const InstructionInput& input)
 
 void iand(const InstructionInput& input)
 {
-    const i4 val2 = input.thread->m_currentFrame->popInt();
-    const i4 val1 = input.thread->m_currentFrame->popInt();
+    const vint val2 = input.thread->m_currentFrame->popInt();
+    const vint val1 = input.thread->m_currentFrame->popInt();
     input.thread->m_currentFrame->pushInt(val1&val2);
 }
 
 void land(const InstructionInput& input)
 {
     StackFrame* currentFrame = input.thread->m_currentFrame;
-    const i8 long2 = currentFrame->popLong();
-    const i8 long1 = currentFrame->popLong();
-    const i8 conjunction = long1 & long2;
+    const vlong long2 = currentFrame->popLong();
+    const vlong long1 = currentFrame->popLong();
+    const vlong conjunction = long1 & long2;
     input.thread->m_currentFrame->pushLong(conjunction);
 }
 
@@ -174,9 +174,9 @@ void ior(const InstructionInput& input)
 void lor(const InstructionInput& input)
 {
     StackFrame* currentFrame = input.thread->m_currentFrame;
-    const i8 long2 = currentFrame->popLong();
-    const i8 long1 = currentFrame->popLong();
-    const i8 conjunction = long1 | long2;
+    const vlong long2 = currentFrame->popLong();
+    const vlong long1 = currentFrame->popLong();
+    const vlong conjunction = long1 | long2;
     input.thread->m_currentFrame->pushLong(conjunction);
 }
 

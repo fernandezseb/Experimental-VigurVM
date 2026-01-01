@@ -45,6 +45,7 @@ public:
     void internalError(std::string_view error) const;
     u1 readUnsignedByte();
     u2 readUnsignedShort();
+    i2 readSignedShort();
     i4 readSignedInt();
 
     StackFrame* getTopFrameNonNative();

@@ -18,24 +18,16 @@
 #include "VM/VM.h"
 #include "Data/VData.h"
 
-// TODO: Move to VM
-static i2 readShort(VMThread* thread)
-{
-    const u1* code = thread->m_currentMethod->code->code;
-    const u1 buffer[2] = {code[thread->m_pc++], code[thread->m_pc++]};
-    const i2 value = static_cast<i2>(buffer[1]) | static_cast<i2>(buffer[0]) << 8;
-    return value;
-}
 
 void wide(const InstructionInput& input)
 {
-    u1 opcode = input.thread->readUnsignedByte();
+    const u1 opcode = input.thread->readUnsignedByte();
     switch (opcode)
     {
     case i_iinc:
         {
             u2 index = input.thread->readUnsignedShort();
-            i2 constant = readShort(input.thread);
+            i2 constant = input.thread->readSignedShort();
             vdata* var =  &input.thread->m_currentFrame->localVariables[index];
             // var->data += constData;
             i4 currentInt = var->getInt();
@@ -51,7 +43,7 @@ void wide(const InstructionInput& input)
 
 void ifnull(const InstructionInput& input)
 {
-    const i2 branchByte = readShort(input.thread);
+    const i2 branchByte = input.thread->readSignedShort();
     // uint8_t byte = thread->currentMethod->code->code[thread->pc-3+branchByte];
     const vdata ref = input.thread->m_currentFrame->popOperand();
     if (ref.getReference() == 0u) {
@@ -61,7 +53,7 @@ void ifnull(const InstructionInput& input)
 
 void ifnonnull(const InstructionInput& input)
 {
-    const i2 branchByte = readShort(input.thread);
+    const i2 branchByte = input.thread->readSignedShort();
     // uint8_t byte = thread->currentMethod->code->code[thread->pc-3+branchByte];
     const vdata ref = input.thread->m_currentFrame->popOperand();
     if (ref.getReference() != 0) {

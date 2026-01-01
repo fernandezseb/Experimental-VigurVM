@@ -23,39 +23,38 @@
 
 void i2l(const InstructionInput& input)
 {
-    const vdata valueVar = input.thread->m_currentFrame->popOperand();
-    const vint intValue = valueVar.getInt();
-    const vlong l = intValue;
-    input.thread->m_currentFrame->operands.emplace_back(vdata{VariableType_LONG, l});
-    input.thread->m_currentFrame->operands.emplace_back(vdata{VariableType_LONG, l});
+    const vint intValue = input.thread->m_currentFrame->popInt();
+    const auto l = static_cast<vlong>(intValue);
+    input.thread->m_currentFrame->operands.emplace_back(VariableType_LONG, l);
+    input.thread->m_currentFrame->operands.emplace_back(VariableType_LONG, l);
 }
 
 void i2f(const InstructionInput& input)
 {
-    const i4 intValue = input.thread->m_currentFrame->popInt();
-    const float f = static_cast<float>(intValue);
+    const vint intValue = input.thread->m_currentFrame->popInt();
+    const auto f = static_cast<vfloat>(intValue);
     input.thread->m_currentFrame->pushFloat(f);
 }
 
 void f2i(const InstructionInput& input)
 {
     const float f = input.thread->m_currentFrame->popFloat();
-    const i4 intValue = static_cast<i4>(f);
+    const vint intValue = static_cast<i4>(f);
     input.thread->m_currentFrame->pushInt(intValue);
 }
 
 void i2b(const InstructionInput& input)
 {
-    const i4 intValue = input.thread->m_currentFrame->popInt();
+    const vint intValue = input.thread->m_currentFrame->popInt();
     const u1 b = static_cast<u1>(intValue);// TODO: Check if correct
-    const i4 result = b;
+    const vint result = b;
     input.thread->m_currentFrame->pushInt(result);
 }
 
 void i2c(const InstructionInput& input)
 {
-    const i4 intValue = input.thread->m_currentFrame->popInt();
+    const vint intValue = input.thread->m_currentFrame->popInt();
     const u2 f = static_cast<u2>(intValue);// TODO: Check if correct
-    const i4 result = f;
+    const vint result = f;
     input.thread->m_currentFrame->pushInt(result);
 }
