@@ -25,31 +25,28 @@ JavaHeap::JavaHeap()
     // because this would be considered a null pointer
     objects.push_back(0);
 }
-
 vreference JavaHeap::createArray(ArrayType type, uint64_t size, std::string_view descriptor)
 {
-    Array* array = static_cast<Array*>(Platform::allocateMemory(sizeof(Array), 0));
+    u1 bytes = 4;
+    if (type == AT_CHAR)
+    {
+        bytes = 2;
+    }
+    else if (type == AT_LONG || type == AT_DOUBLE)
+    {
+        bytes = 8;
+    }
+    Array* array = static_cast<Array*>(Platform::allocateMemory(sizeof(Array) + bytes * size, 0));
     array->length = size;
     array->type = ARRAY;
     array->arrayType = type;
     array->data = 0;
     array->descriptor = descriptor;
-    if (size > 0 )
+    u1* basePtr = static_cast<u1*>(static_cast<void*>(array));
+    array->data = basePtr + sizeof(Array);
+    for (int i = 0; i < size * bytes; ++i)
     {
-        u1 bytes = 4;
-        if (type == AT_CHAR)
-        {
-            bytes = 2;
-        }
-        else if (type == AT_LONG || type == AT_DOUBLE)
-        {
-            bytes = 8;
-        }
-        array->data = (u1*) Platform::allocateMemory(bytes * size, 0);
-        for (int i = 0; i < size * bytes; ++i)
-        {
-            array->data[i] = 0;
-        }
+        array->data[i] = 0;
     }
 
     objects.push_back(array);
@@ -58,8 +55,6 @@ vreference JavaHeap::createArray(ArrayType type, uint64_t size, std::string_view
 
 vreference JavaHeap::createObject(ClassInfo* classInfo)
 {
-    void* objectMemory = Platform::allocateMemory(sizeof(Object), 0);
-    const auto object = new (objectMemory) Object;
     u2 fieldsCount = 0;
     for (u2 currentField = 0; currentField < classInfo->fieldsCount; ++currentField)
     {
@@ -70,11 +65,15 @@ vreference JavaHeap::createObject(ClassInfo* classInfo)
         }
     }
 
+    void* objectMemory = Platform::allocateMemory(sizeof(Object) + sizeof(FieldData) * fieldsCount, 0);
+    const auto object = new (objectMemory) Object;
+
     object->classInfo = classInfo;
     object->type = OBJECT;
     if (fieldsCount > 0)
     {
-        const auto fields = static_cast<FieldData*>(Platform::allocateMemory(sizeof(FieldData) * fieldsCount, 0));
+        u1* basePtr = static_cast<u1*>(objectMemory);
+        const auto fields = static_cast<FieldData*>(static_cast<void*>(basePtr + sizeof(Object)));
         object->fields = std::span{fields,fieldsCount};
     }
     object->fieldsCount = fieldsCount;
@@ -120,8 +119,6 @@ vreference JavaHeap::createClassObject(ClassInfo* classInfo, std::string_view na
         return existingClassObject;
     }
 
-    void* objectMemory = Platform::allocateMemory(sizeof(ClassObject), 0);
-    const auto object = new (objectMemory) ClassObject();
     u2 fieldsCount = 0;
     for (u2 currentField = 0; currentField < classClassInfo->fieldsCount; ++currentField)
     {
@@ -132,12 +129,16 @@ vreference JavaHeap::createClassObject(ClassInfo* classInfo, std::string_view na
         }
     }
 
+    void* objectMemory = Platform::allocateMemory(sizeof(ClassObject) + sizeof(FieldData) * fieldsCount, 0);
+    const auto object = new (objectMemory) ClassObject();
+
     object->classInfo = classClassInfo;
     object->classClassInfo = classInfo;
     object->type = CLASSOBJECT;
     if (fieldsCount > 0)
     {
-        const auto fields = static_cast<FieldData*>(Platform::allocateMemory(sizeof(FieldData) * fieldsCount, 0));
+        u1* basePtr = static_cast<u1*>(objectMemory);
+        const auto fields = static_cast<FieldData*>(static_cast<void*>(basePtr + sizeof(ClassObject)));
         object->fields = std::span(fields, fieldsCount);
     }
     object->fieldsCount = fieldsCount;
