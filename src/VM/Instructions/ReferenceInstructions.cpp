@@ -462,7 +462,7 @@ void anewarray(const InstructionInput& input)
     // TODO: Is this needed? This loads the class eagerly
     [[maybe_unused]] ClassInfo* classInfo = input.thread->getClass(className);
 
-    const vint size = std::bit_cast<i4>(topFrame->popOperand().getInt());
+    const vint size = topFrame->popOperand().getInt();
 
     if (size < 0)
     {

@@ -46,8 +46,8 @@ void fcmpl(const InstructionInput& input)
     var2.checkType(VariableType_FLOAT);
     var1.checkType(VariableType_FLOAT);
 
-    const auto f2 = std::bit_cast<float>(var2.getFloat());
-    const auto f1 = std::bit_cast<float>(var1.getFloat());
+    const auto f2 = var2.getFloat();
+    const auto f1 = var1.getFloat();
 
     i4 result = 0;
 
@@ -74,11 +74,9 @@ void fcmpg(const InstructionInput& input)
 {
     const vdata var2 = input.thread->m_currentFrame->popOperand();
     const vdata var1 = input.thread->m_currentFrame->popOperand();
-    var2.checkType(VariableType_FLOAT);
-    var1.checkType(VariableType_FLOAT);
 
-    const auto f2 = std::bit_cast<float>(var2.getFloat());
-    const auto f1 = std::bit_cast<float>(var1.getFloat());
+    const auto f2 = var2.getFloat();
+    const auto f1 = var1.getFloat();
 
     i4 result = 0;
 
@@ -136,7 +134,7 @@ void iflt(const InstructionInput& input)
 
     const vdata intVar = input.thread->m_currentFrame->popOperand();
 
-    if (std::bit_cast<i4>(intVar.getInt()) < 0)
+    if (intVar.getInt() < 0)
     {
         input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
@@ -151,7 +149,7 @@ void ifge(const InstructionInput& input)
 
     const vdata intVar = input.thread->m_currentFrame->popOperand();
 
-    if (std::bit_cast<i4>(intVar.getInt()) >= 0)
+    if (intVar.getInt() >= 0)
     {
         input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
@@ -166,7 +164,7 @@ void ifgt(const InstructionInput& input)
 
     const vdata intVar = input.thread->m_currentFrame->popOperand();
 
-    if (std::bit_cast<i4>(intVar.getInt()) > 0)
+    if (intVar.getInt() > 0)
     {
         input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
@@ -181,7 +179,7 @@ void ifle(const InstructionInput& input)
 
     const vdata intVar = input.thread->m_currentFrame->popOperand();
 
-    if (std::bit_cast<i4>(intVar.getInt()) <= 0)
+    if (intVar.getInt() <= 0)
     {
         input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
@@ -197,7 +195,7 @@ void if_icmpeq(const InstructionInput& input)
     const vdata var2 = input.thread->m_currentFrame->popOperand();
     const vdata var1 = input.thread->m_currentFrame->popOperand();
 
-    if (std::bit_cast<i4>(var1.getInt()) == std::bit_cast<i4>(var2.getInt()))
+    if (var1.getInt() == var2.getInt())
     {
         input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
@@ -213,7 +211,7 @@ void if_icmpne(const InstructionInput& input)
     const vdata var2 = input.thread->m_currentFrame->popOperand();
     const vdata var1 = input.thread->m_currentFrame->popOperand();
 
-    if (std::bit_cast<i4>(var1.getInt()) != std::bit_cast<i4>(var2.getInt()))
+    if (var1.getInt() != var2.getInt())
     {
         input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
@@ -229,7 +227,7 @@ void if_icmplt(const InstructionInput& input)
     const vdata var2 = input.thread->m_currentFrame->popOperand();
     const vdata var1 = input.thread->m_currentFrame->popOperand();
 
-    if (std::bit_cast<i4>(var1.getInt()) < std::bit_cast<i4>(var2.getInt()))
+    if (var1.getInt() < var2.getInt())
     {
         input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
@@ -245,7 +243,7 @@ void if_icmpge(const InstructionInput& input)
     vdata var2 = input.thread->m_currentFrame->popOperand();
     vdata var1 = input.thread->m_currentFrame->popOperand();
 
-    if (std::bit_cast<i4>(var1.getInt()) >= std::bit_cast<i4>(var2.getInt()))
+    if (var1.getInt() >= var2.getInt())
     {
         input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
@@ -261,7 +259,7 @@ void if_icmpgt(const InstructionInput& input)
     vdata var2 = input.thread->m_currentFrame->popOperand();
     vdata var1 = input.thread->m_currentFrame->popOperand();
 
-    if (std::bit_cast<i4>(var1.getInt()) > std::bit_cast<i4>(var2.getInt()))
+    if (var1.getInt() > var2.getInt())
     {
         input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
@@ -277,7 +275,7 @@ void if_icmple(const InstructionInput& input)
     vdata var2 = input.thread->m_currentFrame->popOperand();
     vdata var1 = input.thread->m_currentFrame->popOperand();
 
-    if (std::bit_cast<i4>(var1.getInt()) <= std::bit_cast<i4>(var2.getInt()))
+    if (var1.getInt() <= var2.getInt())
     {
         input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
