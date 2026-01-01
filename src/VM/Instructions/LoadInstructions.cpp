@@ -18,7 +18,7 @@
 #include <bit>
 
 #include "VM/VM.h"
-#include "Data/Variable.h"
+#include "Data/VData.h"
 
 
 void iload(const InstructionInput& input)

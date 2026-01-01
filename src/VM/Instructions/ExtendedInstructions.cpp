@@ -16,7 +16,7 @@
 #include "ExtendedInstructions.h"
 
 #include "VM/VM.h"
-#include "Data/Variable.h"
+#include "Data/VData.h"
 
 // TODO: Move to VM
 static i2 readShort(VMThread* thread)

@@ -16,7 +16,7 @@
 #include "ControlInstructions.h"
 
 #include "VM/VM.h"
-#include "Data/Variable.h"
+#include "Data/VData.h"
 
 static void returnCat1Var(VMThread* thread)
 {

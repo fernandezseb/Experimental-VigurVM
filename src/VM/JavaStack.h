@@ -5,7 +5,7 @@
 
 #include "Core.h"
 #include "Data/Class.h"
-#include "Data/Variable.h"
+#include "Data/VData.h"
 
 class ConstantPool;
 

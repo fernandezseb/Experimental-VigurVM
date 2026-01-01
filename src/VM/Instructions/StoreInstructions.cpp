@@ -17,7 +17,7 @@
 
 #include "CoreUtils.h"
 #include "VM/VM.h"
-#include "Data/Variable.h"
+#include "Data/VData.h"
 
 void istore(const InstructionInput& input)
 {

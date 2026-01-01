@@ -16,7 +16,7 @@
 #include "ConstantInstructions.h"
 
 #include "VM/VM.h"
-#include "Data/Variable.h"
+#include "Data/VData.h"
 #include "CoreUtils.h"
 
 #include <bit>

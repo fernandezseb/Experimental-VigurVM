@@ -8,7 +8,7 @@
 #include "Core.h"
 #include "DynamicArray.h"
 #include "Data/Class.h"
-#include "Data/Variable.h"
+#include "Data/VData.h"
 
 #include <vector>
 

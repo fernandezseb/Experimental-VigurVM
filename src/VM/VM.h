@@ -3,7 +3,7 @@
 #include "Core.h"
 #include "Configuration.h"
 #include "ClassLoader/ClassLoader.h"
-#include "Data/Variable.h"
+#include "Data/VData.h"
 #include "Data/Opcode.h"
 #include "JavaHeap.h"
 #include "VMThread.h"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Variable.h"
+#include "VData.h"
 
 #include "VM/VM.h"
 #include "Error.h"

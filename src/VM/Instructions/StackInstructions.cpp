@@ -16,7 +16,7 @@
 #include "StackInstructions.h"
 
 #include "VM/VM.h"
-#include "Data/Variable.h"
+#include "Data/VData.h"
 
 void pop(const InstructionInput& input)
 {
