@@ -1,5 +1,3 @@
-#pragma once
-
 #include "VData.h"
 
 #include "VM/VM.h"
