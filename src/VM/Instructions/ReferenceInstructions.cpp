@@ -75,7 +75,10 @@ void putstatic(const InstructionInput& input)
     {
         var2 = input.thread->m_currentFrame->popOperand();
     }
-    VM::get()->updateVariableFromVariable(&targetField->staticData, descriptor.data(), var, input.thread);
+    VariableType type = fromDescriptor(descriptor.data());
+    targetField->staticData.checkType(type);
+    var.checkType(type);
+    targetField->staticData.value = var.value;
 }
 
 void getfield(const InstructionInput& input)

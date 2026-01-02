@@ -114,92 +114,10 @@ vreference VM::createThreadObject(VMThread* thread, const vreference threadGroup
     return objectReference;
 }
 
-// TODO: Refactor this with simpler creation
-vdata VM::createVariableForDescriptor(std::string_view descriptor)
-{
-    if (descriptor == "I")
-    {
-        return vdata(VariableType_INT);
-    } else if (descriptor ==  "Z")
-    {
-        return vdata(VariableType_INT);
-    } else if (descriptor == "B")
-    {
-        return vdata(VariableType_INT);
-    } else if (descriptor == "J")
-    {
-        return vdata(VariableType_LONG);
-    } else if (descriptor ==  "D")
-    {
-        return vdata(VariableType_DOUBLE);
-    } else if (descriptor[0] == '[')
-    {
-        return vdata(VariableType_REFERENCE);
-    } else if (descriptor[0] == 'L')
-    {
-        return vdata(VariableType_REFERENCE);
-    } else if (descriptor[0] == 'F') {
-        return vdata(VariableType_FLOAT);
-    } else if (descriptor[0] == 'C')
-    {
-        return vdata(VariableType_INT);
-    }
-    else
-    {
-        fprintf(stderr, "Error: Couldn't construct data for descriptor type: %s\n", descriptor.data());
-        Platform::exitProgram(7);
-        std::unreachable();
-    }
-}
-
 
 JavaHeap* VM::getHeap()
 {
     return &m_heap;
-}
-
-
-void VM::updateVariableFromVariable(vdata* variable, std::string_view descriptor, vdata operand, VMThread* thread)
-{
-    if (descriptor ==  "I")
-    {
-        variable->checkType(VariableType_INT);
-        operand.checkType(VariableType_INT);
-
-        variable->value.i = operand.value.i;
-    } else if (descriptor ==  "C")
-    {
-        variable->checkType(VariableType_INT);
-        // checkType(operand, VariableType_CHAR, thread); TODO: Enable
-
-        variable->value.i = operand.value.i;
-    } else if (descriptor ==  "Z")
-    {
-        variable->checkType(VariableType_INT);
-
-        variable->value.i = operand.value.i;
-    } else if (descriptor[0] == '[' || descriptor[0] == 'L') {
-
-        variable->checkType(VariableType_REFERENCE);
-        operand.checkType(VariableType_REFERENCE);
-
-        variable->value.l = operand.value.l;
-    } else if (descriptor[0] == 'J')
-    {
-        variable->checkType(VariableType_LONG);
-        operand.checkType(VariableType_LONG);
-        variable->value.j = operand.value.j;
-    } else if (descriptor[0] == 'D')
-    {
-        variable->checkType(VariableType_DOUBLE);
-        operand.checkType(VariableType_DOUBLE);
-        variable->value.d = operand.value.d;
-    } else
-    {
-        char buffer[200];
-        snprintf(buffer, 200, "Error: Setting of variable of type with descriptor: %s not implemented yet!\n", descriptor.data());
-        thread->internalError(buffer, 5);
-    }
 }
 
 void VM::createArgsArray(const VMThread* thread)

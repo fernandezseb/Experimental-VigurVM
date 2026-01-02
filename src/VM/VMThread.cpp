@@ -142,7 +142,8 @@ void VMThread::initStaticFields(ClassInfo* class_info)
         FieldInfo* field = class_info->fields[currentField];
         if (field->isStatic())
         {
-            vdata variable = VM::createVariableForDescriptor(class_info->constantPool->getString(field->descriptorIndex));
+            const VariableType type = fromDescriptor(class_info->constantPool->getString(field->descriptorIndex));
+            const vdata variable(type);
             class_info->staticFields[currentStaticField++] = variable;
             if (variable.getCategory() == 2)
             {
