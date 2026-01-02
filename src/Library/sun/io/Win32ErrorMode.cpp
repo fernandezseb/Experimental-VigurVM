@@ -18,17 +18,11 @@
 
 JCALL void lib_sun_io_Win32ErrorMode_setErrorMode(const NativeArgs& args)
 {
-    const Variable lowBytes = args.thread->m_currentFrame->localVariables[1];
-    const Variable highBytes = args.thread->m_currentFrame->localVariables[0];
-    highBytes.checkType(VariableType_LONG);
-    lowBytes.checkType(VariableType_LONG);
-
-    const i8 longValue = ((i8)highBytes.data << 32) + (i8)lowBytes.data;
-    const u4 errorModeValue = longValue;
+    const vdata flags = args.thread->m_currentFrame->localVariables[0];
+    const u4 errorModeValue = flags.getLong();
 
     Platform::WinAPISetErrorMode(errorModeValue);
     args.thread->returnVar(
-        Variable{VariableType_LONG, highBytes.data},
-        Variable{VariableType_LONG, lowBytes.data}
+        vdata{VariableType_LONG, flags.getLong()}
         );
 }

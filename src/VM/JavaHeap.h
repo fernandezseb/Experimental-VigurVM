@@ -8,7 +8,7 @@
 #include "Core.h"
 #include "DynamicArray.h"
 #include "Data/Class.h"
-#include "Data/Variable.h"
+#include "Data/VData.h"
 
 #include <vector>
 
@@ -50,12 +50,7 @@ struct FieldData {
     uint16_t nameIndex;
     uint16_t descriptorIndex;
     VariableType type{VariableType_UNDEFINED};
-    union
-    {
-        u4 data;
-        u4 lowBytes;
-    };
-    u4 highBytes;
+    vvalue value;
 };
 
 class Object : public Reference {
@@ -67,7 +62,7 @@ public:
     u4 superClassObject{0};
     FieldData* getField(const char* name, const char* descriptor) const;
     [[nodiscard]] const Object* getObject(u4 fieldIndex) const;
-    [[nodiscard]] const i8 getLong(u4 fieldIndex) const;
+    [[nodiscard]] const vlong getLong(u4 fieldIndex) const;
 };
 
 class ClassObject : public Object
@@ -110,20 +105,20 @@ public:
     /*
      * Object operations
      */
-    u4 createArray(ArrayType type, uint64_t size, std::string_view descriptor);
-    u4 createObject(ClassInfo* classInfo);
-    u4 createClassObject(ClassInfo* classInfo, std::string_view name);
-    u4 createString(const char* utf8String);
+    vreference createArray(ArrayType type, uint64_t size, std::string_view descriptor);
+    vreference createObject(ClassInfo* classInfo);
+    vreference createClassObject(ClassInfo* classInfo, std::string_view name);
+    vreference createString(const char* utf8String);
 
-    [[nodiscard]] const Object* getObject(uint32_t id) const;
-    [[nodiscard]] Reference* getReference(u4 id) const;
-    [[nodiscard]] ClassObject* getClassObject(uint32_t id) const;
-    [[nodiscard]] const Object* getChildObject(uint32_t id, ClassInfo* classInfo);
-    [[nodiscard]] const Array* getArray(u4 id) const;
-    [[nodiscard]] u4 getString(const char* utf8String) const;
+    [[nodiscard]] const Object* getObject(vreference id) const;
+    [[nodiscard]] Reference* getReference(vreference id) const;
+    [[nodiscard]] ClassObject* getClassObject(vreference id) const;
+    [[nodiscard]] const Object* getChildObject(vreference id, ClassInfo* classInfo);
+    [[nodiscard]] const Array* getArray(vreference id) const;
+    [[nodiscard]] vreference getString(const char* utf8String) const;
     [[nodiscard]] std::u16string_view getStringContent(const Object* stringObject) const;
-    [[nodiscard]] std::u16string_view getStringContent(const u4 id) const;
-    [[nodiscard]] u4 getClassObjectByName(std::string_view name) const;
+    [[nodiscard]] std::u16string_view getStringContent(vreference id) const;
+    [[nodiscard]] vreference getClassObjectByName(std::string_view name) const;
 
     /*
      * Class Operations

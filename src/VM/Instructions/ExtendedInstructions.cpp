@@ -16,31 +16,23 @@
 #include "ExtendedInstructions.h"
 
 #include "VM/VM.h"
-#include "Data/Variable.h"
+#include "Data/VData.h"
 
-// TODO: Move to VM
-static i2 readShort(VMThread* thread)
-{
-    const u1* code = thread->m_currentMethod->code->code;
-    const u1 buffer[2] = {code[thread->m_pc++], code[thread->m_pc++]};
-    const i2 value = static_cast<i2>(buffer[1]) | static_cast<i2>(buffer[0]) << 8;
-    return value;
-}
 
 void wide(const InstructionInput& input)
 {
-    u1 opcode = input.thread->readUnsignedByte();
+    const u1 opcode = input.thread->readUnsignedByte();
     switch (opcode)
     {
     case i_iinc:
         {
             u2 index = input.thread->readUnsignedShort();
-            i2 constant = readShort(input.thread);
-            Variable* var =  &input.thread->m_currentFrame->localVariables[index];
+            i2 constant = input.thread->readSignedShort();
+            vdata* var =  &input.thread->m_currentFrame->localVariables[index];
             // var->data += constData;
-            i4 currentInt = std::bit_cast<i4>(var->data);
+            i4 currentInt = var->getInt();
             currentInt += constant;
-            var->data = std::bit_cast<u4>(currentInt);
+            var->value.i = currentInt;
             printf("");
             break;
         }
@@ -51,20 +43,20 @@ void wide(const InstructionInput& input)
 
 void ifnull(const InstructionInput& input)
 {
-    const i2 branchByte = readShort(input.thread);
+    const i2 branchByte = input.thread->readSignedShort();
     // uint8_t byte = thread->currentMethod->code->code[thread->pc-3+branchByte];
-    const Variable ref = input.thread->m_currentFrame->popOperand();
-    if (ref.data == 0) {
+    const vdata ref = input.thread->m_currentFrame->popOperand();
+    if (ref.getReference() == 0u) {
         input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
 }
 
 void ifnonnull(const InstructionInput& input)
 {
-    const i2 branchByte = readShort(input.thread);
+    const i2 branchByte = input.thread->readSignedShort();
     // uint8_t byte = thread->currentMethod->code->code[thread->pc-3+branchByte];
-    const Variable ref = input.thread->m_currentFrame->popOperand();
-    if (ref.data != 0) {
+    const vdata ref = input.thread->m_currentFrame->popOperand();
+    if (ref.getReference() != 0) {
         input.thread->m_pc = input.thread->m_pc-3+branchByte;
     }
 }

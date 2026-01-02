@@ -17,7 +17,7 @@
 
 JCALL void lib_java_lang_Float_floatToRawIntBits(const NativeArgs& args)
 {
-    const Variable floatVal = args.thread->m_currentFrame->localVariables[0];
+    const vdata floatVal = args.thread->m_currentFrame->localVariables[0];
     floatVal.checkType(VariableType_FLOAT);
-    args.thread->returnVar(Variable{VariableType_INT, floatVal.data});
+    args.thread->returnVar(vdata(VariableType_INT, std::bit_cast<i4>(floatVal.getFloat())));
 }

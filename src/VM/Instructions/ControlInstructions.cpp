@@ -16,11 +16,11 @@
 #include "ControlInstructions.h"
 
 #include "VM/VM.h"
-#include "Data/Variable.h"
+#include "Data/VData.h"
 
 static void returnCat1Var(VMThread* thread)
 {
-    const Variable returnVal = thread->m_currentFrame->popOperand();
+    const vdata returnVal = thread->m_currentFrame->popOperand();
     thread->popFrame();
     thread->returnVar(returnVal);
 }
@@ -43,7 +43,7 @@ void gotoInstruction(const InstructionInput& input)
 
 void lookupswitch(const InstructionInput& input)
 {
-    const i4 intValue = input.thread->m_currentFrame->popInt();
+    const vint intValue = input.thread->m_currentFrame->popInt();
     const u4 instructionIndex = input.thread->m_pc-1;
 
     while ((input.thread->m_pc % 4) != 0) {
@@ -84,18 +84,20 @@ void ireturnInstruction(const InstructionInput& input)
 
 void lreturnInstruction(const InstructionInput& input)
 {
-    const Variable lowByte = input.thread->m_currentFrame->popOperand();
-    const Variable highByte = input.thread->m_currentFrame->popOperand();
+    const vdata long1 = input.thread->m_currentFrame->popOperand();
+    [[maybe_unused]] const vdata long2 = input.thread->m_currentFrame->popOperand();
     input.thread->popFrame();
-    input.thread->returnVar(highByte, lowByte);
+    long1.checkType(VariableType_LONG);
+    input.thread->returnVar(long1);
 }
 
 void dreturnInstruction(const InstructionInput& input)
 {
-    const Variable lowByte = input.thread->m_currentFrame->popOperand();
-    const Variable highByte = input.thread->m_currentFrame->popOperand();
+    const vdata double1 = input.thread->m_currentFrame->popOperand();
+    const vdata double2 = input.thread->m_currentFrame->popOperand();
     input.thread->popFrame();
-    input.thread->returnVar(highByte, lowByte);
+    double1.checkType(VariableType_DOUBLE);
+    input.thread->returnVar(double1);
 }
 
 void areturnInstruction(const InstructionInput& input)

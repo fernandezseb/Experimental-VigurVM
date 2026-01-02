@@ -18,12 +18,12 @@
 
 JCALL void lib_java_lang_String_intern(const NativeArgs& args)
 {
-    Variable var = args.thread->m_currentFrame->localVariables[0];
+    vdata var = args.thread->m_currentFrame->localVariables[0];
     // const Object* stringObject = getThisObjectReference(args.thread, args.heap, args.vm);
     // const u4 arrayReference = stringObject->fields[0].data->data;
     // const Array* charArray = args.heap->getArray(arrayReference);
     // const u4 stringRef = args.heap->createString(reinterpret_cast<const char*>(charArray->data), args.vm);
     // TODO: Refactor to use string pool
     // printf("|String Interned with id: %d\n", var.data);
-    args.thread->returnVar(Variable{VariableType_REFERENCE, var.data});
+    args.thread->returnVar(vdata(VariableType_REFERENCE, var.getReference()));
 }

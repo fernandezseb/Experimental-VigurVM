@@ -18,8 +18,8 @@
 JCALL void lib_java_security_AccessController_doPriviliged(const NativeArgs& args)
 {
     const StackFrame* currentFrame = args.thread->m_currentFrame;
-    const Variable objectVar = currentFrame->localVariables[0];
-    const Object* method = VM::get()->getHeap()->getObject(currentFrame->localVariables[0].data);
+    const vdata objectVar = currentFrame->localVariables[0];
+    const Object* method = VM::get()->getHeap()->getObject(currentFrame->localVariables[0].getReference());
     const MethodInfo* methodInfo = method->classInfo->findMethodWithNameAndDescriptor("run", "()Ljava/lang/Object;");
     ClassInfo* classInfo = method->classInfo;
 
@@ -34,8 +34,8 @@ JCALL void lib_java_security_AccessController_doPriviliged_PriviligedExceptionAc
     // TODO: Catch checked exceptions and throw a PrivilegedActionException
     // when exception handling is properly implemented
     const StackFrame* currentFrame = args.thread->m_currentFrame;
-    const Variable objectVar = currentFrame->localVariables[0];
-    const Object* method = VM::get()->getHeap()->getObject(currentFrame->localVariables[0].data);
+    const vdata objectVar = currentFrame->localVariables[0];
+    const Object* method = VM::get()->getHeap()->getObject(currentFrame->localVariables[0].getReference());
     const MethodInfo* methodInfo = method->classInfo->findMethodWithNameAndDescriptor("run", "()Ljava/lang/Object;");
     ClassInfo* classInfo = method->classInfo;
 
@@ -47,5 +47,5 @@ JCALL void lib_java_security_AccessController_doPriviliged_PriviligedExceptionAc
 
 JCALL void lib_java_security_AccessController_getStackAccessControlContext(const NativeArgs& args)
 {
-    args.thread->returnVar(Variable{VariableType_REFERENCE, 0});
+    args.thread->returnVar(vdata(VariableType_REFERENCE, static_cast<vreference>(0)));
 }

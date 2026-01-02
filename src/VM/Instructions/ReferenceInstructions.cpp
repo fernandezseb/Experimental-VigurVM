@@ -16,21 +16,13 @@
 #include "ReferenceInstructions.h"
 
 #include "VM/VM.h"
-#include "Data/Variable.h"
+#include "Data/VData.h"
 #include "VM/Native.h"
 
 #include <bit>
 #include <deque>
 #include <string>
 #include <thread>
-
-static u2 readShort(VMThread* thread)
-{
-    uint8_t indexByte1 = thread->m_currentMethod->code->code[thread->m_pc++];
-    uint8_t indexByte2 = thread->m_currentMethod->code->code[thread->m_pc++];
-    uint16_t shortCombined = (indexByte1 << 8) | indexByte2;
-    return shortCombined;
-}
 
 
 [[nodiscard]] static constexpr u2 combineBytes(const u1 byte1, const u1 byte2) {
@@ -39,7 +31,7 @@ static u2 readShort(VMThread* thread)
 
 void getstatic(const InstructionInput& input)
 {
-    const uint16_t index = readShort(input.thread);
+    const u2 index = input.thread->readSignedShort();
     const CPFieldRef* fieldRef =  input.thread->m_currentFrame->constantPool->getFieldRef(index);
     const CPClassInfo* classInfo =  input.thread->m_currentFrame->constantPool->getClassInfo(fieldRef->classIndex);
     const CPNameAndTypeInfo* nameAndType = input.thread->m_currentFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
@@ -52,20 +44,20 @@ void getstatic(const InstructionInput& input)
     const std::string_view descriptor = input.thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex);
     const u1 varCount = getDescriptorVarCategory(descriptor);
     // TODO: Check type
-    const Variable *vars = targetField->staticData;
-    for (u1 currentVar = 0; currentVar < varCount; ++currentVar)
+    const vdata var = targetField->staticData;
+    if (var.type == VariableType_UNDEFINED)
     {
-        if (vars[currentVar].type == VariableType_UNDEFINED)
-        {
-            input.thread->internalError("Error: Unitialized field not supported in getstatic yet");
-        }
-        input.thread->m_currentFrame->operands.push_back(vars[currentVar]);
+        input.thread->internalError("Error: Unitialized field not supported in getstatic yet");
+    }
+    input.thread->m_currentFrame->operands.push_back(var);
+    if (var.getCategory() == 2) {
+        input.thread->m_currentFrame->operands.push_back(var);
     }
 }
 
 void putstatic(const InstructionInput& input)
 {
-    uint16_t index = readShort(input.thread);
+    const uint16_t index = input.thread->readSignedShort();
     CPFieldRef* fieldRef =  input.thread->m_currentFrame->constantPool->getFieldRef(index);
     CPClassInfo* classInfo =  input.thread->m_currentFrame->constantPool->getClassInfo(fieldRef->classIndex);
     CPNameAndTypeInfo* nameAndType = input.thread->m_currentFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
@@ -77,18 +69,18 @@ void putstatic(const InstructionInput& input)
     const std::string_view descriptor = input.thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex);
     const u1 varCount = getDescriptorVarCategory(descriptor);
     // With cat 2 vars, var should be the LSB
-    Variable var = input.thread->m_currentFrame->popOperand();
-    Variable var2{VariableType_UNDEFINED};
+    vdata var = input.thread->m_currentFrame->popOperand();
+    vdata var2{VariableType_UNDEFINED};
     if (varCount == 2)
     {
         var2 = input.thread->m_currentFrame->popOperand();
     }
-    VM::get()->updateVariableFromVariable(targetField->staticData, descriptor.data(), var, var2, input.thread);
+    VM::get()->updateVariableFromVariable(&targetField->staticData, descriptor.data(), var, input.thread);
 }
 
 void getfield(const InstructionInput& input)
 {
-    uint16_t index = readShort(input.thread);
+    uint16_t index = input.thread->readSignedShort();
     CPFieldRef* fieldRef = input.thread->m_currentFrame->constantPool->getFieldRef(index);
     CPClassInfo* cpClassInfo = input.thread->m_currentFrame->constantPool->getClassInfo(fieldRef->classIndex);
     CPNameAndTypeInfo* nameAndType = input.thread->m_currentFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
@@ -99,7 +91,7 @@ void getfield(const InstructionInput& input)
     const std::string_view fieldDescr = input.thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex);
 
 
-    Variable referencePointer = input.thread->m_currentFrame->popOperand();
+    vdata referencePointer = input.thread->m_currentFrame->popOperand();
 
     if (referencePointer.type != VariableType_REFERENCE)
     {
@@ -107,30 +99,30 @@ void getfield(const InstructionInput& input)
         Platform::exitProgram(6);
     }
 
-    if (referencePointer.data == 0)
+    if (referencePointer.getReference() == 0)
     {
         fprintf(stderr, "Error: Nullpointer Exception\n");
         Platform::exitProgram(6);
     }
     else
     {
-        const Object* object = VM::get()->getHeap()->getChildObject(referencePointer.data, targetClass);
+        const Object* object = VM::get()->getHeap()->getChildObject(referencePointer.getReference(), targetClass);
         FieldData* field = object->getField(fieldName.data(), fieldDescr.data());
         if (field == 0)
         {
             input.thread->internalError("Error: Field not found in object!");
         }
-        input.thread->m_currentFrame->operands.emplace_back(field->type, field->data);
+        input.thread->m_currentFrame->operands.emplace_back(field->type, field->value);
         if (field->dataSize == 2)
         {
-            input.thread->m_currentFrame->operands.emplace_back(field->type, field->highBytes);
+            input.thread->m_currentFrame->operands.emplace_back(field->type, field->value);
         }
     }
 }
 
 void putfield(const InstructionInput& input)
 {
-    uint16_t index = readShort(input.thread);
+    uint16_t index = input.thread->readSignedShort();
     CPFieldRef* fieldRef = input.thread->m_currentFrame->constantPool->getFieldRef(index);
     CPClassInfo* cpClassInfo = input.thread->m_currentFrame->constantPool->getClassInfo(fieldRef->classIndex);
     CPNameAndTypeInfo* nameAndType = input.thread->m_currentFrame->constantPool->getNameAndTypeInfo(fieldRef->nameAndTypeIndex);
@@ -140,31 +132,25 @@ void putfield(const InstructionInput& input)
     const std::string_view fieldName = input.thread->m_currentFrame->constantPool->getString(nameAndType->nameIndex);
     const std::string_view fieldDescr = input.thread->m_currentFrame->constantPool->getString(nameAndType->descriptorIndex);
 
-    Variable targetValue = input.thread->m_currentFrame->popOperand();
-    Variable targetValue2{VariableType_UNDEFINED};
+    vdata targetValue = input.thread->m_currentFrame->popOperand();
+    vdata targetValue2{VariableType_UNDEFINED};
     if (targetValue.getCategory() == 2)
     {
         targetValue2 = input.thread->m_currentFrame->popOperand(); // MSB
     }
-    Variable referencePointer = input.thread->m_currentFrame->popOperand();
+    vdata referencePointer = input.thread->m_currentFrame->popOperand();
 
-    const Object* targetObject = VM::get()->getHeap()->getChildObject(referencePointer.data, targetClass);
+    const Object* targetObject = VM::get()->getHeap()->getChildObject(referencePointer.getReference(), targetClass);
 
     FieldData* fieldData = targetObject->getField(fieldName.data(), fieldDescr.data());
 
     // TODO: Check for type descriptor
-    fieldData->data = targetValue.data;
-    if (targetValue.getCategory() == 2 && fieldData->dataSize == 2)
-    {
-        // ARRAY: | MOST SIGN | LEAST SIGN |
-        fieldData->lowBytes = targetValue.data;  // Least significant bits
-        fieldData->highBytes = targetValue2.data; // Most significant bits
-    }
+    fieldData->value = targetValue.value;
 }
 
 static void invokeVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread* thread, VM* VM) {
     StackFrame* topFrame = thread->m_currentFrame;
-    std::deque<Variable> arguments;
+    std::deque<vdata> arguments;
 
     MethodInfo* targetMethod = nullptr;
     ClassInfo* targetClass = nullptr;
@@ -174,10 +160,10 @@ static void invokeVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread
         // The arguments and the pointer to the object
         for (int i = methodInfo->argsCount; i >= 0; --i)
         {
-            Variable operand = topFrame->popOperand();
+            vdata operand = topFrame->popOperand();
             if (operand.getCategory() == 2)
             {
-                Variable highByte = topFrame->popOperand();
+                vdata highByte = topFrame->popOperand();
                 arguments.push_front(operand);
                 arguments.push_front(highByte);
             } else {
@@ -185,14 +171,14 @@ static void invokeVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread
             }
         }
 
-        const Variable ref = arguments[0];
-        if (ref.type == VariableType_REFERENCE && ref.data == 0)
+        const vdata ref = arguments[0];
+        if (ref.getReference() == 0)
         {
             thread->internalError("NullpointerException in virtual call");
         }
 
         // Look for method based on the object
-        const Reference* reference = VM::get()->getHeap()->getReference(ref.data);
+        const Reference* reference = VM::get()->getHeap()->getReference(ref.getReference());
         if (reference->type == OBJECT || reference->type == CLASSOBJECT) {
             const Object* object = reference->getObject();
             targetClass = object->classInfo;
@@ -260,7 +246,7 @@ static void invokeVirtual(ClassInfo* classInfo, MethodInfo* methodInfo, VMThread
 void invokevirtual(const InstructionInput& input)
 {
     StackFrame* topFrame = input.thread->m_currentFrame;
-    const u2 index = readShort(input.thread);
+    const u2 index = input.thread->readSignedShort();
     const CPMethodRef* methodRef = topFrame->constantPool->getMethodRef(index);
     const CPClassInfo* cpClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
     const CPNameAndTypeInfo* nameAndTypeInfo = topFrame->constantPool->getNameAndTypeInfo(methodRef->nameAndTypeIndex);
@@ -325,7 +311,7 @@ void invokevirtual(const InstructionInput& input)
 void invokespecial(const InstructionInput& input)
 {
     StackFrame* topFrame = input.thread->m_currentFrame;
-    const uint16_t index = readShort(input.thread);
+    const uint16_t index = input.thread->readSignedShort();
     const CPMethodRef* methodRef = topFrame->constantPool->getMethodRef(index);
     const CPClassInfo* cpClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
     const CPNameAndTypeInfo* nameAndTypeInfo = topFrame->constantPool->getNameAndTypeInfo(methodRef->nameAndTypeIndex);
@@ -352,7 +338,7 @@ void invokespecial(const InstructionInput& input)
 void invokestatic(const InstructionInput& input)
 {
     StackFrame* topFrame = input.thread->m_currentFrame;
-    uint16_t index = readShort(input.thread);
+    const uint16_t index = input.thread->readSignedShort();
     CPMethodRef* methodRef = topFrame->constantPool->getMethodRef(index);
     CPClassInfo* targetClassInfo = topFrame->constantPool->getClassInfo(methodRef->classIndex);
     CPNameAndTypeInfo* nameAndTypeInfo = topFrame->constantPool->getNameAndTypeInfo(methodRef->nameAndTypeIndex);
@@ -368,14 +354,14 @@ void invokestatic(const InstructionInput& input)
 
     if (methodInfo->isNative())
     {
-        std::deque<Variable> arguments;
+        std::deque<vdata> arguments;
         // The arguments and the pointer to the object
         for (int i = methodInfo->argsCount; i > 0; --i)
         {
-            Variable operand = topFrame->popOperand();
+            vdata operand = topFrame->popOperand();
             if (operand.getCategory() == 2)
             {
-                Variable highByte = topFrame->popOperand();
+                vdata highByte = topFrame->popOperand();
                 arguments.push_front(operand);
                 arguments.push_front(highByte);
             } else
@@ -422,7 +408,7 @@ void invokeinterface(const InstructionInput& input) {
 void newInstruction(const InstructionInput& input)
 {
     StackFrame* topFrame = input.thread->m_currentFrame;
-    uint16_t index = readShort(input.thread);
+    const uint16_t index = input.thread->readSignedShort();
     CPClassInfo* cpClasInfo = topFrame->constantPool->getClassInfo(index);
     ClassInfo* targetClass = input.thread->getClass(topFrame->constantPool->getString(cpClasInfo->nameIndex).data());
 
@@ -439,8 +425,8 @@ void newInstruction(const InstructionInput& input)
         }
     }
 
-    const uint32_t reference = VM::get()->getHeap()->createObject(targetClass);
-    const Variable variable{VariableType_REFERENCE, reference};
+    const vreference reference = VM::get()->getHeap()->createObject(targetClass);
+    const vdata variable{VariableType_REFERENCE, reference};
 
     topFrame->operands.push_back(variable);
 }
@@ -450,12 +436,11 @@ void newarray(const InstructionInput& input)
     const u1 typeArg = input.args[0];
     const ArrayType type = (ArrayType) typeArg;
 
-    const Variable countVar = input.thread->m_currentFrame->popOperand();
-    countVar.checkType(VariableType_INT);
+    const vdata countVar = input.thread->m_currentFrame->popOperand();
 
     // TODO: Fix by putting the correct descriptor based on the type
-    const uint32_t reference = VM::get()->getHeap()->createArray(type, countVar.data, "");
-    const Variable variable{VariableType_REFERENCE, reference};
+    const vreference reference = VM::get()->getHeap()->createArray(type, countVar.getInt(), "");
+    const vdata variable{VariableType_REFERENCE, reference};
 
     input.thread->m_currentFrame->operands.push_back(variable);
 }
@@ -463,13 +448,13 @@ void newarray(const InstructionInput& input)
 void anewarray(const InstructionInput& input)
 {
     StackFrame* topFrame = input.thread->m_currentFrame;
-    uint16_t index = readShort(input.thread);
+    u2 index = input.thread->readSignedShort();
     CPClassInfo* cpclassInfo = topFrame->constantPool->getClassInfo(index);
     const char* className = topFrame->constantPool->getString(cpclassInfo->nameIndex).data();
     // TODO: Is this needed? This loads the class eagerly
     [[maybe_unused]] ClassInfo* classInfo = input.thread->getClass(className);
 
-    const int32_t size = std::bit_cast<i4>(topFrame->popOperand().data);
+    const vint size = topFrame->popOperand().getInt();
 
     if (size < 0)
     {
@@ -480,25 +465,24 @@ void anewarray(const InstructionInput& input)
     str.insert(0, "L");
     str.push_back(';');
     const uint32_t reference = VM::get()->getHeap()->createArray(AT_REFERENCE, size, str);
-    const Variable variable{VariableType_REFERENCE, reference};
+    const vdata variable{VariableType_REFERENCE, reference};
 
     topFrame->operands.push_back(variable);
 }
 
 void arraylength(const InstructionInput& input)
 {
-    const Variable arrayRef = input.thread->m_currentFrame->popOperand();
-    arrayRef.checkType(VariableType_REFERENCE);
-    const Array* array = VM::get()->getHeap()->getArray(arrayRef.data);
+    const vdata arrayRef = input.thread->m_currentFrame->popOperand();
+    const Array* array = VM::get()->getHeap()->getArray(arrayRef.getReference());
 
-    const Variable lengthVar{VariableType_INT, static_cast<uint32_t>(array->length)};
+    const vdata lengthVar{VariableType_INT, static_cast<vint>(array->length)};
     input.thread->m_currentFrame->operands.push_back(lengthVar);
 }
 
 void athrow(const InstructionInput& input)
 {
-    const Variable throwableRef = input.thread->m_currentFrame->popOperand();
-    const Object* throwable = VM::get()->getHeap()->getObject(throwableRef.data);
+    const vdata throwableRef = input.thread->m_currentFrame->popOperand();
+    const Object* throwable = VM::get()->getHeap()->getObject(throwableRef.getReference());
 
     while(!input.thread->m_stack.frames.empty()) {
         const AttributeCode* codeAttribute = input.thread->m_currentMethod->code;
@@ -522,7 +506,7 @@ void athrow(const InstructionInput& input)
                 {
                     input.thread->m_pc = handler.handlerPc;
                     input.thread->m_currentFrame->operands.clear();
-                    input.thread->m_currentFrame->pushObject(throwableRef.data);
+                    input.thread->m_currentFrame->pushObject(throwableRef.getReference());
                     return;
                 }
             }
@@ -553,18 +537,18 @@ void instanceof(const InstructionInput& input)
     const CPClassInfo* cpClassInfo =  input.thread->m_currentClass->constantPool->getClassInfo(index);
     const std::string_view name =  input.thread->m_currentClass->constantPool->getString(cpClassInfo->nameIndex);
 
-    const Variable operand = input.thread->m_currentFrame->popOperand();
+    const vdata operand = input.thread->m_currentFrame->popOperand();
     operand.checkType(VariableType_REFERENCE);
 
     i4 returnVal = 0;
 
-    if (operand.data == 0)
+    if (operand.getReference() == 0)
     {
         input.thread->m_currentFrame->pushInt(returnVal);
         return;
     }
 
-    const Reference* reference = VM::get()->getHeap()->getReference(operand.data);
+    const Reference* reference = VM::get()->getHeap()->getReference(operand.getReference());
 
     if (reference->type == OBJECT || reference->type == CLASSOBJECT)
     {
@@ -623,13 +607,9 @@ void instanceof(const InstructionInput& input)
 void monitorenter(const InstructionInput& input)
 {
     // TODO: Implement when real threading is implemented
-    const Variable ref = input.thread->m_currentFrame->popOperand();
-    if (ref.type != VariableType_REFERENCE)
-    {
-        input.thread->internalError("Expected object reference on stack");
-    }
+    const vdata ref = input.thread->m_currentFrame->popOperand();
 
-    if (ref.data == 0)
+    if (ref.getReference() == 0)
     {
         input.thread->internalError("Nullpointer Exception");
     }
@@ -638,14 +618,9 @@ void monitorenter(const InstructionInput& input)
 void monitorexit(const InstructionInput& input)
 {
     // TODO: Implement when real threading is implemented
-    const Variable ref = input.thread->m_currentFrame->popOperand();
-    if (ref.type != VariableType_REFERENCE)
-    {
-        fprintf(stderr, "Error: Expected object reference on stack\n");
-        Platform::exitProgram(6);
-    }
+    const vdata ref = input.thread->m_currentFrame->popOperand();
 
-    if (ref.data == 0) {
+    if (ref.getReference() == 0) {
         input.thread->internalError("Nullpointer Exception");
     }
 }

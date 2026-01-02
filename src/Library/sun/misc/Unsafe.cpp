@@ -37,15 +37,15 @@ JCALL void lib_sun_misc_Unsafe_registerNatives([[maybe_unused]]const NativeArgs&
 JCALL void lib_sun_misc_Unsafe_arrayBaseOffset(const NativeArgs& args)
 {
     constexpr u4 offset = offsetof(Array, data);
-    constexpr u4 val = std::bit_cast<u4>(offset);
-    args.thread->returnVar(Variable{VariableType_INT,  val});
+    constexpr vint val = std::bit_cast<vint>(offset);
+    args.thread->returnVar(vdata{VariableType_INT,  val});
 }
 
 JCALL void lib_sun_misc_Unsafe_arrayIndexScale(const NativeArgs& args)
 {
-    const Variable classObjectRef = args.thread->m_currentFrame->localVariables[1];
-    const ClassObject* classObject = VM::get()->getHeap()->getClassObject(classObjectRef.data);
-    u4 length = 4;
+    const vdata classObjectRef = args.thread->m_currentFrame->localVariables[1];
+    const ClassObject* classObject = VM::get()->getHeap()->getClassObject(classObjectRef.getReference());
+    vint length = 4;
     if (classObject->name[1] == 'C')
     {
         length = 2;
@@ -53,23 +53,23 @@ JCALL void lib_sun_misc_Unsafe_arrayIndexScale(const NativeArgs& args)
     {
         length = 8;
     }
-    args.thread->returnVar(Variable{VariableType_INT, length});
+    args.thread->returnVar(vdata{VariableType_INT, length});
 }
 
 JCALL void lib_sun_misc_Unsafe_addressSize(const NativeArgs& args)
 {
-    constexpr Variable size{VariableType_INT, 64};
+    const vdata size{VariableType_INT, 64};
     args.thread->returnVar(size);
 }
 
 JCALL void lib_sun_misc_Unsafe_objectFieldOffset(const NativeArgs& args)
 {
-    const Variable fieldObjectRef = args.thread->m_currentFrame->localVariables[1];
-    const Object* fieldObject = VM::get()->getHeap()->getObject(fieldObjectRef.data);
+    const vdata fieldObjectRef = args.thread->m_currentFrame->localVariables[1];
+    const Object* fieldObject = VM::get()->getHeap()->getObject(fieldObjectRef.getReference());
     const FieldData* slotField = fieldObject->getField("slot", "I");
-    const u4 slot = slotField->data;
+    const u4 slot = slotField->value.i;
     const FieldData* classField = fieldObject->getField("clazz", "Ljava/lang/Class;");
-    ClassObject* classObject = VM::get()->getHeap()->getClassObject(classField->data);
+    ClassObject* classObject = VM::get()->getHeap()->getClassObject(classField->value.l);
     u4 index = 0;
     // Ignore static fields
     for (u4 currentField = 0; currentField < slot; ++currentField)
@@ -82,16 +82,16 @@ JCALL void lib_sun_misc_Unsafe_objectFieldOffset(const NativeArgs& args)
     }
     constexpr u4 baseOffset = offsetof(Object, fields);
     const u4 fieldOffset = baseOffset + (index * sizeof(FieldData));
-    args.thread->returnVar(Variable{VariableType_LONG, 0}, Variable{VariableType_LONG, fieldOffset});
+    args.thread->returnVar(vdata{VariableType_LONG, static_cast<vlong>(fieldOffset)});
 }
 
 JCALL void lib_sun_misc_Unsafe_compareAndSwapObject(const NativeArgs& args)
 {
-    const Variable oObjectRef = args.thread->m_currentFrame->localVariables[1];
-    const Object* oObject = VM::get()->getHeap()->getObject(oObjectRef.data);
-    const u8 offsetVar = ((static_cast<u8>(args.thread->m_currentFrame->localVariables[2].data) << 32) | static_cast<u8>(args.thread->m_currentFrame->localVariables[3].data));
-    const Variable expectedObjectRef = args.thread->m_currentFrame->localVariables[4];
-    const Variable xObjectRef = args.thread->m_currentFrame->localVariables[5];
+    const vdata oObjectRef = args.thread->m_currentFrame->localVariables[1];
+    const Object* oObject = VM::get()->getHeap()->getObject(oObjectRef.getReference());
+    const u8 offsetVar = static_cast<u8>(args.thread->m_currentFrame->localVariables[2].getLong());
+    const vdata expectedObjectRef = args.thread->m_currentFrame->localVariables[4];
+    const vdata xObjectRef = args.thread->m_currentFrame->localVariables[5];
     constexpr u4 baseOffset = offsetof(Object, fields);
     const u4 fieldIndex = (offsetVar-baseOffset)/sizeof(FieldData);
     if (fieldIndex >= oObject->fields.size())
@@ -99,23 +99,23 @@ JCALL void lib_sun_misc_Unsafe_compareAndSwapObject(const NativeArgs& args)
         args.thread->internalError("Too big offset", 78);
     }
     FieldData* fieldData = &oObject->fields[fieldIndex];
-    if (fieldData->data == expectedObjectRef.data)
+    if (fieldData->value.l == expectedObjectRef.getReference())
     {
-        fieldData->data = xObjectRef.data;
-        args.thread->returnVar(Variable{VariableType_INT, 1u});
+        fieldData->value.l = xObjectRef.getReference();
+        args.thread->returnVar(vdata{VariableType_INT, 1});
     } else
     {
-        args.thread->returnVar(Variable{VariableType_INT, 0u});
+        args.thread->returnVar(vdata{VariableType_INT, 0});
     }
 }
 
 JCALL void lib_sun_misc_Unsafe_compareAndSwapInt(const NativeArgs& args)
 {
-    const Variable oObjectRef = args.thread->m_currentFrame->localVariables[1];
-    const Object* oObject = VM::get()->getHeap()->getObject(oObjectRef.data);
-    const u8 offsetVar = ((static_cast<u8>(args.thread->m_currentFrame->localVariables[2].data) << 32) | static_cast<u8>(args.thread->m_currentFrame->localVariables[3].data));
-    const Variable expectedIntVar = args.thread->m_currentFrame->localVariables[4];
-    const Variable xIntVar = args.thread->m_currentFrame->localVariables[5];
+    const vdata oObjectRef = args.thread->m_currentFrame->localVariables[1];
+    const Object* oObject = VM::get()->getHeap()->getObject(oObjectRef.getReference());
+    const u8 offsetVar = static_cast<u8>(args.thread->m_currentFrame->localVariables[2].getLong());
+    const vdata expectedIntVar = args.thread->m_currentFrame->localVariables[4];
+    const vdata xIntVar = args.thread->m_currentFrame->localVariables[5];
     constexpr u4 baseOffset = offsetof(Object, fields);
     const u4 fieldIndex = (offsetVar-baseOffset)/sizeof(FieldData);
     if (fieldIndex >= oObject->fields.size())
@@ -123,40 +123,38 @@ JCALL void lib_sun_misc_Unsafe_compareAndSwapInt(const NativeArgs& args)
         args.thread->internalError("Too big offset", -9);
     }
     FieldData* fieldData = &oObject->fields[fieldIndex];
-    if (fieldData->data == expectedIntVar.data)
+    if (fieldData->value.i == expectedIntVar.getInt())
     {
-        fieldData->data = xIntVar.data;
-        args.thread->returnVar(Variable{VariableType_INT, 1u});
+        fieldData->value.i = xIntVar.getInt();
+        args.thread->returnVar(vdata{VariableType_INT, 1});
     } else
     {
-        args.thread->returnVar(Variable{VariableType_INT, 0u});
+        args.thread->returnVar(vdata{VariableType_INT, 0});
     }
 }
 
 JCALL void lib_sun_misc_Unsafe_getIntVolatile(const NativeArgs& args)
 {
     constexpr u4 baseOffset = offsetof(Object, fields);
-    const Variable oObjectRef = args.thread->m_currentFrame->localVariables[1];
-    const Object* oObject = VM::get()->getHeap()->getObject(oObjectRef.data);
-    const u8 offset = ((static_cast<u8>(args.thread->m_currentFrame->localVariables[2].data) << 32) | static_cast<u8>(args.thread->m_currentFrame->localVariables[3].data));
+    const vdata oObjectRef = args.thread->m_currentFrame->localVariables[1];
+    const Object* oObject = VM::get()->getHeap()->getObject(oObjectRef.getReference());
+    const u8 offset = static_cast<u8>(args.thread->m_currentFrame->localVariables[2].getLong());
     const u4 fieldOffset = (offset-baseOffset)/sizeof(FieldData);
     const FieldData fieldData = oObject->fields[fieldOffset];
 
-    args.thread->returnVar(Variable{VariableType_INT, fieldData.data});
+    args.thread->returnVar(vdata(VariableType_INT, fieldData.value.i));
 }
 
 JCALL void lib_sun_misc_Unsafe_allocateMemory(const NativeArgs& args)
 {
-    const u8 size = ((static_cast<u8>(args.thread->m_currentFrame->localVariables[1].data) << 32) | static_cast<u8>(args.thread->m_currentFrame->localVariables[2].data));
+    const u8 size = static_cast<u8>(args.thread->m_currentFrame->localVariables[1].getLong());
     const u8 address = reinterpret_cast<const u8> (malloc(size));
-    const auto parts = reinterpret_cast<const u4*>(&address);
-    args.thread->returnVar(Variable{VariableType_LONG, parts[1]},
-        Variable{VariableType_LONG, parts[0]});
+    args.thread->returnVar(vdata(VariableType_LONG, static_cast<vlong>(address)));
 }
 
 JCALL void lib_sun_misc_Unsafe_freeMemory(const NativeArgs& args)
 {
-    const u8 address = ((static_cast<u8>(args.thread->m_currentFrame->localVariables[1].data) << 32) | static_cast<u8>(args.thread->m_currentFrame->localVariables[2].data));
+    const u8 address = static_cast<u8>(args.thread->m_currentFrame->localVariables[1].getLong());
     if (address != 0)
     {
         free(reinterpret_cast<void*>(address));
@@ -165,8 +163,8 @@ JCALL void lib_sun_misc_Unsafe_freeMemory(const NativeArgs& args)
 
 JCALL void lib_sun_misc_Unsafe_putLong(const NativeArgs& args)
 {
-    const u8 addr = ((static_cast<u8>(args.thread->m_currentFrame->localVariables[1].data) << 32) | static_cast<u8>(args.thread->m_currentFrame->localVariables[2].data));
-    const u8 x = ((static_cast<u8>(args.thread->m_currentFrame->localVariables[3].data) << 32) | static_cast<u8>(args.thread->m_currentFrame->localVariables[4].data));
+    const u8 addr = static_cast<u8>(args.thread->m_currentFrame->localVariables[1].getLong());
+    const u8 x = static_cast<u8>(args.thread->m_currentFrame->localVariables[3].getLong());
 
     const auto memLocation = reinterpret_cast<u8*>(addr);
     *memLocation = x;
@@ -174,10 +172,10 @@ JCALL void lib_sun_misc_Unsafe_putLong(const NativeArgs& args)
 
 JCALL void lib_sun_misc_Unsafe_getByte(const NativeArgs& args)
 {
-    const u8 addr = ((static_cast<u8>(args.thread->m_currentFrame->localVariables[1].data) << 32) | static_cast<u8>(args.thread->m_currentFrame->localVariables[2].data));
+    const u8 addr = args.thread->m_currentFrame->localVariables[1].getLong();
     const auto memLocation = reinterpret_cast<i1*>(addr);
 
     const i1 val = *memLocation;
     const i4 valExtended = val;
-    args.thread->returnVar(Variable{VariableType_INT, std::bit_cast<u4>(valExtended)});
+    args.thread->returnVar(vdata(VariableType_INT, valExtended));
 }

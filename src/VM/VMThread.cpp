@@ -133,7 +133,7 @@ void VMThread::initStaticFields(ClassInfo* class_info)
     }
 
     class_info->staticFieldsCount = staticFieldsCount;
-    const auto variablesMemory = (Variable*) class_info->memory->alloc(sizeof(Variable) * staticFieldsCount);
+    const auto variablesMemory = (vdata*) class_info->memory->alloc(sizeof(vdata) * staticFieldsCount);
     class_info->staticFields = std::span(variablesMemory, staticFieldsCount);
 
     u2 currentStaticField = 0;
@@ -142,12 +142,14 @@ void VMThread::initStaticFields(ClassInfo* class_info)
         FieldInfo* field = class_info->fields[currentField];
         if (field->isStatic())
         {
-            std::vector<Variable> variables = VM::createVariableForDescriptor(class_info->constantPool->getString(field->descriptorIndex));
-            for (Variable variable : variables) {
+            vdata variable = VM::createVariableForDescriptor(class_info->constantPool->getString(field->descriptorIndex));
+            class_info->staticFields[currentStaticField++] = variable;
+            if (variable.getCategory() == 2)
+            {
                 class_info->staticFields[currentStaticField++] = variable;
             }
-            const std::size_t index = currentStaticField-variables.size();
-            field->staticData = &class_info->staticFields[index];
+            const std::size_t index = currentStaticField-variable.getCategory();
+            field->staticData = class_info->staticFields[index];
         }
     }
 }
@@ -180,7 +182,7 @@ void VMThread::pushStackFrameWithoutParams(ClassInfo* classInfo, const MethodInf
     stackFrame.localVariables.reserve(methodInfo->code->maxLocals);
     for (u2  currentLocal = 0; currentLocal < methodInfo->code->maxLocals; ++currentLocal)
     {
-        constexpr Variable var{VariableType_UNDEFINED};
+        constexpr vdata var{VariableType_UNDEFINED};
         stackFrame.localVariables.push_back(var);
     }
     stackFrame.operands.reserve(methodInfo->code->maxStack);
@@ -205,7 +207,7 @@ void VMThread::pushNativeStackFrame(ClassInfo* classInfo, const MethodInfo* meth
     StackFrame stackFrame;
     for (size_t currentLocal = 0; currentLocal < argumentsSize; ++currentLocal)
     {
-        constexpr Variable var{VariableType_UNDEFINED};
+        constexpr vdata var{VariableType_UNDEFINED};
         stackFrame.localVariables.push_back(var);
     }
     stackFrame.constantPool = classInfo->constantPool;
@@ -245,16 +247,16 @@ void VMThread::popFrame()
 
 void VMThread::pushStackFrameSpecial(ClassInfo* classInfo, const MethodInfo* methodInfo, StackFrame* previousFrame)
 {
-    std::deque<Variable> arguments;
+    std::deque<vdata> arguments;
     if (previousFrame != nullptr)
     {
         // The arguments and the pointer to the object
         for (int i = methodInfo->argsCount; i >= 0; --i)
         {
-            Variable operand = previousFrame->popOperand();
+            vdata operand = previousFrame->popOperand();
             if (operand.getCategory() == 2)
             {
-                Variable highByte = previousFrame->popOperand();
+                vdata highByte = previousFrame->popOperand();
                 arguments.push_front(operand);
                 arguments.push_front(highByte);
             } else {
@@ -262,8 +264,8 @@ void VMThread::pushStackFrameSpecial(ClassInfo* classInfo, const MethodInfo* met
             }
         }
 
-        const Variable ref = arguments[0];
-        if (ref.type == VariableType_REFERENCE && ref.data == 0)
+        const vdata ref = arguments[0];
+        if (ref.type == VariableType_REFERENCE && ref.getReference() == 0)
         {
             internalError("NullpointerException in special call");
         }
@@ -333,6 +335,14 @@ u2 VMThread::readUnsignedShort()
     const uint8_t indexByte2 = code[m_pc++];
     const uint16_t shortCombined = (indexByte1 << 8) | indexByte2;
     return shortCombined;
+}
+
+i2 VMThread::readSignedShort()
+{
+    const u1* code = m_currentMethod->code->code;
+    const u1 buffer[2] = {code[m_pc++], code[m_pc++]};
+    const i2 value = static_cast<i2>(buffer[1]) | static_cast<i2>(buffer[0]) << 8;
+    return value;
 }
 
 i4 VMThread::readSignedInt()
@@ -407,27 +417,18 @@ void VMThread::executeLoop()
     }
 }
 
-void VMThread::returnVar(const Variable returnValue)
+void VMThread::returnVar(const vdata returnValue)
 {
     StackFrame* targetFrame = getTopFrameNonNative();
     if (targetFrame != nullptr)
     {
         targetFrame->operands.push_back(returnValue);
+        if (returnValue.getCategory() == 2) // TODO: Check if 1 data item is enough
+        {
+            targetFrame->operands.push_back(returnValue);
+        }
     }
     else
-    {
-        internalError(NoNonNativeStackFrameFound);
-    }
-}
-
-void VMThread::returnVar(Variable highByte, Variable lowByte)
-{
-    StackFrame* targetFrame = getTopFrameNonNative();
-    if (targetFrame != nullptr)
-    {
-        targetFrame->operands.push_back(highByte);
-        targetFrame->operands.push_back(lowByte);
-    } else
     {
         internalError(NoNonNativeStackFrameFound);
     }
@@ -439,14 +440,14 @@ void VMThread::pushStackFrameStatic(ClassInfo* classInfo, MethodInfo* methodInfo
 
     if (previousFrame != nullptr)
     {
-        std::deque<Variable> arguments;
+        std::deque<vdata> arguments;
         // The arguments
         for (int i = methodInfo->argsCount; i > 0; --i)
         {
-            Variable operand = previousFrame->popOperand();
+            vdata operand = previousFrame->popOperand();
             if (operand.getCategory() == 2)
             {
-                Variable highByte = previousFrame->popOperand();
+                vdata highByte = previousFrame->popOperand();
                 arguments.push_front(operand);
                 arguments.push_front(highByte);
             } else {

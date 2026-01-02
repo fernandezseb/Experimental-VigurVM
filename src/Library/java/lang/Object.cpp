@@ -26,7 +26,7 @@ JCALL void lib_java_lang_Object_registerNatives(const NativeArgs& args)
 JCALL void lib_java_lang_Object_hashCode(const NativeArgs& args)
 {
     const StackFrame* currentFrame = args.thread->m_currentFrame;
-    const Variable var{VariableType_INT, currentFrame->localVariables[0].data};
+    const vdata var{VariableType_INT, static_cast<vint>(currentFrame->localVariables[0].getReference())};
     args.thread->returnVar(var);
 }
 
@@ -34,21 +34,21 @@ JCALL void lib_java_lang_Object_getClass(const NativeArgs& args)
 {
     // TODO: Implement getClass for arrays as well
     const StackFrame* currentFrame = args.thread->m_currentFrame;
-    const Reference* reference = VM::get()->getHeap()->getReference(currentFrame->localVariables[0].data);
+    const Reference* reference = VM::get()->getHeap()->getReference(currentFrame->localVariables[0].getReference());
 
     if (reference->type == OBJECT)
     {
-        const Object* object = VM::get()->getHeap()->getObject(currentFrame->localVariables[0].data);
-        const u4 classObject = VM::get()->getHeap()->createClassObject(object->classInfo, object->classInfo->getName());
-        args.thread->returnVar(Variable{VariableType_REFERENCE, classObject});
+        const Object* object = VM::get()->getHeap()->getObject(currentFrame->localVariables[0].getReference());
+        const vreference classObject = VM::get()->getHeap()->createClassObject(object->classInfo, object->classInfo->getName());
+        args.thread->returnVar(vdata{VariableType_REFERENCE, classObject});
     } else if (reference->type == ARRAY)
     {
-        const Array* array = VM::get()->getHeap()->getArray(currentFrame->localVariables[0].data);
+        const Array* array = VM::get()->getHeap()->getArray(currentFrame->localVariables[0].getReference());
         printf("brol");
         std::string name = std::string(array->descriptor);
         name.insert(0, "[");
-        const u4 classObject = VM::get()->getHeap()->createClassObject(nullptr, name.c_str());
-        args.thread->returnVar(Variable{VariableType_REFERENCE, classObject});
+        const vreference classObject = VM::get()->getHeap()->createClassObject(nullptr, name.c_str());
+        args.thread->returnVar(vdata{VariableType_REFERENCE, classObject});
     } else
     {
         args.thread->internalError("Running getClass on unknown type of object", 12);
@@ -57,11 +57,11 @@ JCALL void lib_java_lang_Object_getClass(const NativeArgs& args)
 
 JCALL void lib_java_lang_Object_clone(const NativeArgs& args)
 {
-    const Reference* reference = VM::get()->getHeap()->getReference(args.thread->m_currentFrame->localVariables[0].data);
+    const Reference* reference = VM::get()->getHeap()->getReference(args.thread->m_currentFrame->localVariables[0].getReference());
     if (reference->type == ARRAY)
     {
         const Array* array = reference->getArray();
-        const u4 cloneRef = VM::get()->getHeap()->createArray(array->arrayType, array->length, array->descriptor);
+        const vreference cloneRef = VM::get()->getHeap()->createArray(array->arrayType, array->length, array->descriptor);
         const Array* clone = VM::get()->getHeap()->getArray(cloneRef);
         // TODO: Do the copy of the data
         u4* newArrayData = reinterpret_cast<u4*>(clone->data);
@@ -70,7 +70,7 @@ JCALL void lib_java_lang_Object_clone(const NativeArgs& args)
         {
             newArrayData[currentItemIndex] = oldArrayData[currentItemIndex];
         }
-        args.thread->returnVar(Variable{VariableType_REFERENCE, cloneRef});
+        args.thread->returnVar(vdata{VariableType_REFERENCE, cloneRef});
         printf("");
     } else if (reference->type == CLASSOBJECT || reference->type == OBJECT) {
         args.thread->internalError("Not implemented yet", 781);

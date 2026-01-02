@@ -17,5 +17,5 @@
 
 JCALL void lib_java_lang_Throwable_fillInStackTrace(const NativeArgs& args)
 {
-    args.thread->returnVar(Variable{VariableType_REFERENCE, args.thread->m_currentFrame->localVariables[0].data});
+    args.thread->returnVar(vdata{VariableType_REFERENCE, args.thread->m_currentFrame->localVariables[0].getReference()});
 }

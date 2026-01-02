@@ -18,13 +18,13 @@
 #include <bit>
 
 #include "VM/VM.h"
-#include "Data/Variable.h"
+#include "Data/VData.h"
 
 
 void iload(const InstructionInput& input)
 {
     const u1 index = input.args[0];
-    const Variable var = input.thread->m_currentFrame->localVariables[index];
+    const vdata var = input.thread->m_currentFrame->localVariables[index];
     var.checkType(VariableType_INT);
 
     input.thread->m_currentFrame->operands.push_back(var);
@@ -33,20 +33,20 @@ void iload(const InstructionInput& input)
 void lload(const InstructionInput& input)
 {
     const u1 index = input.args[0];
-    const Variable highBytes = input.thread->m_currentFrame->localVariables[index];
-    highBytes.checkType( VariableType_LONG);
+    const vdata long1 = input.thread->m_currentFrame->localVariables[index];
+    long1.checkType( VariableType_LONG);
 
-    const Variable lowBytes = input.thread->m_currentFrame->localVariables[index+1];
-    lowBytes.checkType(VariableType_LONG);
+    const vdata long2 = input.thread->m_currentFrame->localVariables[index+1];
+    long2.checkType(VariableType_LONG);
 
-    input.thread->m_currentFrame->operands.push_back(highBytes);
-    input.thread->m_currentFrame->operands.push_back(lowBytes);
+    input.thread->m_currentFrame->operands.push_back(long1);
+    input.thread->m_currentFrame->operands.push_back(long2);
 }
 
 void fload(const InstructionInput& input)
 {
     const u1 index = input.args[0];
-    const Variable var = input.thread->m_currentFrame->localVariables[index];
+    const vdata var = input.thread->m_currentFrame->localVariables[index];
     var.checkType(VariableType_FLOAT);
 
     input.thread->m_currentFrame->operands.push_back(var);
@@ -54,14 +54,14 @@ void fload(const InstructionInput& input)
 
 void aload(const InstructionInput& input) {
     const u1 index = input.args[0];
-    const Variable var = input.thread->m_currentFrame->localVariables[index];
+    const vdata var = input.thread->m_currentFrame->localVariables[index];
     var.checkType(VariableType_REFERENCE);
     input.thread->m_currentFrame->operands.push_back(var);
 }
 
 void aload_i(const InstructionInput& input)
 {
-    const Variable var = input.thread->m_currentFrame->localVariables[input.arg];
+    const vdata var = input.thread->m_currentFrame->localVariables[input.arg];
     var.checkType(VariableType_REFERENCE);
 
     input.thread->m_currentFrame->operands.push_back(var);
@@ -69,7 +69,7 @@ void aload_i(const InstructionInput& input)
 
 void iload_i(const InstructionInput& input)
 {
-    const Variable var = input.thread->m_currentFrame->localVariables[input.arg];
+    const vdata var = input.thread->m_currentFrame->localVariables[input.arg];
     var.checkType(VariableType_INT);
 
     input.thread->m_currentFrame->operands.push_back(var);
@@ -77,19 +77,19 @@ void iload_i(const InstructionInput& input)
 
 void lload_i(const InstructionInput& input)
 {
-    const Variable highBytes = input.thread->m_currentFrame->localVariables[input.arg];
-    highBytes.checkType(VariableType_LONG);
+    const vdata long1 = input.thread->m_currentFrame->localVariables[input.arg];
+    long1.checkType(VariableType_LONG);
 
-    const Variable lowBytes = input.thread->m_currentFrame->localVariables[input.arg+1];
-    lowBytes.checkType(VariableType_LONG);
+    const vdata long2 = input.thread->m_currentFrame->localVariables[input.arg+1];
+    long2.checkType(VariableType_LONG);
 
-    input.thread->m_currentFrame->operands.push_back(highBytes);
-    input.thread->m_currentFrame->operands.push_back(lowBytes);
+    input.thread->m_currentFrame->operands.push_back(long1);
+    input.thread->m_currentFrame->operands.push_back(long2);
 }
 
 void fload_i(const InstructionInput& input)
 {
-    const Variable var = input.thread->m_currentFrame->localVariables[input.arg];
+    const vdata var = input.thread->m_currentFrame->localVariables[input.arg];
     var.checkType(VariableType_FLOAT);
 
     input.thread->m_currentFrame->operands.push_back(var);
@@ -97,62 +97,62 @@ void fload_i(const InstructionInput& input)
 
 void iaload(const InstructionInput& input)
 {
-    const Variable index = input.thread->m_currentFrame->popOperand();
-    const Variable arrayRef = input.thread->m_currentFrame->popOperand();
+    const vdata index = input.thread->m_currentFrame->popOperand();
+    const vdata arrayRef = input.thread->m_currentFrame->popOperand();
 
-    const Array* array = VM::get()->getHeap()->getArray(arrayRef.data);
+    const Array* array = VM::get()->getHeap()->getArray(arrayRef.getReference());
     const i4* intArray = (i4*) array->data;
 
-    const i4 data = intArray[index.data];
+    const i4 data = intArray[index.getInt()];
 
-    const Variable dataVar{VariableType_INT, std::bit_cast<u4>(data)};
+    const vdata dataVar{VariableType_INT, static_cast<vint>(data)};
     input.thread->m_currentFrame->operands.push_back(dataVar);
 }
 
 void aaload(const InstructionInput& input)
 {
-    const Variable index = input.thread->m_currentFrame->popOperand();
-    const Variable arrayRef = input.thread->m_currentFrame->popOperand();
+    const vdata index = input.thread->m_currentFrame->popOperand();
+    const vdata arrayRef = input.thread->m_currentFrame->popOperand();
 
-    const Array* array = VM::get()->getHeap()->getArray(arrayRef.data);
+    const Array* array = VM::get()->getHeap()->getArray(arrayRef.getReference());
     const u4* referenceArray = (u4*) array->data;
 
-    const u4 data = referenceArray[index.data];
+    const u4 data = referenceArray[index.getInt()];
 
-    const Variable dataVar{VariableType_REFERENCE, std::bit_cast<u4>(data)};
+    const vdata dataVar{VariableType_REFERENCE, static_cast<vreference>(data)};
     input.thread->m_currentFrame->operands.push_back(dataVar);
 }
 
 void baload(const InstructionInput& input)
 {
-    const Variable index = input.thread->m_currentFrame->popOperand();
-    const Variable arrayRef = input.thread->m_currentFrame->popOperand();
+    const vdata index = input.thread->m_currentFrame->popOperand();
+    const vdata arrayRef = input.thread->m_currentFrame->popOperand();
 
-    const Array* array = VM::get()->getHeap()->getArray(arrayRef.data);
+    const Array* array = VM::get()->getHeap()->getArray(arrayRef.getReference());
     const i4* intArray = (i4*) array->data;
 
-    const i4 data = intArray[index.data];
+    const i4 data = intArray[index.getInt()];
 
-    const Variable dataVar{VariableType_INT, std::bit_cast<u4>(data)};
+    const vdata dataVar{VariableType_INT, static_cast<vint>(data)};
     input.thread->m_currentFrame->operands.push_back(dataVar);
 }
 
 void caload(const InstructionInput& input)
 {
     // TODO: Fix for utf-16
-    const Variable index = input.thread->m_currentFrame->popOperand();
-    const Variable arrayRef = input.thread->m_currentFrame->popOperand();
+    const vdata index = input.thread->m_currentFrame->popOperand();
+    const vdata arrayRef = input.thread->m_currentFrame->popOperand();
 
-    const Array* array = VM::get()->getHeap()->getArray(arrayRef.data);
+    const Array* array = VM::get()->getHeap()->getArray(arrayRef.getReference());
     const u2* intArray = reinterpret_cast<u2*>(array->data);
 
-    const i4 indexSigned = static_cast<i4>(index.data);
+    const vint indexSigned = index.getInt();
     if ((indexSigned > array->length) || (indexSigned < 0))
     {
         input.thread->internalError("Index out of bound");
     }
     const u2 data = intArray[indexSigned];
 
-    const Variable dataVar{VariableType_INT, std::bit_cast<u4>(static_cast<i4>(data))};
+    const vdata dataVar{VariableType_INT, static_cast<vint>(data)};
     input.thread->m_currentFrame->operands.push_back(dataVar);
 }

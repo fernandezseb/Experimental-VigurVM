@@ -18,48 +18,43 @@
 #include <bit>
 
 #include "VM/VM.h"
-#include "Data/Variable.h"
+#include "Data/VData.h"
 
 
 void i2l(const InstructionInput& input)
 {
-    const Variable valueVar = input.thread->m_currentFrame->popOperand();
-    valueVar.checkType(VariableType_INT);
-    const i4 intValue = std::bit_cast<i4>(valueVar.data);
-    const i8 l = intValue;
-    const u4* bytes = (u4*)(&l);
-    const u4 highByte = bytes[1];
-    const u4 lowByte = bytes[0];
-    input.thread->m_currentFrame->operands.emplace_back(Variable{VariableType_LONG, highByte});
-    input.thread->m_currentFrame->operands.emplace_back(Variable{VariableType_LONG, lowByte});
+    const vint intValue = input.thread->m_currentFrame->popInt();
+    const auto l = static_cast<vlong>(intValue);
+    input.thread->m_currentFrame->operands.emplace_back(VariableType_LONG, l);
+    input.thread->m_currentFrame->operands.emplace_back(VariableType_LONG, l);
 }
 
 void i2f(const InstructionInput& input)
 {
-    const i4 intValue = input.thread->m_currentFrame->popInt();
-    const float f = static_cast<float>(intValue);
+    const vint intValue = input.thread->m_currentFrame->popInt();
+    const auto f = static_cast<vfloat>(intValue);
     input.thread->m_currentFrame->pushFloat(f);
 }
 
 void f2i(const InstructionInput& input)
 {
     const float f = input.thread->m_currentFrame->popFloat();
-    const i4 intValue = static_cast<i4>(f);
+    const vint intValue = static_cast<i4>(f);
     input.thread->m_currentFrame->pushInt(intValue);
 }
 
 void i2b(const InstructionInput& input)
 {
-    const i4 intValue = input.thread->m_currentFrame->popInt();
+    const vint intValue = input.thread->m_currentFrame->popInt();
     const u1 b = static_cast<u1>(intValue);// TODO: Check if correct
-    const i4 result = b;
+    const vint result = b;
     input.thread->m_currentFrame->pushInt(result);
 }
 
 void i2c(const InstructionInput& input)
 {
-    const i4 intValue = input.thread->m_currentFrame->popInt();
+    const vint intValue = input.thread->m_currentFrame->popInt();
     const u2 f = static_cast<u2>(intValue);// TODO: Check if correct
-    const i4 result = f;
+    const vint result = f;
     input.thread->m_currentFrame->pushInt(result);
 }

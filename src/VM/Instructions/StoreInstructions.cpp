@@ -17,11 +17,11 @@
 
 #include "CoreUtils.h"
 #include "VM/VM.h"
-#include "Data/Variable.h"
+#include "Data/VData.h"
 
 void istore(const InstructionInput& input)
 {
-    const Variable refVar = input.thread->m_currentFrame->popOperand();
+    const vdata refVar = input.thread->m_currentFrame->popOperand();
     refVar.checkType(VariableType_INT);
     const u1 index = input.args[0];
     input.thread->m_currentFrame->localVariables[index] = refVar;
@@ -29,62 +29,58 @@ void istore(const InstructionInput& input)
 
 void fstore(const InstructionInput& input)
 {
-    const Variable refVar = input.thread->m_currentFrame->popOperand();
+    const vdata refVar = input.thread->m_currentFrame->popOperand();
     const u1 index = input.args[0];
     input.thread->m_currentFrame->localVariables[index] = refVar;
 }
 
 void astore(const InstructionInput& input)
 {
-    const Variable refVar = input.thread->m_currentFrame->popOperand();
+    const vdata refVar = input.thread->m_currentFrame->popOperand();
     const u1 index = input.args[0];
     input.thread->m_currentFrame->localVariables[index] = refVar;
 }
 
 void istore_i(const InstructionInput& input)
 {
-    const Variable refVar = input.thread->m_currentFrame->popOperand();
+    const vdata refVar = input.thread->m_currentFrame->popOperand();
     refVar.checkType(VariableType_INT);
     input.thread->m_currentFrame->localVariables[input.arg] = refVar;
 }
 
 void lstore_i(const InstructionInput& input)
 {
-    const i8 longVal = input.thread->m_currentFrame->popLong();
-    const auto parts = reinterpret_cast<const u4*>(&longVal);
-    input.thread->m_currentFrame->localVariables[input.arg] = Variable{VariableType_LONG, parts[1]};
-    input.thread->m_currentFrame->localVariables[input.arg+1] = Variable{VariableType_LONG, parts[0]};
+    // TODO: Check duplication. Is it needed in the future?
+    const vlong longVal = input.thread->m_currentFrame->popLong();
+    input.thread->m_currentFrame->localVariables[input.arg] = vdata{VariableType_LONG, longVal};
+    input.thread->m_currentFrame->localVariables[input.arg+1] = vdata{VariableType_LONG, longVal};
 }
 
 void astore_i(const InstructionInput& input)
 {
-    const Variable refVar = input.thread->m_currentFrame->popOperand();
+    const vdata refVar = input.thread->m_currentFrame->popOperand();
     input.thread->m_currentFrame->localVariables[input.arg] = refVar;
 }
 
 void iastore(const InstructionInput& input)
 {
-    Variable value = input.thread->m_currentFrame->popOperand();
-    const Variable index = input.thread->m_currentFrame->popOperand();
-    const Variable arrayref = input.thread->m_currentFrame->popOperand();
+    vdata value = input.thread->m_currentFrame->popOperand();
+    const vdata index = input.thread->m_currentFrame->popOperand();
+    const vdata arrayref = input.thread->m_currentFrame->popOperand();
 
-    const Array* array = VM::get()->getHeap()->getArray(arrayref.data);
+    const Array* array = VM::get()->getHeap()->getArray(arrayref.getReference());
     i4* intArray = reinterpret_cast<i4*>(array->data);
-    intArray[index.data] = *reinterpret_cast<i4*>(&value.data);
+    intArray[index.getInt()] = value.getInt();
 }
 
 void aastore(const InstructionInput& input)
 {
     StackFrame* currentFrame = input.thread->m_currentFrame;
-    const Variable value = currentFrame->popOperand();
-    const Variable index = currentFrame->popOperand();
-    const Variable arrayRef = currentFrame->popOperand();
+    const vdata value = currentFrame->popOperand();
+    const vdata index = currentFrame->popOperand();
+    const vdata arrayRef = currentFrame->popOperand();
 
-    value.checkType(VariableType_REFERENCE);
-    index.checkType(VariableType_INT);
-    arrayRef.checkType(VariableType_REFERENCE);
-
-    const Array* arrayArr = VM::get()->getHeap()->getArray(arrayRef.data);
+    const Array* arrayArr = VM::get()->getHeap()->getArray(arrayRef.getReference());
 
     if (arrayArr->arrayType != AT_REFERENCE)
     {
@@ -92,31 +88,31 @@ void aastore(const InstructionInput& input)
     }
 
     auto* arrData = reinterpret_cast<uint32_t*>(arrayArr->data);
-    arrData[index.data] = value.data;
+    arrData[index.getInt()] = value.getReference();
 }
 
 void bastore(const InstructionInput& input)
 {
     // TODO: Fix!!!!!
-    Variable value = input.thread->m_currentFrame->popOperand();
-    const Variable index = input.thread->m_currentFrame->popOperand();
-    const Variable arrayref = input.thread->m_currentFrame->popOperand();
+    vdata value = input.thread->m_currentFrame->popOperand();
+    const vdata index = input.thread->m_currentFrame->popOperand();
+    const vdata arrayref = input.thread->m_currentFrame->popOperand();
 
-    const Array* array = VM::get()->getHeap()->getArray(arrayref.data);
+    const Array* array = VM::get()->getHeap()->getArray(arrayref.getReference());
     i1* byteArray = reinterpret_cast<i1*>(array->data);
-    byteArray[index.data] = static_cast<i1>(*reinterpret_cast<i4*>(&value.data));
+    byteArray[index.getInt()] = static_cast<i1>(value.getInt());
 }
 
 void castore(const InstructionInput& input)
 {
     // TODO: Fix for utf-16
     StackFrame* currentFrame = input.thread->m_currentFrame;
-    const Variable value = currentFrame->popOperand();
-    const Variable index = currentFrame->popOperand();
-    const Variable arrayref = currentFrame->popOperand();
+    const vdata value = currentFrame->popOperand();
+    const vdata index = currentFrame->popOperand();
+    const vdata arrayref = currentFrame->popOperand();
 
-    const Array* array = VM::get()->getHeap()->getArray(arrayref.data);
+    const Array* array = VM::get()->getHeap()->getArray(arrayref.getReference());
 
     u2* charArray = reinterpret_cast<u2*>(array->data);
-    charArray[index.data] = castToU2<u4>(value.data); // XXX
+    charArray[index.getInt()] = castToU2<vint>(value.getInt()); // XXX
 }

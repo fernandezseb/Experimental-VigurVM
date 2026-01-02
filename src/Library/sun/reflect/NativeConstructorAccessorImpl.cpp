@@ -17,13 +17,13 @@
 
 JCALL void lib_sun_reflect_NativeConstructorAccessorImpl_newInstance0(const NativeArgs& args)
 {
-    const Object* constructor = VM::get()->getHeap()->getObject(args.thread->m_currentFrame->localVariables[0].data);
+    const Object* constructor = VM::get()->getHeap()->getObject(args.thread->m_currentFrame->localVariables[0].getReference());
 
     const FieldData* slotField = constructor->getField("slot", "I");
 
     // Set the class field
     const FieldData* classField = constructor->getField("clazz", "Ljava/lang/Class;");
-    const ClassObject* classObject = VM::get()->getHeap()->getClassObject(classField->data);
+    const ClassObject* classObject = VM::get()->getHeap()->getClassObject(classField->value.l);
 
     // Set the modifiers field
     const FieldData* modifiersField = constructor->getField("modifiers", "I");
@@ -32,18 +32,18 @@ JCALL void lib_sun_reflect_NativeConstructorAccessorImpl_newInstance0(const Nati
     const FieldData* parameterTypes = constructor->getField("parameterTypes", "[Ljava/lang/Class;");
 
 
-    const MethodInfo* constructorMethod = classObject->classClassInfo->methods[slotField->data];
+    const MethodInfo* constructorMethod = classObject->classClassInfo->methods[slotField->value.i];
 
 
-    const u4 objectRef = VM::get()->getHeap()->createObject(classObject->classClassInfo);
+    const vreference objectRef = VM::get()->getHeap()->createObject(classObject->classClassInfo);
 
     args.thread->pushStackFrameWithoutParams(classObject->classClassInfo, constructorMethod);
-    args.thread->m_currentFrame->localVariables[0] = Variable{VariableType_REFERENCE, objectRef};
+    args.thread->m_currentFrame->localVariables[0] = vdata{VariableType_REFERENCE, objectRef};
     // TODO: Implement passing of n arguments to constructor
 
     args.thread->executeLoop();
 
-    args.thread->returnVar(Variable{VariableType_REFERENCE,  objectRef});
+    args.thread->returnVar(vdata{VariableType_REFERENCE,  objectRef});
 
 
     printf("");

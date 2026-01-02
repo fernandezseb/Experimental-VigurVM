@@ -21,7 +21,7 @@ public:
     // current class
     ClassInfo* m_currentClass{nullptr};
     std::string_view m_name;
-    u4 threadObject{0};
+    vreference threadObject{0};
     i1 priority{5};
     bool alive{false};
     std::thread::id m_pthreadId;
@@ -40,12 +40,12 @@ public:
     void popFrame();
     void pushStackFrameStatic(ClassInfo* classInfo, MethodInfo* methodInfo, StackFrame* previousFrame);
     void pushStackFrameSpecial(ClassInfo* classInfo, const MethodInfo* methodInfo, StackFrame* previousFrame);
-    void returnVar(Variable returnValue);
-    void returnVar(Variable highByte, Variable lowByte);
+    void returnVar(vdata returnValue);
     void internalError(std::string_view error, i4 errorCode) const;
     void internalError(std::string_view error) const;
     u1 readUnsignedByte();
     u2 readUnsignedShort();
+    i2 readSignedShort();
     i4 readSignedInt();
 
     StackFrame* getTopFrameNonNative();

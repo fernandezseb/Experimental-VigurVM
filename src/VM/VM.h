@@ -3,7 +3,7 @@
 #include "Core.h"
 #include "Configuration.h"
 #include "ClassLoader/ClassLoader.h"
-#include "Data/Variable.h"
+#include "Data/VData.h"
 #include "Data/Opcode.h"
 #include "JavaHeap.h"
 #include "VMThread.h"
@@ -28,14 +28,13 @@ class VM
 {
 public:
     explicit VM(Configuration configuration) noexcept;
-    void updateVariableFromVariable(Variable* variable, std::string_view descriptor, Variable operand,
-                                    Variable operand2, VMThread* thread);
-    static std::vector<Variable> createVariableForDescriptor(std::string_view descriptor);
+    void updateVariableFromVariable(vdata* variable, std::string_view descriptor, vdata operand, VMThread* thread);
+    static vdata createVariableForDescriptor(std::string_view descriptor);
     void start(std::string_view commandLineName);
     void runMain();
     void shutdown();
 
-    VMThread* getVMThreadByObjectRef(u4 objectReference);
+    VMThread* getVMThreadByObjectRef(vreference objectReference);
     VMThread* getCurrentVMThread();
     std::string userDir;
     static VM* create(Configuration config);
@@ -60,8 +59,8 @@ private:
     JavaHeap m_heap;
     std::vector<VMThread> m_threads;
     Configuration m_configuration;
-    u4 createThreadObject(VMThread* thread, u4 threadGroupReference);
-    u4 createThreadGroupObject(VMThread* thread);
+    vreference createThreadObject(VMThread* thread, vreference threadGroupReference);
+    vreference createThreadGroupObject(VMThread* thread);
     void createArgsArray(const VMThread* thread);
     static constexpr std::array<Instruction, 138> m_instructions{
         {
