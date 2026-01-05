@@ -200,7 +200,7 @@ void VMThread::pushStackFrameWithoutParams(ClassInfo* classInfo, const MethodInf
     m_currentMethod = methodInfo;
 
     this->m_stack.frames.push_back(stackFrame);
-    m_currentFrame = &this->m_stack.frames[this->m_stack.frames.size()-1];
+    m_currentFrame = &this->m_stack.frames.back();
 }
 
 void VMThread::pushNativeStackFrame(ClassInfo* classInfo, const MethodInfo* methodInfo, size_t argumentsSize)

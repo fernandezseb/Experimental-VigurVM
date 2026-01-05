@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Sebastiaan Fernandez.
+ * Copyright (c) 2023-2026 Sebastiaan Fernandez.
  *
  * This file is part of VigurVM.
  *
@@ -38,7 +38,12 @@ JCALL void lib_java_io_FileOutputStream_writeBytes(const NativeArgs& args) {
     // Get the file handle
     const Object* thisObject = args.getThisObjectReference();
     const Object* descriptorObject = thisObject->getObject(0);
+#ifdef WINDOWS
     const vlong handle = descriptorObject->getLong(1);
+#endif
+#ifdef LINUX
+    const vlong handle = descriptorObject->getInt(0);
+#endif
 
     // TODO: Implement correct handle determination
     if (handle == 1)
@@ -55,6 +60,7 @@ JCALL void lib_java_io_FileOutputStream_writeBytes(const NativeArgs& args) {
         Platform::print(&(((const char*)array->data)[offset]), length);
     } else
     {
+
         args.thread->internalError("Not implemented yet for arbitrary file handles", ErrorCode::NOT_IMPLEMENTED_YET);
     }
 

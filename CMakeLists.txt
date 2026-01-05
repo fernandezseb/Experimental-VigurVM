@@ -77,6 +77,7 @@ add_executable(${PROJECT_NAME}
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    add_compile_definitions(WINDOWS)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS} /GR- -EHa- -Gm- -DUNICODE -D_UNICODE -W4")
     else ()
@@ -89,6 +90,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    add_compile_definitions(LINUX)
     add_subdirectory(src/Linux)
     target_link_directories(${PROJECT_NAME} PRIVATE Linux)
     target_link_libraries(${PROJECT_NAME} Linux)

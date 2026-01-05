@@ -46,5 +46,7 @@ add_library(Library
         sun/misc/Signal.cpp
         sun/io/Win32ErrorMode.h
         sun/io/Win32ErrorMode.cpp
+        java/io/UnixFileSystem.h
+        java/io/UnixFileSystem.cpp
 )
 target_include_directories(Library PRIVATE ${PROJECT_SOURCE_DIR}/src/)

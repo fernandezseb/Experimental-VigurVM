@@ -19,6 +19,7 @@
 #include "java/io/FileOutputStream.h"
 #include "java/io/FileInputStream.h"
 #include "java/io/WinNTFileSystem.h"
+#include "java/io/UnixFileSystem.h"
 #include "java/lang/Class.h"
 #include "java/lang/ClassLoader.h"
 #include "java/lang/Double.h"
@@ -58,6 +59,7 @@ void registerBuiltinRegisterNatives()
     registerNative("java/io/FileDescriptor/initIDs", "()V", lib_java_io_FileDescriptor_initIDs);
     registerNative("java/io/FileDescriptor/set", "(I)J", lib_java_io_FileDescriptor_set);
     registerNative("java/io/WinNTFileSystem/initIDs", "()V", lib_java_io_WinNTFileSystem_initIDs);
+    registerNative("java/io/UnixFileSystem/initIDs", "()V", lib_java_io_UnixFileSystem_initIDs);
     registerNative("java/io/FileOutputStream/writeBytes", "([BIIZ)V", lib_java_io_FileOutputStream_writeBytes);
     // sun/misc
     registerNative("sun/misc/Unsafe/registerNatives", "()V", lib_sun_misc_Unsafe_registerNatives);

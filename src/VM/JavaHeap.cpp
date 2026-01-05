@@ -65,15 +65,14 @@ vreference JavaHeap::createObject(ClassInfo* classInfo)
         }
     }
 
-    void* objectMemory = Platform::allocateMemory(sizeof(Object) + sizeof(FieldData) * fieldsCount, 0);
+    void* objectMemory = Platform::allocateMemory(sizeof(Object), 0);
     const auto object = new (objectMemory) Object;
 
     object->classInfo = classInfo;
     object->type = OBJECT;
     if (fieldsCount > 0)
     {
-        u1* basePtr = static_cast<u1*>(objectMemory);
-        const auto fields = static_cast<FieldData*>(static_cast<void*>(basePtr + sizeof(Object)));
+        const auto fields = static_cast<FieldData*>(Platform::allocateMemory(sizeof(FieldData) * fieldsCount, 0));
         object->fields = std::span{fields,fieldsCount};
     }
     object->fieldsCount = fieldsCount;
@@ -129,7 +128,7 @@ vreference JavaHeap::createClassObject(ClassInfo* classInfo, std::string_view na
         }
     }
 
-    void* objectMemory = Platform::allocateMemory(sizeof(ClassObject) + sizeof(FieldData) * fieldsCount, 0);
+    void* objectMemory = Platform::allocateMemory(sizeof(ClassObject), 0);
     const auto object = new (objectMemory) ClassObject();
 
     object->classInfo = classClassInfo;
@@ -137,8 +136,7 @@ vreference JavaHeap::createClassObject(ClassInfo* classInfo, std::string_view na
     object->type = CLASSOBJECT;
     if (fieldsCount > 0)
     {
-        u1* basePtr = static_cast<u1*>(objectMemory);
-        const auto fields = static_cast<FieldData*>(static_cast<void*>(basePtr + sizeof(ClassObject)));
+        const auto fields = static_cast<FieldData*>(Platform::allocateMemory(sizeof(FieldData) * fieldsCount, 0));
         object->fields = std::span(fields, fieldsCount);
     }
     object->fieldsCount = fieldsCount;
@@ -436,5 +434,11 @@ const vlong Object::getLong(u4 fieldIndex) const
     const FieldData fieldData = fields[fieldIndex];
     const vlong longValue = fieldData.value.j;
     return longValue;
+}
+
+const vint Object::getInt(u4 fieldIndex) const {
+    const FieldData fieldData = fields[fieldIndex];
+    const vlong intValue = fieldData.value.i;
+    return intValue;
 }
 

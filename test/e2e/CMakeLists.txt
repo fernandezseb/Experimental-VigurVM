@@ -21,7 +21,7 @@ add_jar(e2e
 
 get_target_property(_classDir e2e CLASSDIR)
 
-add_test(NAME SmokeTest COMMAND VigurVM "-disableSystemInit" "-classpath" "${_classDir}" "SmokeTest" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+add_test(NAME SmokeTest COMMAND VigurVM "-classpath" "${_classDir}" "SmokeTest" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 add_test(NAME PrivilegedTest COMMAND VigurVM "-disableSystemInit" "-classpath" "${_classDir}" "PrivilegedTest" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 add_test(NAME InstanceofTest COMMAND VigurVM "-disableSystemInit" "-classpath" "${_classDir}" "InstanceofTest" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 add_test(NAME LibraryTest COMMAND VigurVM "-disableSystemInit" "-classpath" "${_classDir}" "LibraryTest" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
