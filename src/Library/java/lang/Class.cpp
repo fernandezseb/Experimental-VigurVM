@@ -22,22 +22,22 @@
 JCALL void lib_java_lang_Class_registerNatives(const NativeArgs& args)
 {
     registerNative("java/lang/Class/getPrimitiveClass", "(Ljava/lang/String;)Ljava/lang/Class;",
-                   lib_java_lang_Class_getPrimitiveClass);
+                   (nativeImplementation)lib_java_lang_Class_getPrimitiveClass);
     registerNative("java/lang/Class/desiredAssertionStatus0", "(Ljava/lang/Class;)Z",
-                   lib_java_lang_Class_desiredAssertionStatus0);
+                   (nativeImplementation)lib_java_lang_Class_desiredAssertionStatus0);
     registerNative("java/lang/Class/getName0", "()Ljava/lang/String;", lib_java_lang_Class_getName0);
     registerNative("java/lang/Class/forName0", "(Ljava/lang/String;ZLjava/lang/ClassLoader;Ljava/lang/Class;)Ljava/lang/Class;", lib_java_lang_Class_forName0);
-    registerNative("java/lang/Class/getDeclaredFields0", "(Z)[Ljava/lang/reflect/Field;", lib_java_lang_Class_getDeclaredFields0);
+    registerNative("java/lang/Class/getDeclaredFields0", "(Z)[Ljava/lang/reflect/Field;", (nativeImplementation)lib_java_lang_Class_getDeclaredFields0);
     registerNative("java/lang/Class/isPrimitive", "()Z", lib_java_lang_Class_isPrimitive);
-    registerNative("java/lang/Class/isAssignableFrom", "(Ljava/lang/Class;)Z", lib_java_lang_Class_isAssignableFrom);
+    registerNative("java/lang/Class/isAssignableFrom", "(Ljava/lang/Class;)Z", (nativeImplementation)lib_java_lang_Class_isAssignableFrom);
     registerNative("java/lang/Class/isInterface", "()Z", lib_java_lang_Class_isInterface);
-    registerNative("java/lang/Class/getDeclaredConstructors0", "(Z)[Ljava/lang/reflect/Constructor;", lib_java_lang_Class_getDeclaredConstructors0);
+    registerNative("java/lang/Class/getDeclaredConstructors0", "(Z)[Ljava/lang/reflect/Constructor;", (nativeImplementation)lib_java_lang_Class_getDeclaredConstructors0);
     registerNative("java/lang/Class/getModifiers", "()I", lib_java_lang_Class_getModifiers);
     registerNative("java/lang/Class/getSuperclass", "()Ljava/lang/Class;", lib_java_lang_Class_getSuperClass);
     registerNative("java/lang/Class/getInterfaces0", "()[Ljava/lang/Class;", lib_java_lang_Class_getInterfaces0);
 }
 
-JCALL void lib_java_lang_Class_getPrimitiveClass(const NativeArgs& args)
+JCALL void lib_java_lang_Class_getPrimitiveClass(vreference ref, const NativeArgs& args)
 {
     const Object* strObject = args.getThisObjectReference();
     const std::u16string_view typeString = VM::get()->getHeap()->getStringContent(strObject);
@@ -79,7 +79,7 @@ JCALL void lib_java_lang_Class_getPrimitiveClass(const NativeArgs& args)
     args.thread->returnVar(vdata{VariableType_REFERENCE, classRef});
 }
 
-JCALL void lib_java_lang_Class_desiredAssertionStatus0(const NativeArgs& args)
+JCALL void lib_java_lang_Class_desiredAssertionStatus0(vreference ref, const NativeArgs& args)
 {
     args.thread->returnVar(vdata{VariableType_INT, 0});
 }
@@ -125,7 +125,7 @@ JCALL void lib_java_lang_Class_forName0(const NativeArgs& args)
     args.thread->returnVar(vdata{VariableType_REFERENCE, classObjectRef});
 }
 
-JCALL void lib_java_lang_Class_getDeclaredFields0(const NativeArgs& args)
+JCALL void lib_java_lang_Class_getDeclaredFields0(vint intValue, const NativeArgs& args)
 {
     const ClassObject* classObject = args.getThisClassObjectReference();
     const StackFrame* currentFrame = args.thread->m_currentFrame;
@@ -222,7 +222,7 @@ JCALL void lib_java_lang_Class_isPrimitive(const NativeArgs& args)
     args.thread->returnVar(vdata{VariableType_INT, result});
 }
 
-JCALL void lib_java_lang_Class_isAssignableFrom(const NativeArgs& args)
+JCALL void lib_java_lang_Class_isAssignableFrom(vreference ref, const NativeArgs& args)
 {
     const ClassObject* thisClassObject = args.getThisClassObjectReference();
 
@@ -248,7 +248,7 @@ JCALL void lib_java_lang_Class_isInterface(const NativeArgs& args)
     args.thread->returnVar(vdata{VariableType_INT, result});
 }
 
-JCALL void lib_java_lang_Class_getDeclaredConstructors0(const NativeArgs& args)
+JCALL void lib_java_lang_Class_getDeclaredConstructors0(vint intValue, const NativeArgs& args)
 {
     const ClassObject* classObject = args.getThisClassObjectReference();
     const StackFrame* currentFrame = args.thread->m_currentFrame;

@@ -15,11 +15,11 @@
 
 #include "AccessController.h"
 
-JCALL void lib_java_security_AccessController_doPriviliged(const NativeArgs& args)
+JCALL void lib_java_security_AccessController_doPriviliged(vreference thisReference, const NativeArgs& args)
 {
     const StackFrame* currentFrame = args.thread->m_currentFrame;
     const vdata objectVar = currentFrame->localVariables[0];
-    const Object* method = VM::get()->getHeap()->getObject(currentFrame->localVariables[0].getReference());
+    const Object* method = VM::get()->getHeap()->getObject(thisReference);
     const MethodInfo* methodInfo = method->classInfo->findMethodWithNameAndDescriptor("run", "()Ljava/lang/Object;");
     ClassInfo* classInfo = method->classInfo;
 
@@ -29,7 +29,7 @@ JCALL void lib_java_security_AccessController_doPriviliged(const NativeArgs& arg
     args.thread->executeLoop();
 }
 
-JCALL void lib_java_security_AccessController_doPriviliged_PriviligedExceptionAction(const NativeArgs& args)
+JCALL void lib_java_security_AccessController_doPriviliged_PriviligedExceptionAction(vreference thisReference, const NativeArgs& args)
 {
     // TODO: Catch checked exceptions and throw a PrivilegedActionException
     // when exception handling is properly implemented

@@ -18,7 +18,7 @@
 JCALL void lib_java_lang_Thread_registerNatives(const NativeArgs& args)
 {
     registerNative("java/lang/Thread/currentThread", "()Ljava/lang/Thread;", lib_java_lang_Thread_currentThread);
-    registerNative("java/lang/Thread/setPriority0", "(I)V", lib_java_lang_Thread_setPriority0);
+    registerNative("java/lang/Thread/setPriority0", "(I)V", (nativeImplementation)lib_java_lang_Thread_setPriority0);
     registerNative("java/lang/Thread/isAlive", "()Z", lib_java_lang_Thread_isAlive);
     registerNative("java/lang/Thread/start0", "()V", lib_java_lang_Thread_start0);
 }
@@ -29,7 +29,7 @@ JCALL void lib_java_lang_Thread_currentThread(const NativeArgs& args)
     returnFrame->pushObject(args.thread->threadObject);
 }
 
-JCALL void lib_java_lang_Thread_setPriority0(const NativeArgs& args)
+JCALL void lib_java_lang_Thread_setPriority0(vvalue value, const NativeArgs& args)
 {
     const Object* threadObject = args.getThisObjectReference();
     const StackFrame* currentFrame = args.thread->m_currentFrame;

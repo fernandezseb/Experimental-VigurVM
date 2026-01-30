@@ -21,12 +21,12 @@
 JCALL void lib_java_lang_System_registerNatives(const NativeArgs& args)
 {
     registerNative("java/lang/System/arraycopy", "(Ljava/lang/Object;ILjava/lang/Object;II)V", lib_java_lang_System_arraycopy);
-    registerNative("java/lang/System/initProperties", "(Ljava/util/Properties;)Ljava/util/Properties;", lib_java_lang_System_initProperties);
-    registerNative("java/lang/System/setIn0", "(Ljava/io/InputStream;)V", lib_java_lang_System_setIn0);
-    registerNative("java/lang/System/setOut0", "(Ljava/io/PrintStream;)V", lib_java_lang_System_setOut0);
-    registerNative("java/lang/System/setErr0", "(Ljava/io/PrintStream;)V", lib_java_lang_System_setErr0);
+    registerNative("java/lang/System/initProperties", "(Ljava/util/Properties;)Ljava/util/Properties;", (nativeImplementation) lib_java_lang_System_initProperties);
+    registerNative("java/lang/System/setIn0", "(Ljava/io/InputStream;)V", (nativeImplementation) lib_java_lang_System_setIn0);
+    registerNative("java/lang/System/setOut0", "(Ljava/io/PrintStream;)V", (nativeImplementation) lib_java_lang_System_setOut0);
+    registerNative("java/lang/System/setErr0", "(Ljava/io/PrintStream;)V", (nativeImplementation) lib_java_lang_System_setErr0);
     registerNative("java/lang/System/currentTimeMillis", "()J", lib_java_lang_System_currentTimeMillis);
-    registerNative("java/lang/System/mapLibraryName", "(Ljava/lang/String;)Ljava/lang/String;", lib_java_lang_System_mapLibraryName);
+    registerNative("java/lang/System/mapLibraryName", "(Ljava/lang/String;)Ljava/lang/String;", (nativeImplementation) lib_java_lang_System_mapLibraryName);
 }
 
 JCALL void lib_java_lang_System_arraycopy(const NativeArgs& args)
@@ -68,7 +68,7 @@ static void setProperty(const NativeArgs& args, vdata propertiesObjectRef, Class
     args.thread->executeLoop();
 }
 
-JCALL void lib_java_lang_System_initProperties(const NativeArgs& args)
+JCALL void lib_java_lang_System_initProperties(vreference reference, const NativeArgs& args)
 {
     const vdata propertiesObjectRef = args.thread->m_currentFrame->localVariables[0];
     const Object* properties = VM::get()->getHeap()->getObject(propertiesObjectRef.getReference());
@@ -87,21 +87,21 @@ JCALL void lib_java_lang_System_initProperties(const NativeArgs& args)
     args.thread->returnVar(propertiesObjectRef);
 }
 
-JCALL void lib_java_lang_System_setIn0(const NativeArgs& args)
+JCALL void lib_java_lang_System_setIn0(vreference reference, const NativeArgs& args)
 {
     const ClassInfo* classInfo = args.thread->getClass("java/lang/System");
     FieldInfo* field = classInfo->findField("in", "Ljava/io/InputStream;");
     field->staticData.value.l = args.thread->m_currentFrame->localVariables[0].getReference();
 }
 
-JCALL void lib_java_lang_System_setOut0(const NativeArgs& args)
+JCALL void lib_java_lang_System_setOut0(vreference reference, const NativeArgs& args)
 {
     const ClassInfo* classInfo = args.thread->getClass("java/lang/System");
     FieldInfo* field = classInfo->findField("out", "Ljava/io/PrintStream;");
     field->staticData.value.l = args.thread->m_currentFrame->localVariables[0].getReference();
 }
 
-JCALL void lib_java_lang_System_setErr0(const NativeArgs& args)
+JCALL void lib_java_lang_System_setErr0(vreference reference, const NativeArgs& args)
 {
     const ClassInfo* classInfo = args.thread->getClass("java/lang/System");
     FieldInfo* field = classInfo->findField("err", "Ljava/io/PrintStream;");
@@ -116,7 +116,7 @@ JCALL void lib_java_lang_System_currentTimeMillis(const NativeArgs &args) {
     printf("");
 }
 
-JCALL void lib_java_lang_System_mapLibraryName(const NativeArgs &args) {
+JCALL void lib_java_lang_System_mapLibraryName(vreference reference, const NativeArgs &args) {
     vdata var = args.thread->m_currentFrame->localVariables[0];
     // TODO: Append '.dll' for Windows
     args.thread->returnVar(vdata{VariableType_REFERENCE, var.getReference()});

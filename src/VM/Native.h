@@ -50,6 +50,11 @@ struct NativeArgs
 };
 
 typedef void (*nativeImplementation)(const NativeArgs& args);
+typedef void (*nativeImplementation1)(vvalue value1, const NativeArgs& args);
+typedef void (*nativeImplementation2)(vvalue value1, vvalue value2, const NativeArgs& args);
+typedef void (*nativeImplementation3)(vvalue value1, vvalue value2, vvalue value3, const NativeArgs& args);
+typedef void (*nativeImplementation4)(vvalue value1, vvalue value2, vvalue value3, vvalue value$, const NativeArgs& args);
+typedef void (*nativeImplementation4)(vvalue value1, vvalue value2, vvalue value3, vvalue value$, const NativeArgs& args);
 
 struct NativeMethod
 {

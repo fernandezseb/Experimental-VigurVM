@@ -16,17 +16,16 @@
 #include "Double.h"
 
 
-JCALL void lib_java_lang_Double_doubleToRawLongBits(const NativeArgs& args)
+JCALL void lib_java_lang_Double_doubleToRawLongBits(vvalue value, const NativeArgs& args)
 {
-    const vdata var = args.thread->m_currentFrame->localVariables[0];
-    vdouble d = var.getDouble();
+    vdouble d = value.d;
 
     args.thread->returnVar(
         vdata(VariableType_LONG, std::bit_cast<vlong>(d))
         );
 }
 
-JCALL void lib_java_lang_Double_longBitsToDouble(const NativeArgs& args) {
+JCALL void lib_java_lang_Double_longBitsToDouble(vvalue value, const NativeArgs& args) {
     const vdata var = args.thread->m_currentFrame->localVariables[0];
     vlong l = var.getLong();
     args.thread->returnVar(

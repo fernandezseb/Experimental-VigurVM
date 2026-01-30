@@ -45,37 +45,37 @@ void registerBuiltinRegisterNatives()
     registerNative("java/lang/Object/registerNatives", "()V", lib_java_lang_Object_registerNatives);
     registerNative("java/lang/Class/registerNatives", "()V", lib_java_lang_Class_registerNatives);
     registerNative("java/lang/System/registerNatives", "()V", lib_java_lang_System_registerNatives);
-    registerNative("java/lang/Float/floatToRawIntBits", "(F)I", lib_java_lang_Float_floatToRawIntBits);
-    registerNative("java/lang/Double/doubleToRawLongBits", "(D)J", lib_java_lang_Double_doubleToRawLongBits);
-    registerNative("java/lang/Double/longBitsToDouble", "(J)D", lib_java_lang_Double_longBitsToDouble);
+    registerNative("java/lang/Float/floatToRawIntBits", "(F)I", (nativeImplementation)lib_java_lang_Float_floatToRawIntBits);
+    registerNative("java/lang/Double/doubleToRawLongBits", "(D)J", (nativeImplementation)lib_java_lang_Double_doubleToRawLongBits);
+    registerNative("java/lang/Double/longBitsToDouble", "(J)D", (nativeImplementation)lib_java_lang_Double_longBitsToDouble);
     registerNative("java/lang/Thread/registerNatives", "()V", lib_java_lang_Thread_registerNatives);
     registerNative("java/lang/String/intern", "()Ljava/lang/String;", lib_java_lang_String_intern);
-    registerNative("java/lang/Throwable/fillInStackTrace", "(I)Ljava/lang/Throwable;", lib_java_lang_Throwable_fillInStackTrace);
+    registerNative("java/lang/Throwable/fillInStackTrace", "(I)Ljava/lang/Throwable;", (nativeImplementation)lib_java_lang_Throwable_fillInStackTrace);
     registerNative("java/util/concurrent/atomic/AtomicLong/VMSupportsCS8", "()Z", lib_java_util_concurrent_atomic_AtomicLong_VMSupportsCS8);
     registerNative("java/lang/ClassLoader/registerNatives", "()V", lib_java_lang_ClassLoader_registerNatives);
     // java/io package
     registerNative("java/io/FileOutputStream/initIDs", "()V", lib_java_io_FileOutputStream_initIDs);
     registerNative("java/io/FileInputStream/initIDs", "()V", lib_java_io_FileInputStream_initIDs);
     registerNative("java/io/FileDescriptor/initIDs", "()V", lib_java_io_FileDescriptor_initIDs);
-    registerNative("java/io/FileDescriptor/set", "(I)J", lib_java_io_FileDescriptor_set);
+    registerNative("java/io/FileDescriptor/set", "(I)J", (nativeImplementation)lib_java_io_FileDescriptor_set);
     registerNative("java/io/WinNTFileSystem/initIDs", "()V", lib_java_io_WinNTFileSystem_initIDs);
     registerNative("java/io/UnixFileSystem/initIDs", "()V", lib_java_io_UnixFileSystem_initIDs);
     registerNative("java/io/FileOutputStream/writeBytes", "([BIIZ)V", lib_java_io_FileOutputStream_writeBytes);
     // sun/misc
     registerNative("sun/misc/Unsafe/registerNatives", "()V", lib_sun_misc_Unsafe_registerNatives);
     registerNative("sun/misc/VM/initialize", "()V", lib_sun_misc_VM_initialize);
-    registerNative("sun/misc/Signal/findSignal", "(Ljava/lang/String;)I", lib_sun_misc_Signal_findSignal);
+    registerNative("sun/misc/Signal/findSignal", "(Ljava/lang/String;)I", (nativeImplementation) lib_sun_misc_Signal_findSignal);
     // Security API
-    registerNative("java/security/AccessController/doPrivileged", "(Ljava/security/PrivilegedAction;)Ljava/lang/Object;", lib_java_security_AccessController_doPriviliged);
-    registerNative("java/security/AccessController/doPrivileged", "(Ljava/security/PrivilegedExceptionAction;)Ljava/lang/Object;", lib_java_security_AccessController_doPriviliged_PriviligedExceptionAction);
+    registerNative("java/security/AccessController/doPrivileged", "(Ljava/security/PrivilegedAction;)Ljava/lang/Object;", (nativeImplementation)lib_java_security_AccessController_doPriviliged);
+    registerNative("java/security/AccessController/doPrivileged", "(Ljava/security/PrivilegedExceptionAction;)Ljava/lang/Object;", (nativeImplementation)lib_java_security_AccessController_doPriviliged_PriviligedExceptionAction);
     registerNative("java/security/AccessController/getStackAccessControlContext", "()Ljava/security/AccessControlContext;", lib_java_security_AccessController_getStackAccessControlContext);
     // Vigur/lang package
     registerNative("vigur/lang/System/registerNatives", "()V", lib_vigur_lang_System_registerNatives);
     registerNative("vigur/lang/System/printLnString", "(Ljava/lang/String;)V", lib_vigur_lang_System_printLnString);
     // Reflection API
     registerNative("sun/reflect/Reflection/getCallerClass", "()Ljava/lang/Class;", lib_sun_reflect_Reflection_getCallerClass);
-    registerNative("sun/reflect/Reflection/getClassAccessFlags", "(Ljava/lang/Class;)I", lib_sun_reflect_Reflection_getClassAccessFlags);
+    registerNative("sun/reflect/Reflection/getClassAccessFlags", "(Ljava/lang/Class;)I", (nativeImplementation)lib_sun_reflect_Reflection_getClassAccessFlags);
     registerNative("sun/reflect/NativeConstructorAccessorImpl/newInstance0", "(Ljava/lang/reflect/Constructor;[Ljava/lang/Object;)Ljava/lang/Object;", lib_sun_reflect_NativeConstructorAccessorImpl_newInstance0);
     // sun/io
-    registerNative("sun/io/Win32ErrorMode/setErrorMode", "(J)J", lib_sun_io_Win32ErrorMode_setErrorMode);
+    registerNative("sun/io/Win32ErrorMode/setErrorMode", "(J)J", (nativeImplementation)lib_sun_io_Win32ErrorMode_setErrorMode);
 }

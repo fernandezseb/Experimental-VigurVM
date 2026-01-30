@@ -25,11 +25,11 @@ JCALL void lib_java_lang_ClassLoader_registerNatives(const NativeArgs& args)
 {
     // registerNative("java/lang/Class/getPrimitiveClass", "(Ljava/lang/String;)Ljava/lang/Class;",
     //                lib_java_lang_Class_getPrimitiveClass);
-    registerNative("java/lang/ClassLoader/findBuiltinLib", "(Ljava/lang/String;)Ljava/lang/String;", lib_java_lang_ClassLoader_findBuiltinLib);
+    registerNative("java/lang/ClassLoader/findBuiltinLib", "(Ljava/lang/String;)Ljava/lang/String;", (nativeImplementation)lib_java_lang_ClassLoader_findBuiltinLib);
     registerNative("java/lang/ClassLoader$NativeLibrary/load", "(Ljava/lang/String;Z)V", lib_java_lang_ClassLoader$NativeLibrary_load);
 }
 
-JCALL void lib_java_lang_ClassLoader_findBuiltinLib(const NativeArgs& args)
+JCALL void lib_java_lang_ClassLoader_findBuiltinLib(vreference ref, const NativeArgs& args)
 {
     VMThread* thread = args.thread;
     const StackFrame* currentFrame = thread->m_currentFrame;

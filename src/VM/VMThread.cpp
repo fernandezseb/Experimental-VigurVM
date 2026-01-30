@@ -21,6 +21,8 @@
 
 #include <stack>
 
+#include "ClassLoader/DescriptorParser.h"
+
 static constexpr std::string_view NoNonNativeStackFrameFound{"Can't return to previous frame because there is no previous non-native frame"};
 
 ClassInfo* VMThread::getClass(std::string_view className)
@@ -47,6 +49,8 @@ void VMThread::executeNativeMethod(const ClassInfo* targetClass, const MethodInf
     const std::string_view className = targetClass->getName();
     // printf("Running native code of method: %s.%s\n", className.data(), methodInfo->name.data());
     const std::string_view description = targetClass->constantPool->getString(methodInfo->descriptorIndex);
+    Memory mem(MIB(1), MIB(2));
+    Descriptor descriptor = DescriptorParser::parseDescriptor(const_cast<char*>(description.data()), &mem);
     const std::string_view methodName = methodInfo->name;
     std::string fullName = std::string{className};
     fullName += "/";
@@ -56,7 +60,14 @@ void VMThread::executeNativeMethod(const ClassInfo* targetClass, const MethodInf
     {
         NativeArgs nativeArgs{};
         nativeArgs.thread = this;
-        impl(nativeArgs);
+        if (descriptor.argsCount == 1)
+        {
+            vvalue arg1 = m_currentFrame->localVariables[0].value;
+            ((nativeImplementation1)(impl))(arg1, nativeArgs);
+        } else
+        {
+            impl(nativeArgs);
+        }
     }
     else
     {

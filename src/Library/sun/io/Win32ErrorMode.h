@@ -2,4 +2,4 @@
 
 #include "Library/NativeDefs.h"
 
-JCALL void lib_sun_io_Win32ErrorMode_setErrorMode(const NativeArgs& args);
+JCALL void lib_sun_io_Win32ErrorMode_setErrorMode(vint intValue, const NativeArgs& args);

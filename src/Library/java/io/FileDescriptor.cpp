@@ -20,7 +20,7 @@ JCALL void lib_java_io_FileDescriptor_initIDs(const NativeArgs& args)
     // printf("[Running initIDs from FileDescriptor]\n");
 }
 
-JCALL void lib_java_io_FileDescriptor_set(const NativeArgs& args)
+JCALL void lib_java_io_FileDescriptor_set(vint intValue, const NativeArgs& args)
 {
     const StackFrame* currentFrame = args.thread->m_currentFrame;
     const vdata var = currentFrame->localVariables[0];

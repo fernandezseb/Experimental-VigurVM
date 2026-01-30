@@ -22,7 +22,7 @@ JCALL void lib_sun_reflect_Reflection_getCallerClass(const NativeArgs& args) {
     args.thread->returnVar(classRef);
 }
 
-JCALL void lib_sun_reflect_Reflection_getClassAccessFlags(const NativeArgs& args)
+JCALL void lib_sun_reflect_Reflection_getClassAccessFlags(vreference ref, const NativeArgs& args)
 {
     const ClassObject* classObject = VM::get()->getHeap()->getClassObject(args.thread->m_currentFrame->localVariables[0].getReference());
     args.thread->returnVar(vdata{VariableType_INT, static_cast<vint>(classObject->classClassInfo->accessFlags)});

@@ -15,7 +15,7 @@
 
 #include "Signal.h"
 
-JCALL void lib_sun_misc_Signal_findSignal(const NativeArgs& args)
+JCALL void lib_sun_misc_Signal_findSignal(vreference reference, const NativeArgs& args)
 {
     const Object* sigNameObject = args.getObject(0);
     const std::u16string_view sigName = VM::get()->getHeap()->getStringContent(sigNameObject);
